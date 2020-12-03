@@ -25,12 +25,12 @@ ifeq ($(TARGET),black)
 CHIP = CHIP_F411
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
-OBJS = locore_411.o init.o main.o rcc.o gpio_411.o led.o serial.o nvic.o systick.o event.o
+OBJS = locore_411.o init.o main.o rcc_411.o flash.o gpio_411.o led.o serial.o nvic.o systick.o event.o
 else
 CHIP = CHIP_F103
 ARM_CPU = cortex-m3
 LDS_FILE=f103.lds
-OBJS = locore_103.o init.o main.o rcc.o gpio_103.o led.o serial.o nvic.o systick.o event.o
+OBJS = locore_103.o init.o main.o rcc_103.o flash.o gpio_103.o led.o serial.o nvic.o systick.o event.o
 endif
 
 # Use the -g flag if you intend to use gdb

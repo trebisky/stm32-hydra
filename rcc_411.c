@@ -4,53 +4,6 @@
  * Reset and Clock Control for the STM32F411
  */
 
-/* ====================================================================== */
-
-/* This doesn't really belong here, but here it is.
- */
-
-struct flash {
-	volatile unsigned int acr;
-	volatile unsigned int keyr;
-	volatile unsigned int optkeyr;
-	volatile unsigned int sr;
-	volatile unsigned int cr;
-	volatile unsigned int optcr;
-};
-
-#define FLASH_BASE (struct flash *) 0x40023c00
-
-/* In the ACR */
-#define FL_PRFTEN	0x100
-#define FL_ICEN		0x200
-#define FL_DCEN		0x400
-#define FL_ICRST	0x800
-#define FL_DCRST	0x1000
-
-void
-flash_waits ( int nw )
-{
-	struct flash *fp = FLASH_BASE;
-	unsigned int xyz;
-
-	xyz = fp->acr;
-	xyz &= ~0xf;
-	xyz |= nw;
-	fp->acr = xyz;
-}
-
-/* Enable data cache, instruction cache, and prefetch */
-static void
-flash_cache_enable ( void )
-{
-	struct flash *fp = FLASH_BASE;
-
-	fp->acr |= FL_PRFTEN | FL_ICEN | FL_DCEN;
-}
-
-/* ====================================================================== */
-/* ====================================================================== */
-
 struct rcc {
 	volatile unsigned int cr;	/* 0 - control reg */
 	volatile unsigned int pll;	/* 4 - pll config */
@@ -327,23 +280,21 @@ cpu_clock_init ( void )
 	cpu_clock_init_25 ();
 #endif
 #if defined(CLOCK_96)
-	flash_waits ( 3 );
+	flash_init ( 3 );
 	cpu_clock_init_pll ();
 #endif
 #if defined(CLOCK_48)
-	flash_waits ( 1 );
+	flash_init ( 1 );
 	cpu_clock_init_pll ();
 #endif
 #ifdef CLOCK_HSI_96
-	flash_waits ( 3 );
+	flash_init ( 3 );
 	cpu_clock_init_hsi ();
 #endif
 #ifdef CLOCK_32
-	flash_waits ( 1 );
+	flash_init ( 1 );
 	cpu_clock_init_32 ();
 #endif
-
-	flash_cache_enable ();
 }
 
 /* Note that only GPIO A,B,C are wired to pins, so it is
