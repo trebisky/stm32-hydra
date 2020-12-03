@@ -2,8 +2,8 @@
 #
 # Tom Trebisky  12-2-2020
 
-TARGET = black
-#TARGET = blue
+#TARGET = black
+TARGET = blue
 
 # --------------------------------------
 # Resist any urge to fool around below here.
@@ -26,11 +26,14 @@ CHIP = CHIP_F411
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
 OBJS = locore_411.o init.o main.o rcc_411.o flash.o gpio_411.o led.o serial.o nvic.o systick.o event.o
+OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else
 CHIP = CHIP_F103
 ARM_CPU = cortex-m3
 LDS_FILE=f103.lds
 OBJS = locore_103.o init.o main.o rcc_103.o flash.o gpio_103.o led.o serial.o nvic.o systick.o event.o
+OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
+#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/cs32f1x.cfg
 endif
 
 # Use the -g flag if you intend to use gdb
@@ -53,9 +56,8 @@ show:
 ifeq ($(TARGET),black)
 	@echo "Building for black-pill (STM32F411)"
 else
-	@echo "Building for blue-pill (STM32F411)"
+	@echo "Building for blue-pill (STM32F103)"
 endif
-
 
 # Look at object file sections
 zoot:
@@ -77,7 +79,6 @@ locore.o:	locore.s
 .c.o:
 	$(CC) -o $@ -c $<
 
-OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 
 flash:  hydra.elf
 	openocd $(OCDCFG) -c "program hydra.elf verify reset exit"

@@ -12,9 +12,15 @@
 #define LED_PIN		13	/* PC13 */
 #endif
 
-#ifdef CHIP_F103
+/* Just here for reference */
+#ifdef CHIP_MAPLE
 #define LED_GPIO	GPIOA	/* PA0 */
 #define LED_PIN		0	/* PA0 */
+#endif
+
+#ifdef CHIP_F103
+#define LED_GPIO	GPIOC	/* PC13 */
+#define LED_PIN		13	/* PC13 */
 #endif
 
 void

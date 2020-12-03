@@ -300,9 +300,8 @@ cpu_clock_init ( void )
 /* Note that only GPIO A,B,C are wired to pins, so it is
  * pointless to power up D,E,H
  */
-
-void
-rcc_init ( void )
+static void
+rcc_bus_init ( void )
 {
 	struct rcc *rp = RCC_BASE;
 
@@ -318,8 +317,14 @@ rcc_init ( void )
 
 	rp->apb2_e |= UART1_ENABLE;
 	rp->apb2_e |= UART3_ENABLE;
+}
+
+void
+rcc_init ( void )
+{
 
 	cpu_clock_init ();
+	rcc_bus_init ();
 }
 
 #ifdef notdef

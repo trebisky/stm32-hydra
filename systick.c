@@ -1,7 +1,7 @@
 /* systick.c
  * (c) Tom Trebisky  11-23-2020
  *
- * Basic Systick driver for the F411
+ * Basic Systick driver for Hydra
  */
 
 #include "hydra.h"

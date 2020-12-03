@@ -260,8 +260,10 @@ startup ( void )
 	// fd = serial_begin ( UART2, 115200 );
 	set_std_serial ( fd );
 
+	/*
 	puts ( "\n" );
 	puts ( "Up and running\n" );
+	*/
 
 	// printf ( "CPU running at %d Hz\n", get_cpu_hz() );
 	// printf ( "Console on UART%d\n", fd+1 );
@@ -284,9 +286,11 @@ startup ( void )
 
 	blink_test ();
 
+	/*
 	printf ( "Yo Ho Ho\n" );
-
 	printf ( "Enter idle loop\n" );
+	*/
+
 	idle ();
 }
 
