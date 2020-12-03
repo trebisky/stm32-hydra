@@ -8,3 +8,6 @@ one codebase for both chips.
 
 So this project began 12-2-2020 by taking the files from my stm32f411/delay
 demo and going from there.
+
+Why "Hydra" -- well, why not.  It seemed like a good name, and there are a lot
+of STM32 chip variants, so it might become a Hydra.
