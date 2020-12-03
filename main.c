@@ -7,7 +7,7 @@
  * This began as the F411 blink demo and was modifed
  */
 
-#include "f411.h"
+#include "hydra.h"
 
 extern void show_events ( void );
 extern void led_off ( void );
@@ -234,6 +234,12 @@ test_inter ( void )
 	event ( 100, check_pri );
 }
 
+static void
+blink_test ( void )
+{
+	repeat ( 125, toggle_led );
+}
+
 /* ================================================= */
 
 #ifdef notdef
@@ -274,7 +280,11 @@ startup ( void )
 	// repeat_test ();
 	// test_inter ();
 
-	repeat_test2 ();
+	// repeat_test2 ();
+
+	blink_test ();
+
+	printf ( "Yo Ho Ho\n" );
 
 	printf ( "Enter idle loop\n" );
 	idle ();

@@ -7,11 +7,7 @@
  * Also includes LED routines
  */
 
-#include "f411.h"
-
-/* Where is the LED ?? */
-#define LED_PIN		13	/* PC13 */
-#define LED_GPIO	GPIOC	/* PC13 */
+#include "hydra.h"
 
 /* Here is the F411 gpio structure.
  *  very different from the F103.
@@ -45,10 +41,12 @@ static struct gpio *gpio_bases[] = {
     GPIOA_BASE, GPIOB_BASE, GPIOC_BASE
 };
 
+/* ================================================ */
+
 /* Change alternate function setting for a pin
  * These are 4 bit fields. All initially 0.
  */
-void
+static void
 gpio_af ( int gpio, int pin, int val )
 {
 	struct gpio *gp;
@@ -73,16 +71,28 @@ gpio_af ( int gpio, int pin, int val )
 #define MODE_ANALOG	3
 
 /* This is a 2 bit field */
-void
+static void
 gpio_mode ( int gpio, int pin, int val )
 {
 	struct gpio *gp;
 	int shift;
 
 	gp = gpio_bases[gpio];
+
 	shift = pin * 2;
 	gp->mode &= ~(0x3<<shift);
 	gp->mode |= val<<shift;
+}
+
+/* This is a 1 bit field */
+static void
+gpio_otype ( int gpio, int pin, int val )
+{
+	struct gpio *gp;
+
+	gp = gpio_bases[gpio];
+	gp->pupd &= ~(0x1<<pin);
+	gp->pupd |= val<<pin;
 }
 
 #define PUPD_NONE	0
@@ -90,8 +100,15 @@ gpio_mode ( int gpio, int pin, int val )
 #define PUPD_DOWN	2
 #define PUPD_XXX	3
 
-/* This is a 2 bit field */
 void
+gpio_output ( int gpio, int pin )
+{
+	gpio_mode ( gpio, pin, 1 );
+	gpio_otype ( gpio, pin, 0 );
+}
+
+/* This is a 2 bit field */
+static void
 gpio_pupd ( int gpio, int pin, int val )
 {
 	struct gpio *gp;
@@ -136,6 +153,17 @@ gpio_read ( int gpio, int pin )
 	return gp->idata & (1<<pin);
 }
 
+void
+gpio_bit ( int gpio, int pin, int val )
+{
+	struct gpio *gp = gpio_bases[gpio];
+
+	if ( val )
+	    gp->bsrr = 1 << (pin+16);
+	else
+	    gp->bsrr = 1 << pin;
+}
+
 /* Note that UART1 can be moved around a lot.
  * I make a choice here.
  * I suppose a general interface would allow this to
@@ -175,43 +203,6 @@ gpio_uart_init ( int uart )
 	    gpio_mode ( GPIOC, 7, MODE_AF );
 	    gpio_uart ( GPIOC, 7 );
 	}
-}
-
-/* ========================================================== */
-
-static struct gpio *led_gp;
-static unsigned long on_mask;
-static unsigned long off_mask;
-
-void
-led_init ( void )
-{
-	int conf;
-	int shift;
-	int pin = LED_PIN;
-
-	// led_gp = GPIOC_BASE;
-	led_gp = gpio_bases[LED_GPIO];
-
-	shift = pin * 2;
-	led_gp->mode &= ~(3<<shift);
-	led_gp->mode |= (1<<shift);
-	led_gp->otype &= ~(1<<pin);
-
-	off_mask = 1 << pin;
-	on_mask = 1 << (pin+16);
-}
-
-void
-led_on ( void )
-{
-	led_gp->bsrr = on_mask;
-}
-
-void
-led_off ( void )
-{
-	led_gp->bsrr = off_mask;
 }
 
 /* THE END */

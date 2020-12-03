@@ -1,6 +1,6 @@
-/* Tom Trebisky (c) 11-22-2020
+/* Tom Trebisky (c) 11-22-2020 12-2-2020
  *
- * f411.h
+ * hydra.h
  */
 
 /* names to call functions with */
