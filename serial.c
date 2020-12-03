@@ -49,6 +49,8 @@ struct uart {
  * and then the RM doesn't give a USART3!
  * We are given USART6, which I call USART3.
  */
+
+#ifdef CHIP_F411
 #define UART1_BASE      (struct uart *) 0x40011000
 #define UART2_BASE      (struct uart *) 0x40004400
 #define UART3_BASE      (struct uart *) 0x40011400
@@ -57,11 +59,30 @@ struct uart {
 #define UART2_IRQ	38
 #define UART3_IRQ	71
 
+#define NUM_UARTS 2
+#else
+  /* F103 */
+#define UART1_BASE      (struct uart *) 0x40013800
+#define UART2_BASE      (struct uart *) 0x40004400
+#define UART3_BASE      (struct uart *) 0x40004800
+
+#define UART1_IRQ	37
+#define UART2_IRQ	38
+#define UART3_IRQ	39
+
+/* Unlike the black pill we have pins connected to all
+ * 3 uarts on the blue pill.
+ * NOTE - beware on UART1, as you have a choice of two
+ *   different pairs of pins.
+ *   I use pins A9, A10 by default, but you can
+ *   switch to B6, B7 with a bit of AFIO monkey business
+ */
+#define NUM_UARTS 3
+#endif
+
 static struct uart *uart_bases[] = {
     UART1_BASE, UART2_BASE, UART3_BASE
 };
-
-#define NUM_UARTS 2
 
 struct uart_stuff {
 	ifptr uart_hook;
@@ -129,6 +150,20 @@ uart2_handler ( void )
 	/* We only enable interrupts when we have a hook fn */
 	(*uart_info[UART2].uart_hook) ( up->data & 0x7f );
 }
+
+#ifdef CHIP_F103
+void
+uart3_handler ( void )
+{
+	struct uart *up = UART3_BASE;
+
+	/* clear the interrupt */
+	up->status = 0;
+
+	/* We only enable interrupts when we have a hook fn */
+	(*uart_info[UART3].uart_hook) ( up->data & 0x7f );
+}
+#endif
 
 /* The baud rate.  This is subdivided from the bus clock.
  * It is as simple as dividing the bus clock by the baud
