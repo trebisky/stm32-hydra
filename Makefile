@@ -21,17 +21,19 @@ OBJCOPY = $(TOOLS)-objcopy
 DUMP = $(TOOLS)-objdump -d
 GDB = $(TOOLS)-gdb
 
+BASE_OBJS = init.o main.o flash.o led.o serial.o nvic.o exti.o systick.o event.o iic.o
+
 ifeq ($(TARGET),black)
 CHIP = CHIP_F411
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
-OBJS = locore_411.o init.o main.o rcc_411.o flash.o gpio_411.o led.o serial.o nvic.o systick.o event.o
+OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o
 OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else
 CHIP = CHIP_F103
 ARM_CPU = cortex-m3
 LDS_FILE=f103.lds
-OBJS = locore_103.o init.o main.o rcc_103.o flash.o gpio_103.o led.o serial.o nvic.o systick.o event.o
+OBJS = locore_103.o $(BASE_OBJS) rcc_103.o gpio_103.o
 OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
 #OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/cs32f1x.cfg
 endif
@@ -46,9 +48,6 @@ endif
 # CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Wno-implicit-function-declaration -fno-builtin
 
 CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  -D$(CHIP) -O
-
-
-# *.o:	f411.h
 
 all: show hydra.elf hydra.dump hydra.bin
 
@@ -76,9 +75,12 @@ hydra.bin:        hydra.elf
 locore.o:	locore.s
 	$(AS) locore.s -o locore.o
 
-.c.o:
+# Doesn't work unless the compile command follows
+%.o: %.c hydra.h
 	$(CC) -o $@ -c $<
 
+#.c.o:
+#	$(CC) -o $@ -c $<
 
 flash:  hydra.elf
 	openocd $(OCDCFG) -c "program hydra.elf verify reset exit"

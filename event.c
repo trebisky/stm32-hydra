@@ -481,5 +481,47 @@ unblock ( void )
 	block_flag = 0;
 }
 
+/* =================================================================== */
+
+/* An orphan, but this needs to live someplace.
+ * Time really short delays with the usual delay loop.
+ * The iic.c bit/bang i2c driver uses this to clock pulses.
+ */
+
+#ifdef notdef
+void
+delay_us ( int us )
+{
+}
+#endif
+
+/* XXX XXX should calibrate the above delay and ditch what follows */
+
+/* For 72 Mhz cpu */
+#ifdef CHIP_F103
+#define DELAY_US_MULT	12
+#endif
+
+/* For 96 Mhz cpu */
+#ifdef CHIP_F411
+#define DELAY_US_MULT	16
+#endif
+
+/* From libmaple */
+// static inline void
+void
+delay_us ( unsigned int us )
+{
+    us *= DELAY_US_MULT;
+
+    /* fudge for function call overhead  */
+    us--;
+    asm volatile("   mov r0, %[us]          \n\t"
+                 "1: subs r0, #1            \n\t"
+                 "   bhi 1b                 \n\t"
+                 :
+                 : [us] "r" (us)
+                 : "r0");
+}
 
 /* THE END */

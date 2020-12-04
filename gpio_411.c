@@ -65,9 +65,9 @@ gpio_af ( int gpio, int pin, int val )
 	}
 }
 
-#define MODE_INPUT	0
-#define MODE_OUT	1
-#define MODE_AF		2
+#define MODE_INPUT	0	/* input (reset state) */
+#define MODE_OUT	1	/* output */
+#define MODE_AF		2	/* alternate fn */
 #define MODE_ANALOG	3
 
 /* This is a 2 bit field */
@@ -83,6 +83,9 @@ gpio_mode ( int gpio, int pin, int val )
 	gp->mode &= ~(0x3<<shift);
 	gp->mode |= val<<shift;
 }
+
+#define TYPE_PP		0	/* push pull (reset state) */
+#define TYPE_OD		1	/* open drain */
 
 /* This is a 1 bit field */
 static void
@@ -100,13 +103,6 @@ gpio_otype ( int gpio, int pin, int val )
 #define PUPD_DOWN	2
 #define PUPD_XXX	3
 
-void
-gpio_output ( int gpio, int pin )
-{
-	gpio_mode ( gpio, pin, 1 );
-	gpio_otype ( gpio, pin, 0 );
-}
-
 /* This is a 2 bit field */
 static void
 gpio_pupd ( int gpio, int pin, int val )
@@ -120,39 +116,53 @@ gpio_pupd ( int gpio, int pin, int val )
 	gp->pupd |= val<<shift;
 }
 
-/* kludge for now */
-void
-gpio_uart ( int gpio, int pin )
+#define SPEED_LOW	0
+#define SPEED_MED	1
+#define SPEED_FAST	2
+#define SPEED_HIGH	3
+
+/* This is a 2 bit field */
+static void
+gpio_ospeed ( int gpio, int pin, int val )
 {
 	struct gpio *gp;
 	int shift;
 
 	gp = gpio_bases[gpio];
-
-	gp->otype &= ~(1<<pin);
-
 	shift = pin * 2;
-	gp->ospeed |= (3<<shift);
-
-	// gp->pupd &= ~(3<<shift);
-	gpio_pupd ( gpio, pin, PUPD_NONE );
+	gp->ospeed &= ~(0x3<<shift);
+	gp->ospeed |= val<<shift;
 }
 
+/* ========================================= */
+
+/* Configure as output pin, push pull */
 void
-gpio_input_init ( int gpio, int pin )
+gpio_output_config ( int gpio, int pin )
+{
+	gpio_mode ( gpio, pin, MODE_OUT );
+	gpio_otype ( gpio, pin, TYPE_PP );
+	gpio_ospeed ( gpio, pin, SPEED_HIGH );
+}
+
+/* Configure as input pin with pull up */
+void
+gpio_input_config ( int gpio, int pin )
 {
 	gpio_mode ( gpio, pin, MODE_INPUT );
 	gpio_pupd ( gpio, pin, PUPD_UP );
 }
 
+/* Read an input pin */
 int
 gpio_read ( int gpio, int pin )
 {
 	struct gpio *gp = gpio_bases[gpio];
 
-	return gp->idata & (1<<pin);
+	return (gp->idata & (1<<pin)) >> pin;
 }
 
+/* Write an output pin */
 void
 gpio_bit ( int gpio, int pin, int val )
 {
@@ -163,6 +173,27 @@ gpio_bit ( int gpio, int pin, int val )
 	else
 	    gp->bsrr = 1 << pin;
 }
+
+/* kludge for now */
+void
+gpio_uart ( int gpio, int pin )
+{
+	// struct gpio *gp;
+	// int shift;
+
+	// gp = gpio_bases[gpio];
+
+	gpio_otype ( gpio, pin, TYPE_PP );
+	// gp->otype &= ~(1<<pin);
+
+	// shift = pin * 2;
+	// gp->ospeed |= (3<<shift);
+	gpio_ospeed ( gpio, pin, SPEED_HIGH );
+
+	// gp->pupd &= ~(3<<shift);
+	gpio_pupd ( gpio, pin, PUPD_NONE );
+}
+
 
 /* Note that UART1 can be moved around a lot.
  * I make a choice here.

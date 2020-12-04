@@ -80,7 +80,7 @@ button_scan ( void )
 {
 	int x;
 
-	gpio_input_init ( GPIOA, 0 );
+	gpio_input_config ( GPIOA, 0 );
 
 	for ( ;; ) {
 	    delay ( 200 );

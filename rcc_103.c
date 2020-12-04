@@ -22,6 +22,7 @@ struct rcc {
 
 #define RCC_BASE	(struct rcc *) 0x40021000
 
+#ifdef notdef
 #define FLASH_ACR	((volatile unsigned long *) 0x40022000)
 
 #define FLASH_PREFETCH	0x0010	/* enable prefetch buffer */
@@ -30,7 +31,7 @@ struct rcc {
 #define FLASH_WAIT0	0x0000	/* for sysclk <= 24 Mhz */
 #define FLASH_WAIT1	0x0001	/* for 24 < sysclk <= 48 Mhz */
 #define FLASH_WAIT2	0x0002	/* for 48 < sysclk <= 72 Mhz */
-
+#endif
 
 /* These are in the apb2_enr register */
 #define GPIOA_ENABLE	0x04
@@ -131,8 +132,11 @@ rcc_clocks ( void )
 	while ( ! (rp->ccr & PLL_LOCK ) )
 	   ;
 
-	/* Need flash wait states when we boost the clock */
+#ifdef notdef
 	* FLASH_ACR = FLASH_PREFETCH | FLASH_WAIT2;
+#endif
+	/* Need flash wait states when we boost the clock */
+	flash_init ( 2 );
 
 	// rp->cfg = SYS_HSI;	/* OK - 8 Mhz */
 	// rp->cfg = SYS_HSE;	/* OK - 8 Mhz */

@@ -136,7 +136,7 @@ gpio_mode ( int gpio, int bit, int mode )
 }
 
 void
-gpio_output ( int gpio, int pin )
+gpio_output_config ( int gpio, int pin )
 {
 	/* For LED */
 	gpio_mode ( gpio, pin, OUTPUT_2M | OUTPUT_ODRAIN );
@@ -175,7 +175,7 @@ gpio_uart_init ( int uart )
 
 /* Untested */
 void
-gpio_input_init ( int gpio, int pin )
+gpio_input_config ( int gpio, int pin )
 {
 	/* We would like it input, with pullup */
 	gpio_mode ( gpio, pin, INPUT_PUPD );
@@ -187,7 +187,7 @@ gpio_read ( int gpio, int pin )
 {
         struct gpio *gp = gpio_bases[gpio];
 
-        return gp->idr & (1<<pin);
+        return (gp->idr & (1<<pin)) >> pin;
 }
 
 /* THE END */
