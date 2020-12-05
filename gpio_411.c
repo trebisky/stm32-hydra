@@ -136,9 +136,18 @@ gpio_ospeed ( int gpio, int pin, int val )
 
 /* ========================================= */
 
+/* Configure as output pin, open drain */
+void
+gpio_output_od_config ( int gpio, int pin )
+{
+	gpio_mode ( gpio, pin, MODE_OUT );
+	gpio_otype ( gpio, pin, TYPE_OD );
+	gpio_ospeed ( gpio, pin, SPEED_HIGH );
+}
+
 /* Configure as output pin, push pull */
 void
-gpio_output_config ( int gpio, int pin )
+gpio_output_pp_config ( int gpio, int pin )
 {
 	gpio_mode ( gpio, pin, MODE_OUT );
 	gpio_otype ( gpio, pin, TYPE_PP );

@@ -29,7 +29,7 @@ led_init ( void )
 	// gpio_mode ( LED_GPIO, LED_PIN, 1 );
 	// gpio_otype ( LED_GPIO, LED_PIN, 1 );
 
-	gpio_output_config ( LED_GPIO, LED_PIN );
+	gpio_output_od_config ( LED_GPIO, LED_PIN );
 }
 
 void

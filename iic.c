@@ -50,7 +50,7 @@
 
 #ifdef ARCH_HYDRA
 #define GPIO_INPUT(g,p)		gpio_input_config ( g, p )
-#define GPIO_OUTPUT(g,p)	gpio_output_config ( g, p )
+#define GPIO_OUTPUT(g,p)	gpio_output_od_config ( g, p )
 #define GPIO_READ(g,p)		gpio_read ( g, p )
 
 // #define GPIO_SET(g,p)	gpio_bit ( g, p, 1 )
@@ -272,8 +272,8 @@ iic_init ( int sda_g, int sda_p, int scl_g, int scl_p )
     scl_gpio = scl_g;
     scl_pin = scl_p;
 
-    gpio_output_config ( sda_gpio, sda_pin );
-    gpio_output_config ( scl_gpio, scl_pin );
+    gpio_output_od_config ( sda_gpio, sda_pin );
+    gpio_output_od_config ( scl_gpio, scl_pin );
 
     iic_setdc ( 1, 1 );
     iic_bus_init ();

@@ -136,14 +136,18 @@ gpio_mode ( int gpio, int bit, int mode )
 }
 
 void
-gpio_output_config ( int gpio, int pin )
+gpio_output_od_config ( int gpio, int pin )
 {
 	/* For LED */
 	gpio_mode ( gpio, pin, OUTPUT_2M | OUTPUT_ODRAIN );
-	// gpio_mode ( gpio, pin, OUT_CONF );
+}
 
-	/* Another way */
+void
+gpio_output_pp_config ( int gpio, int pin )
+{
+	gpio_mode ( gpio, pin, OUTPUT_2M | OUTPUT_PUSH_PULL );
 	// gpio_mode ( gpio, pin, OUTPUT_50M | OUTPUT_PUSH_PULL );
+	// gpio_mode ( gpio, pin, OUT_CONF );
 }
 
 /* Write a value to an output pin */

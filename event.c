@@ -497,25 +497,40 @@ delay_us ( int us )
 
 /* XXX XXX should calibrate the above delay and ditch what follows */
 
+/* The following numbers were worked up using an oscilloscope and
+ * a basic simple scope loop with delay_us(5).
+ * This is what would be used by my bit/bang iic driver for i2c
+ * which needs to generated 100 kHz.
+ */
+
 /* For 72 Mhz cpu */
 #ifdef CHIP_F103
-#define DELAY_US_MULT	12
+// #define DELAY_US_MULT	120	// 89 kHz
+// #define DELAY_US_MULT	110	// 95.4 kHz
+#define DELAY_US_MULT	105	// 100 kHz
+// #define DELAY_US_MULT	100	// 105 kHz
 #endif
 
 /* For 96 Mhz cpu */
 #ifdef CHIP_F411
-#define DELAY_US_MULT	16
+// #define DELAY_US_MULT	300	// 101 kHz
+#define DELAY_US_MULT	302	// 100 kHz
 #endif
 
-/* From libmaple */
-// static inline void
+/* From libmaple.
+ * Having the core loop in assembly makes this stay the
+ * same regardless of compiler optimization levels or
+ * changes in compiler code generation.
+ */
 void
-delay_us ( unsigned int us )
+delay_us ( int us )
 {
     us *= DELAY_US_MULT;
+    us /= 10;
 
     /* fudge for function call overhead  */
     us--;
+
     asm volatile("   mov r0, %[us]          \n\t"
                  "1: subs r0, #1            \n\t"
                  "   bhi 1b                 \n\t"
