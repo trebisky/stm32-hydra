@@ -270,9 +270,11 @@ startup ( void )
 {
 	int fd;
 
+#ifdef notdef
 	fd = serial_begin ( UART1, 115200 );
 	// fd = serial_begin ( UART2, 115200 );
 	set_std_serial ( fd );
+#endif
 
 	puts ( "\n" );
 	puts ( "Up and running\n" );

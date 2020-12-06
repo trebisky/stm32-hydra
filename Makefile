@@ -27,7 +27,7 @@ ifeq ($(TARGET),black)
 CHIP = CHIP_F411
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
-OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o
+OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o usb_411.o
 OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else
 CHIP = CHIP_F103

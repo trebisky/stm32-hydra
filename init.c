@@ -27,6 +27,16 @@ extern int  __text_end;
 extern unsigned int __rodata_start;
 extern unsigned int __rodata_end;
 
+static void
+setup_default_serial ( void )
+{
+	int fd;
+
+        fd = serial_begin ( UART1, 115200 );
+        // fd = serial_begin ( UART2, 115200 );
+        set_std_serial ( fd );
+}
+
 /* Perform various magic before the user code gets started.
  */
 void
@@ -49,8 +59,12 @@ stm_init ( void )
 
 	ram_init ();
 	rcc_init ();
+
+	setup_default_serial ();
 	systick_init ();
 	nvic_init ();
+
+	usb_init ();
 
 	led_init ();
 	led_off ();

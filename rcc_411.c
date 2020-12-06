@@ -67,6 +67,9 @@ struct rcc {
 #define GPIOE_ENABLE	0x10
 #define GPIOH_ENABLE	0x80
 
+/* On AHB2 */
+#define USB_ENABLE	0x80
+
 /* On APB1 */
 #define UART2_ENABLE	0x20000
 
@@ -314,6 +317,9 @@ rcc_bus_init ( void )
 	rp->ahb1_e |= GPIOC_ENABLE;
 
 	rp->apb1_e |= UART2_ENABLE;
+
+	rp->ahb2_e |= USB_ENABLE;
+	rp->ahb2_elp |= USB_ENABLE;
 
 	rp->apb2_e |= UART1_ENABLE;
 	rp->apb2_e |= UART3_ENABLE;
