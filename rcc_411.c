@@ -4,6 +4,8 @@
  * Reset and Clock Control for the STM32F411
  */
 
+#include "hydra.h"
+
 struct rcc {
 	volatile unsigned int cr;	/* 0 - control reg */
 	volatile unsigned int pll;	/* 4 - pll config */
@@ -76,6 +78,7 @@ struct rcc {
 /* On APB2 */
 #define UART1_ENABLE	0x10
 #define UART3_ENABLE	0x20
+#define SYSCFG_ENABLE	BIT(14)
 
 /* In the PLL register */
 
@@ -323,6 +326,7 @@ rcc_bus_init ( void )
 
 	rp->apb2_e |= UART1_ENABLE;
 	rp->apb2_e |= UART3_ENABLE;
+	rp->apb2_e |= SYSCFG_ENABLE;
 }
 
 void

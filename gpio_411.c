@@ -245,4 +245,23 @@ gpio_uart_init ( int uart )
 	}
 }
 
+void
+gpio_usb_init ( void )
+{
+	    gpio_af ( GPIOA, 11, 10 );	/* D- */
+	    gpio_af ( GPIOA, 12, 10 );	/* D- */
+
+	    gpio_mode ( GPIOA, 11, MODE_AF );
+	    gpio_mode ( GPIOA, 12, MODE_AF );
+
+	    gpio_ospeed ( GPIOA, 11, SPEED_HIGH );
+	    gpio_ospeed ( GPIOA, 12, SPEED_HIGH );
+
+	    gpio_otype ( GPIOA, 11, TYPE_PP );
+	    gpio_otype ( GPIOA, 12, TYPE_PP );
+
+	    gpio_pupd ( GPIOA, 11, PUPD_NONE );
+	    gpio_pupd ( GPIOA, 12, PUPD_NONE );
+}
+
 /* THE END */

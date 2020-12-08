@@ -4,6 +4,8 @@
  * Tom Trebisky  12-6-2020
  */
 
+#include "hydra.h"
+
 /* Remember that for us, as a device, the IN endpoint is viewed
  * from the perspective of the host.  So our IN endpoint is
  * actually sending data.  And correspondingly, our OUT endpoint
@@ -25,6 +27,7 @@ struct usb_endpoint {
 };
 
 struct usb_hw {
+	/* Core registers */
 	volatile unsigned int csr;	/* 0x000 GOTGCTL */
 	volatile unsigned int ir;	/* 0x004 GOTGINT */
 	volatile unsigned int ahb_conf;	/* 0x008 GAHBCFG */
@@ -32,8 +35,8 @@ struct usb_hw {
 	volatile unsigned int reset;	/* 0x010 GRSTCTL */
 	volatile unsigned int is;	/* 0x014 GINTSTS - int status */
 	volatile unsigned int im;	/* 0x018 GINTMSK - int mask */
-	volatile unsigned int rx;	/* 0x01c GRXSTSR */
-	volatile unsigned int rxp;	/* 0x020 GRXSTSP */
+	volatile unsigned int rx;	/* 0x01c GRXSTSR - Rx status debug read */
+	volatile unsigned int rxp;	/* 0x020 GRXSTSP - Rx status read and pop */
 	volatile unsigned int rx_fifo;	/* 0x024 GRXFSIZ - Rx fifo size*/
 	volatile unsigned int np_fifo;	/* 0x028 DIEPTXF0 */
 	volatile unsigned int qstat;	/* 0x02C HNPTXSTS */
@@ -41,10 +44,8 @@ struct usb_hw {
 	volatile unsigned int conf;	/* 0x038 GCCCFG - core config*/
 	volatile unsigned int cid;	/* 0x03C CID - core ID */
 	    int _pad1[64-16];
-	volatile unsigned int hp_fifo;	/* 0x100 HNPTXSTS */
-	volatile unsigned int in_fifo1;	/* 0x104 DIEPTXFx */
-	volatile unsigned int in_fifo2;	/* 0x108 DIEPTXFx */
-	volatile unsigned int in_fifo3;	/* 0x10C DIEPTXFx */
+	volatile unsigned int hp_fifo;		/* 0x100 HNPTXSTS */
+	volatile unsigned int in_fifo[3];	/* 0x104 DIEPTXFx */
 	    int _pad2[64*3-4];
 
 	/* Host mode registers.
@@ -56,6 +57,8 @@ struct usb_hw {
 	volatile unsigned int hcfg;	/* 0x400 host config */
 	    int _pad3[64*4-1];
 
+	/* Device mode registers.
+	 */
 	volatile unsigned int dcfg;	/* 0x800 device config */
 	volatile unsigned int dctl;	/* 0x804 device control */
 	volatile unsigned int dstat;	/* 0x808 device status */
@@ -83,6 +86,82 @@ struct usb_hw {
 	volatile unsigned int clock;		/* 0xE00 - power and clock gating */
 };
 
+/* bits in the USB conf register */
+#define CONF_DFORCE	BIT(30)	/* force device mode */
+#define CONF_HFORCE	BIT(29)	/* force host mode */
+#define CONF_PHY	BIT(6)	/* PHY select, always 1, ignore */
+#define CONF_HNP	BIT(9)	/* enable HNP (for OTG) */
+#define CONF_SRP	BIT(8)	/* enable SRP (for OTG) */
+
+/* bits in the AHB config register */
+#define AHB_GINT	1	/* global interrupt enable */
+
+/* bits in the interrupt and interrupt mask register */
+#define INT_CMOD	1	/* current mode of operation */
+#define INT_MMIS	BIT(1)	/* mode mismatch */
+#define INT_SOF		BIT(3)
+#define INT_OTG		4	/* OTG (read OTG interrupt register) */
+#define INT_SUSP	BIT(11)	/* suspend detected */
+#define INT_RESET	BIT(12)	/* reset detected */
+#define INT_ENUM	BIT(13)	/* enum done */
+#define INT_IN_EP	BIT(18)	/* IN endpoint */
+#define INT_OUT_EP	BIT(19)	/* OUT endpoint */
+#define INT_ISOIN	BIT(20)
+#define INT_ISOOUT	BIT(21)
+#define INT_WKUP	BIT(31)	/* OUT endpoint */
+
+/* .. and more .. */
+
+/* bits in the reset register */
+#define RESET_AHB_IDLE	BIT(31)
+#define RESET_TX_SHIFT	6
+#define RESET_FIFO_ALL	0x10
+
+#define RESET_TX_FL	BIT(5)	/* Flush TxFIFO */
+#define RESET_RX_FL	BIT(4)	/* Flush entire RxFIFO */
+#define RESET_FC	BIT(2)	/* Frame counter reset (host only) */
+#define RESET_HCLK	BIT(1)	/* HCLK soft reset */
+#define RESET_CORE	1	/* Core soft reset */
+
+/* bits in the general core config register (conf) 0x38 */
+#define CONF_NOVBUS	BIT(21)	/* set to disble Vbus sensing on special pin */
+#define CONF_SOF	BIT(20)	/* set to enable SOF on special pin */
+#define CONF_A_SENSE	BIT(19)	/* set to enable Vbus A sensing */
+#define CONF_B_SENSE	BIT(18)	/* set to enable Vbus B sensing */
+#define CONF_PWRDOWN	BIT(16)	/* set to deactivate power down */
+
+/* Bits in the Device config register. */
+
+#define DCONF_FI_MASK		0x1800
+#define DCONF_FI_80		0x0000
+#define DCONF_DAD_MASK		0x07F0
+#define DCONF_SPEED_MASK	0x0003
+#define DCONF_SPEED_FS		0x0003
+
+/* Bits in the Device control register */
+#define DCTL_RWU		0x0001	/* remote wakeup signal */
+#define DCTL_SDIS		0x0002	/* soft disconnect */
+/* Set the SDIS bit to perform a soft disconnect, clear it to run */
+#define DCTL_GINAK		BIT(2)	/* Global IN Nak */
+#define DCTL_GONAK		BIT(3)	/* Global OUT Nak */
+#define DCTL_SGINAK		BIT(7)	/* Set Global IN Nak */
+#define DCTL_CGINAK		BIT(8)	/* Clear Global IN Nak */
+#define DCTL_SGONAK		BIT(9)	/* Set Global OUT Nak */
+#define DCTL_CGONAK		BIT(10)	/* Clear Global OUT Nak */
+#define DCTL_POPDONE		BIT(11)	/* Power on programming done */
+
+/* Bits in the device IN endpoint interrupt mask register */
+#define DIN_NAKM	BIT(13)		/* Nak */
+#define DIN_NEM		BIT(6)		/* Nak effective */
+#define DIN_MM		BIT(5)		/* EP mismatch */
+/* On some hardware, the above may be a fifo underrun bit */
+#define DIN_TXE		BIT(4)		/* token when Tx empty */
+#define DIN_TO		BIT(3)		/* timeout */
+#define DIN_DIS		BIT(1)		/* endpoint disabled */
+#define DIN_CM		BIT(0)		/* transfer complete */
+
+/* --------------------- */
+
 #define IRQ_USB_WAKEUP	42
 #define IRQ_USB_FS	67
 
@@ -92,16 +171,27 @@ struct usb_hw {
 /* Direct access here only for debugging */
 #define USB_RAM_BASE	0x50020000
 
+/* ============================================================== */
+
 /* Interrupt handlers.
  */
 void usb_wakeup ( void )
 {
-	printf ( "USB wakeup interrupt" );
+	printf ( "USB wakeup interrupt\n" );
 }
 
 void usb_fs ( void )
 {
-	printf ( "USB OTG FS interrupt" );
+	struct usb_hw *hp = USB_BASE;
+
+	/* Most interrupts are cleared just
+	 * by the first read to the status register.
+	 */
+	printf ( "USB OTG FS interrupt\n" );
+	show_reg ( "Int status: ", &hp->is );
+	show_reg ( "Int status: ", &hp->is );
+	printf ( "\n" );
+	hp->is |= INT_MMIS;
 }
 
 #ifdef notdef
@@ -116,17 +206,243 @@ void irq_usb_hs ( void ) {} /* 75 */
 #endif
 
 void
-usb_init ( void )
+try_int ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+	int xyz;
+
+	hp->im |= INT_MMIS;
+	xyz = hp->hcfg;
+}
+
+static void
+flush_rx_fifo ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+	int tmo;
+
+	hp->reset = RESET_RX_FL;
+	for (tmo = 250000; tmo; tmo-- ) {
+	    if ( ! (hp->reset & RESET_RX_FL) )
+		break;
+	}
+
+	/* Delay 3 PHY clocks */
+	delay_us ( 3 );
+}
+
+static void
+flush_tx_fifo ( int fifo )
+{
+	struct usb_hw *hp = USB_BASE;
+	int tmo;
+
+	hp->reset = RESET_TX_FL | (fifo<<RESET_TX_SHIFT);
+	for (tmo = 250000; tmo; tmo-- ) {
+	    if ( ! (hp->reset & RESET_TX_FL) )
+		break;
+	}
+
+	/* Delay 3 PHY clocks */
+	delay_us ( 3 );
+}
+
+static void
+flush_tx_fifo_all ( void )
+{
+	flush_tx_fifo ( RESET_FIFO_ALL );
+}
+
+static void
+enable_usb_ints ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+
+	hp->im = 0;		/* disable all */
+	hp->is = 0xffffffff;	/* clear all pending */
+	hp->ir = 0xffffffff;	/* clear pending OTG */
+
+	/* Enable those we want */
+	hp->im |= INT_SUSP | INT_WKUP | INT_RESET |
+		    INT_IN_EP | INT_OUT_EP | INT_ENUM |
+		    INT_ISOIN | INT_ISOOUT | INT_SOF;
+
+	printf ( "Enable USB interrupt gate\n" );
+	/* Turn on the main switch */
+	hp->ahb_conf |= AHB_GINT;
+}
+
+static void
+show_stuff ( void )
 {
 	struct usb_hw *hp = USB_BASE;
 
 	show_reg ( "USB csr", &hp->csr );
 	show_reg ( "USB cid", &hp->cid );
-	show_reg ( "USB hcfg", &hp->hcfg );
+
+	/* We come up in device mode, so this access yields
+	 * the MMIS bit set in the IR for a mode mismatch.
+	 */
+	// show_reg ( "USB hcfg", &hp->hcfg );
+
 	show_reg ( "USB clock", &hp->clock );
+	show_reg ( "USB ir", &hp->ir );
+	show_reg ( "USB is", &hp->is );
+
+#ifdef notdef
+	/* No change since we just came out of reset */
+	hp->reset |= RESET_CORE;
+	printf ( "\n" );
+
+	show_reg ( "USB csr", &hp->csr );
+	show_reg ( "USB cid", &hp->cid );
+	// show_reg ( "USB hcfg", &hp->hcfg );
+	show_reg ( "USB clock", &hp->clock );
+	printf ( "\n" );
+	show_reg ( "USB ir", &hp->ir );
+	show_reg ( "USB is", &hp->is );
+#endif
+
+	printf ( "\n" );
+	// printf ( "Poke a host register\n" );
+	// show_reg ( "USB hcfg", &hp->hcfg );
+
+	// delay ( 500 );
+
+	printf ( "\n" );
+	hp->ahb_conf |= AHB_GINT;
+	try_int ();
+	printf ( "\n" );
+
+	delay ( 500 );
+	show_reg ( "USB im", &hp->im );
+	show_reg ( "USB ir", &hp->ir );
+	show_reg ( "USB is", &hp->is );
+	show_reg ( "USB usb_conf", &hp->usb_conf );
+}
+
+void
+usb_init ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+	unsigned int xyz;
+	int start;
+
+	puts ( "---------------------------\n" );
+	printf ( "In USB init\n" );
 
 	nvic_enable ( IRQ_USB_WAKEUP );
 	nvic_enable ( IRQ_USB_FS );
+
+	gpio_usb_init ();
+
+	/* This turns out to be quite important.
+	 * Before setting this bit, the device decided
+	 * for some reason to switch to host mode
+	 * shortly after being initialized.
+	 */
+	show_reg ( "USB usb_conf", &hp->usb_conf );
+	hp->usb_conf |= CONF_DFORCE;
+	// 25 ms delay required to switch modes.
+	// delay ( 30 );
+	show_reg ( "USB usb_conf", &hp->usb_conf );
+
+	hp->conf = CONF_NOVBUS | CONF_PWRDOWN;
+
+	/* Restart the PHY clock in case it has stopped */
+	hp->clock = 0;
+
+	show_reg ( "USB dcfg", &hp->dcfg );
+	xyz = hp->dcfg;
+	xyz &= ~DCONF_FI_MASK;
+	xyz |= DCONF_FI_80;
+	xyz &= ~DCONF_SPEED_MASK;
+	xyz |= DCONF_SPEED_FS;
+	hp->dcfg = xyz;
+	show_reg ( "USB dcfg", &hp->dcfg );
+
+	/* Fifo sizes are in 32 bit words.
+	 * We have 1.25 kb = 1280 bytes = 320 words.
+	 * The RM says that we get a single Rx FIFO
+	 * and several Tx FIFO's
+	 * The Rx FIFO handles all OUT endpoints
+	 * Each IN endpoint has its own Tx FIFO
+	 * See 22.11.1 and 22.11.2 and 22.13.1
+	 */
+#define RX_FIFO_SIZE	128
+#define TX0_FIFO_SIZE	64
+#define TX1_FIFO_SIZE	128
+#define TX2_FIFO_SIZE	0
+#define TX3_FIFO_SIZE	0
+	start = 0;
+	hp->rx_fifo = RX_FIFO_SIZE;	/* 16-256 allowed */
+	start += RX_FIFO_SIZE;
+
+	hp->np_fifo = TX0_FIFO_SIZE << 16 | start;		/* EP0, Tx fifo size */
+	start += TX0_FIFO_SIZE;
+
+	hp->in_fifo[0] = TX1_FIFO_SIZE << 16 | start;		/* EP1, Tx fifo size */
+	start += TX1_FIFO_SIZE;
+	hp->in_fifo[1] = TX2_FIFO_SIZE << 16 | start;		/* EP2, Tx fifo size */
+	start += TX2_FIFO_SIZE;
+	hp->in_fifo[2] = TX3_FIFO_SIZE << 16 | start;		/* EP3, Tx fifo size */
+	start += TX3_FIFO_SIZE;
+
+	flush_tx_fifo_all ();
+	flush_rx_fifo ();
+
+	/* Clear pending interrupts */
+	hp->in_imask = 0;
+	hp->out_imask = 0;
+	hp->all_int = 0xffffffff;
+	hp->all_mask = 0;
+
+/* Bits in the endpoint control register */
+#define EP_CTL_ENA	BIT(31)
+#define EP_CTL_DIS	BIT(30)
+#define EP_CTL_SNAK	BIT(27)
+#define EP_CTL_CNAK	BIT(26)
+#define EP_CTL_FIFO_SHIFT	22
+
+	hp->in_ep[0].ctl = EP_CTL_DIS | EP_CTL_SNAK;
+	hp->in_ep[1].ctl = EP_CTL_DIS | EP_CTL_SNAK;
+	hp->in_ep[2].ctl = 0;
+	hp->in_ep[3].ctl = 0;
+
+	hp->in_ep[0].size = 0;
+	hp->in_ep[1].size = 0;
+	hp->in_ep[2].size = 0;
+	hp->in_ep[3].size = 0;
+
+	hp->in_ep[0].ir = 0xff;
+	hp->in_ep[1].ir = 0xff;
+	hp->in_ep[2].ir = 0xff;
+	hp->in_ep[3].ir = 0xff;
+
+	hp->out_ep[0].ctl = EP_CTL_DIS | EP_CTL_SNAK;
+	hp->out_ep[1].ctl = 0;
+	hp->out_ep[2].ctl = 0;
+	hp->out_ep[3].ctl = 0;
+
+	hp->out_ep[0].size = 0;
+	hp->out_ep[1].size = 0;
+	hp->out_ep[2].size = 0;
+	hp->out_ep[3].size = 0;
+
+	hp->out_ep[0].ir = 0xff;
+	hp->out_ep[1].ir = 0xff;
+	hp->out_ep[2].ir = 0xff;
+	hp->out_ep[3].ir = 0xff;
+
+	// hp->in_imask = 0;
+
+	enable_usb_ints ();
+
+	printf ( "USB Initialization done\n" );
+
+	show_reg ( "USB is", &hp->is );
+
+	// show_stuff ();
 }
 
 /* THE END */

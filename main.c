@@ -277,7 +277,9 @@ startup ( void )
 #endif
 
 	puts ( "\n" );
-	puts ( "Up and running\n" );
+	// puts ( "******************************\n" );
+	// puts ( "******************************\n" );
+	puts ( "Up and running mainline code\n" );
 
 	// printf ( "CPU running at %d Hz\n", get_cpu_hz() );
 	// printf ( "Console on UART%d\n", fd+1 );
@@ -299,9 +301,11 @@ startup ( void )
 	// repeat_test2 ();
 
 	// blink_test ();
-	pulse_test ();
 
-	printf ( "Yo Ho Ho\n" );
+	// Scope loop for delay_us()
+	// pulse_test ();
+
+	// printf ( "Yo Ho Ho\n" );
 	printf ( "Enter idle loop\n" );
 
 	idle ();
