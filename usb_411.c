@@ -106,8 +106,8 @@ struct usb_hw {
 #define INT_ENUM	BIT(13)	/* enum done */
 #define INT_IN_EP	BIT(18)	/* IN endpoint */
 #define INT_OUT_EP	BIT(19)	/* OUT endpoint */
-#define INT_ISOIN	BIT(20)
-#define INT_ISOOUT	BIT(21)
+#define INT_ISOIN	BIT(20) /* Incomplete ISO in */
+#define INT_ISOOUT	BIT(21) /* Incomplete ISO out */
 #define INT_WKUP	BIT(31)	/* OUT endpoint */
 
 /* .. and more .. */
@@ -180,18 +180,53 @@ void usb_wakeup ( void )
 	printf ( "USB wakeup interrupt\n" );
 }
 
+static unsigned int sof_count = 0;
+
 void usb_fs ( void )
 {
 	struct usb_hw *hp = USB_BASE;
+	unsigned int status;
+
+	status = hp->is;
+
+	/* These are cleared just by reading their status */
+	if ( status & INT_IN_EP )
+	    printf ( "Int -- IN endpoint %X %d\n", status, sof_count );
+	if ( status & INT_OUT_EP )
+	    printf ( "Int -- OUT endpoint %X %d\n", status, sof_count );
+
+	if ( status & INT_SOF ) {
+	    // printf ( "Int -- SOF\n" );
+	    hp->is |= INT_SOF;
+	    ++sof_count;
+	    return;
+	}
 
 	/* Most interrupts are cleared just
 	 * by the first read to the status register.
 	 */
-	printf ( "USB OTG FS interrupt\n" );
-	show_reg ( "Int status: ", &hp->is );
-	show_reg ( "Int status: ", &hp->is );
-	printf ( "\n" );
-	hp->is |= INT_MMIS;
+	// printf ( "USB OTG FS interrupt\n" );
+	// printf ( "- USB interrupt, status: %X, %d\n", status, sof_count );
+	// show_reg ( "Int status: ", &hp->is );
+	// printf ( "\n" );
+
+	if ( status & INT_ENUM ) {
+	    printf ( "Int -- Enumeration done %X %d\n", status, sof_count );
+	    hp->is |= INT_ENUM;
+	} else if ( status & INT_RESET ) {
+	    printf ( "Int -- Reset %X %d\n", status, sof_count );
+	    hp->is |= INT_RESET;
+	} else if ( status & INT_MMIS ) {
+	    printf ( "Int -- mode mismatch %X %d\n", status, sof_count );
+	    hp->is |= INT_MMIS;
+	} else if ( status & INT_SUSP ) {
+	    printf ( "Int -- Suspend %X %d\n", status, sof_count );
+	    hp->is |= INT_SUSP;
+	} else if ( status & INT_WKUP ) {
+	    printf ( "Int -- Wakeup %X %d\n", status, sof_count );
+	    hp->is |= INT_WKUP;
+	} else
+	    printf ( "- USB interrupt, status: %X, %d\n", status, sof_count );
 }
 
 #ifdef notdef
@@ -264,8 +299,8 @@ enable_usb_ints ( void )
 
 	/* Enable those we want */
 	hp->im |= INT_SUSP | INT_WKUP | INT_RESET |
-		    INT_IN_EP | INT_OUT_EP | INT_ENUM |
-		    INT_ISOIN | INT_ISOOUT | INT_SOF;
+		    INT_IN_EP | INT_OUT_EP | INT_ENUM | INT_SOF;
+		    // INT_ISOIN | INT_ISOOUT;
 
 	printf ( "Enable USB interrupt gate\n" );
 	/* Turn on the main switch */
