@@ -26,6 +26,8 @@ struct usb_endpoint {
 	    int _pad2;
 };
 
+#define NUM_EP	4
+
 struct usb_hw {
 	/* Core registers */
 	volatile unsigned int csr;	/* 0x000 GOTGCTL */
@@ -38,14 +40,14 @@ struct usb_hw {
 	volatile unsigned int rx;	/* 0x01c GRXSTSR - Rx status debug read */
 	volatile unsigned int rxp;	/* 0x020 GRXSTSP - Rx status read and pop */
 	volatile unsigned int rx_fifo;	/* 0x024 GRXFSIZ - Rx fifo size*/
-	volatile unsigned int np_fifo;	/* 0x028 DIEPTXF0 */
+	volatile unsigned int np_fifo;	/* 0x028 DIEPTXF0 - Tx fifo for EP0 in device mode */
 	volatile unsigned int qstat;	/* 0x02C HNPTXSTS */
 	    int _pad0[2];
 	volatile unsigned int conf;	/* 0x038 GCCCFG - core config*/
 	volatile unsigned int cid;	/* 0x03C CID - core ID */
 	    int _pad1[64-16];
-	volatile unsigned int hp_fifo;		/* 0x100 HNPTXSTS */
-	volatile unsigned int in_fifo[3];	/* 0x104 DIEPTXFx */
+	volatile unsigned int hp_fifo;		/* 0x100 HNPTXSTS - looks host only*/
+	volatile unsigned int in_fifo[3];	/* 0x104 DIEPTXFx - for IN 1,2,3 */
 	    int _pad2[64*3-4];
 
 	/* Host mode registers.
@@ -75,16 +77,22 @@ struct usb_hw {
 	    int _pad7[64-14];
 
 	/* device - IN endpoint registers */
-	struct usb_endpoint in_ep[4];		/* 0x900 */
+	struct usb_endpoint in_ep[NUM_EP];		/* 0x900 */
 	    int _pad8[128-4*8];
 
 	/* device - OUT endpoint registers */	/* 0xB00 */
-	struct usb_endpoint out_ep[4];
+	struct usb_endpoint out_ep[NUM_EP];
 	    int _pad9[128+64-4*8];
 
 	/* power and clock gating */
 	volatile unsigned int clock;		/* 0xE00 - power and clock gating */
 };
+
+/* clear a bit or field, then set a value in it.
+ * This works nicely, and if the val is zero, the compiler
+ * optimizes the OR away entirely.
+ */
+#define usb_mod_reg(reg,mask,val)	hp->reg = (hp->reg & ~mask) | val
 
 /* bits in the USB conf register */
 #define CONF_DFORCE	BIT(30)	/* force device mode */
@@ -134,13 +142,13 @@ struct usb_hw {
 
 #define DCONF_FI_MASK		0x1800
 #define DCONF_FI_80		0x0000
-#define DCONF_DAD_MASK		0x07F0
+#define DCONF_DAD_MASK		0x7F<<4
 #define DCONF_SPEED_MASK	0x0003
 #define DCONF_SPEED_FS		0x0003
 
 /* Bits in the Device control register */
-#define DCTL_RWU		0x0001	/* remote wakeup signal */
-#define DCTL_SDIS		0x0002	/* soft disconnect */
+#define DCTL_RWU		1	/* remote wakeup signal */
+#define DCTL_SDIS		BIT(1)	/* soft disconnect */
 /* Set the SDIS bit to perform a soft disconnect, clear it to run */
 #define DCTL_GINAK		BIT(2)	/* Global IN Nak */
 #define DCTL_GONAK		BIT(3)	/* Global OUT Nak */
@@ -160,6 +168,14 @@ struct usb_hw {
 #define DIN_DIS		BIT(1)		/* endpoint disabled */
 #define DIN_CM		BIT(0)		/* transfer complete */
 
+/* Bits in the endpoint control register */
+#define EP_CTL_ENA	BIT(31)
+#define EP_CTL_DIS	BIT(30)
+#define EP_CTL_SNAK	BIT(27)
+#define EP_CTL_CNAK	BIT(26)
+#define EP_CTL_FIFO_SHIFT	22
+
+
 /* --------------------- */
 
 #define IRQ_USB_WAKEUP	42
@@ -170,22 +186,228 @@ struct usb_hw {
 
 /* Direct access here only for debugging */
 #define USB_RAM_BASE	0x50020000
+#define USB_RAM_SIZE	1280		/* in bytes */
+#define USB_RAM_WSIZE	320		/* in 32 bit words */
+
+/* ============================================================== */
+/* Prototypes */
+
+static void flush_tx_fifo ( int );
+
+/* ============================================================== */
+
+#define FIFO_FILL	0xABABABAB
+
+static void
+fill_fifo_ram ( void )
+{
+	unsigned int *p = (unsigned int *) USB_RAM_BASE;
+	int i;
+
+	for ( i=0; i< USB_RAM_WSIZE; i++ )
+	    *p++ = FIFO_FILL;
+}
+
+/* Count in lines of 4 numbers */
+static void
+dump_l ( void *addr, int n )
+{
+        unsigned int *p;
+        int i;
+
+        p = (unsigned int *) addr;
+
+        while ( n-- ) {
+            printf ( "%X  ", (long) addr );
+
+            for ( i=0; i<4; i++ )
+                printf ( "%X ", *p++ );
+
+            printf ( "\n" );
+            addr += 16;
+        }
+}
+
+static unsigned int ram_snapshot[USB_RAM_WSIZE];
+
+// void *memcpy(void *dest, const void *src, size_t n);
+// void *memcpy(void *dest, void *src, int n);
+
+static void
+dump_fifo_ram ( void )
+{
+	unsigned int *p, *q;
+	int n;
+
+	n = USB_RAM_WSIZE;
+	q = (unsigned int *) USB_RAM_BASE;
+	p = ram_snapshot;
+
+	while ( n-- )
+	    *p++ = *q++;
+
+	// memcpy ( (void *)ram_snapshot, (void *) USB_RAM_BASE, USB_RAM_SIZE );
+	dump_l ( (void *) ram_snapshot, USB_RAM_SIZE / sizeof(long) / 4 );
+}
+
+/* Returns 0 if FIFO still matches fill,
+ * else number of mismatches.
+ */
+static int
+check_fifo_ram ( void )
+{
+	unsigned int *p = (unsigned int *) USB_RAM_BASE;
+	int i;
+	int rv = 0;
+
+	for ( i=0; i< USB_RAM_WSIZE; i++ )
+	    if ( *p++ != FIFO_FILL )
+		++rv;
+	return rv;
+}
+
+/* ============================================================== */
+
+static void
+enable_ep0 ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+
+	/* Get enumerated speed.
+	 * Should always be Full speed (Phy clock at 48) for this chip */
+	if ( hp->dstat & 0x6 != 0x6 )
+	    printf ( "Weird enumerated speed: %x\n", hp->dstat );
+
+	/* A more general driver would set the MPS bits here.
+	 * setting them to zero gives a max packet size of 64,
+	 * which is what we want and have already.
+	 */
+	// hp->in_ep[0] &= ~0x3;
+
+#ifdef notdef
+	/* tjt */
+	// hp->in_ep[0].ctl &= ~EP_CTL_DIS;
+	hp->in_ep[0].ctl |= EP_CTL_ENA;
+	hp->in_ep[0].ctl |= EP_CTL_CNAK;
+
+	// hp->out_ep[0].ctl &= ~EP_CTL_DIS;
+	hp->out_ep[0].ctl |= EP_CTL_ENA;
+	hp->out_ep[0].ctl |= EP_CTL_CNAK;
+
+	/* Clear global IN NAK bit */
+	hp->dctl |= DCTL_CGINAK;
+	hp->dctl |= DCTL_CGONAK;	/* tjt */
+#endif
+}
+
+static void
+start_ep0_out ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+
+#define EP_OUT_SETUP_1		1<<29
+#define EP_OUT_SETUP_2		2<<29
+#define EP_OUT_SETUP_3		3<<29
+#define EP_OUT_PKCNT		BIT(19)
+
+	/* We allow 3 back to back setup packets to be received.
+	 */
+	hp->out_ep[0].size = EP_OUT_SETUP_3 | EP_OUT_PKCNT | 8*3;
+}
+
+/* Handle enum interrupt.
+ *  In general, this comes close on the heels of a reset interrupt.
+ */
+static void
+handle_enum ( void )
+{
+	enable_ep0 ();
+}
+
+/* Handle reset interrupt */
+static void
+handle_reset ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+	int i;
+
+	/* Clear the remote wakeup bit */
+	hp->dctl &= ~DCTL_RWU;
+
+	/* Flush the IN fifo for EP0 */
+	flush_tx_fifo ( 0 );
+
+	for ( i=0; i<NUM_EP; i++ ) {
+	    hp->in_ep[i].ir = 0xff;
+	    hp->out_ep[i].ir = 0xff;
+	}
+
+	/* Clear all */
+	hp->all_int = 0xffffffff;
+
+	/* Enable EP0 interrupts */
+	hp->all_mask = 1 << 16 | 1;
+
+#define OUT_EP_INT_XFERCM	BIT(0)
+#define OUT_EP_INT_SETUP	BIT(3)
+#define OUT_EP_INT_DIS		BIT(4)
+	hp->out_imask = OUT_EP_INT_XFERCM | OUT_EP_INT_SETUP | OUT_EP_INT_DIS;
+
+#define IN_EP_INT_XFERCM	BIT(0)
+#define IN_EP_INT_TO		BIT(3)
+#define IN_EP_INT_DIS		BIT(1)
+	hp->in_imask = IN_EP_INT_XFERCM | IN_EP_INT_TO | IN_EP_INT_DIS;
+
+	/* Set device address to 0 */
+	hp->dcfg &= ~DCONF_DAD_MASK;
+
+	start_ep0_out ();
+}
+
+static unsigned int sof_count = 0;
+static int lne = 0;
+
+/* Dump some registers, triggered by the
+ * SOF "clock" timing.
+ */
+static void
+sof_dump ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+
+	printf ( "----- SOF = %d\n", sof_count );
+	show_reg ( "all EP int: ", &hp->all_int );
+	show_reg ( "EP0 IN ints: ", &hp->in_ep[0].ir );
+	show_reg ( "EP0 OUT ints: ", &hp->out_ep[0].ir );
+}
+
+static void
+handle_sof ( void )
+{
+	    ++sof_count;
+
+	    if ( sof_count == 1 )
+		sof_dump ();
+	    if ( sof_count == 5000 )
+		sof_dump ();
+}
 
 /* ============================================================== */
 
 /* Interrupt handlers.
  */
-void usb_wakeup ( void )
+void
+usb_wakeup ( void )
 {
 	printf ( "USB wakeup interrupt\n" );
 }
 
-static unsigned int sof_count = 0;
-
-void usb_fs ( void )
+void
+usb_fs ( void )
 {
 	struct usb_hw *hp = USB_BASE;
 	unsigned int status;
+	int ne;
 
 	status = hp->is;
 
@@ -197,8 +419,22 @@ void usb_fs ( void )
 
 	if ( status & INT_SOF ) {
 	    // printf ( "Int -- SOF\n" );
+	    handle_sof ();
 	    hp->is |= INT_SOF;
-	    ++sof_count;
+	    /*
+	    ne = check_fifo_ram ();
+	    if ( ne != lne ) {
+		printf ( "Stuff %d at SOF = %d\n", ne, sof_count );
+		dump_fifo_ram ();
+		lne = ne;
+	    }
+	    */
+	    /*
+	    if ( sof_count == 4 ) {
+		printf ( "++ ++ SOF %d ++ ++\n", sof_count );
+		dump_fifo_ram ();
+	    }
+	    */
 	    return;
 	}
 
@@ -211,10 +447,13 @@ void usb_fs ( void )
 	// printf ( "\n" );
 
 	if ( status & INT_ENUM ) {
-	    printf ( "Int -- Enumeration done %X %d\n", status, sof_count );
+	    /* This is speed enumeration */
+	    printf ( "Int -- Speed enumeration done %X %d\n", status, sof_count );
+	    handle_enum ();
 	    hp->is |= INT_ENUM;
 	} else if ( status & INT_RESET ) {
 	    printf ( "Int -- Reset %X %d\n", status, sof_count );
+	    handle_reset ();
 	    hp->is |= INT_RESET;
 	} else if ( status & INT_MMIS ) {
 	    printf ( "Int -- mode mismatch %X %d\n", status, sof_count );
@@ -356,6 +595,14 @@ show_stuff ( void )
 	show_reg ( "USB usb_conf", &hp->usb_conf );
 }
 
+/* XXX */
+static void
+usb_delay_ms ( int ms )
+{
+	while ( ms-- )
+	    delay_us ( 1000 );
+}
+
 void
 usb_init ( void )
 {
@@ -369,6 +616,8 @@ usb_init ( void )
 	nvic_enable ( IRQ_USB_WAKEUP );
 	nvic_enable ( IRQ_USB_FS );
 
+	fill_fifo_ram ();
+
 	gpio_usb_init ();
 
 	/* This turns out to be quite important.
@@ -379,7 +628,10 @@ usb_init ( void )
 	show_reg ( "USB usb_conf", &hp->usb_conf );
 	hp->usb_conf |= CONF_DFORCE;
 	// 25 ms delay required to switch modes.
-	// delay ( 30 );
+	// We probably don't need to delay as we
+	// are already in device mode on boot.
+	usb_delay_ms ( 50 );
+
 	show_reg ( "USB usb_conf", &hp->usb_conf );
 
 	hp->conf = CONF_NOVBUS | CONF_PWRDOWN;
@@ -395,6 +647,8 @@ usb_init ( void )
 	xyz |= DCONF_SPEED_FS;
 	hp->dcfg = xyz;
 	show_reg ( "USB dcfg", &hp->dcfg );
+
+	usb_mod_reg ( dcfg, DCONF_FI_MASK, DCONF_FI_80);
 
 	/* Fifo sizes are in 32 bit words.
 	 * We have 1.25 kb = 1280 bytes = 320 words.
@@ -432,13 +686,6 @@ usb_init ( void )
 	hp->all_int = 0xffffffff;
 	hp->all_mask = 0;
 
-/* Bits in the endpoint control register */
-#define EP_CTL_ENA	BIT(31)
-#define EP_CTL_DIS	BIT(30)
-#define EP_CTL_SNAK	BIT(27)
-#define EP_CTL_CNAK	BIT(26)
-#define EP_CTL_FIFO_SHIFT	22
-
 	hp->in_ep[0].ctl = EP_CTL_DIS | EP_CTL_SNAK;
 	hp->in_ep[1].ctl = EP_CTL_DIS | EP_CTL_SNAK;
 	hp->in_ep[2].ctl = 0;
@@ -473,9 +720,17 @@ usb_init ( void )
 
 	enable_usb_ints ();
 
-	printf ( "USB Initialization done\n" );
+	// This will be clean
+	// dump_fifo_ram ();
 
-	show_reg ( "USB is", &hp->is );
+	// printf ( "USB Initialization done\n" );
+
+	// show_reg ( "USB is", &hp->is );
+
+	delay ( 10 );
+	// printf ( "\n" );
+
+	// dump_fifo_ram ();
 
 	// show_stuff ();
 }
