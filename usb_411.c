@@ -112,8 +112,10 @@ struct usb_hw {
 /* bits in the interrupt and interrupt mask register */
 #define INT_CMOD	1	/* current mode of operation */
 #define INT_MMIS	BIT(1)	/* mode mismatch */
+#define INT_OTG		BIT(2)	/* OTG (read OTG interrupt register) */
 #define INT_SOF		BIT(3)
-#define INT_OTG		4	/* OTG (read OTG interrupt register) */
+#define INT_RXFLVL	BIT(4)	/* Rx FIFO not empty - something to read */
+/* */
 #define INT_ESUSP	BIT(10)	/* early suspend detected */
 #define INT_SUSP	BIT(11)	/* suspend detected */
 #define INT_RESET	BIT(12)	/* reset detected */
@@ -146,9 +148,9 @@ struct usb_hw {
 
 /* Bits in the Device config register. */
 
-#define DCONF_FI_MASK		0x3<<11
+#define DCONF_FI_MASK		(0x3<<11)
 #define DCONF_FI_80		0x0000
-#define DCONF_DAD_MASK		0x7F<<4
+#define DCONF_DAD_MASK		(0x7F<<4)
 #define DCONF_SPEED_MASK	0x0003
 #define DCONF_SPEED_FS		0x0003
 
@@ -179,7 +181,7 @@ struct usb_hw {
 #define EP_CTL_DIS	BIT(30)
 #define EP_CTL_SNAK	BIT(27)
 #define EP_CTL_CNAK	BIT(26)
-#define EP_CTL_FIFO_MASK	0xf<<22
+#define EP_CTL_FIFO_MASK	(0xf<<22)
 #define EP_CTL_FIFO_SHIFT	22
 #define EP_CTL_AEP	BIT(15)		/* Active Endpoint */
 
@@ -191,6 +193,7 @@ struct usb_hw {
 
 /* Register base */
 #define USB_BASE	(struct usb_hw *) 0x50000000
+#define USB_FIFO	(unsigned int *) 0x50001000
 
 /* Direct access here only for debugging */
 #define USB_RAM_BASE	0x50020000
@@ -319,10 +322,11 @@ start_ep0_out ( void )
 {
 	struct usb_hw *hp = USB_BASE;
 
-#define EP_OUT_SETUP_1		1<<29
-#define EP_OUT_SETUP_2		2<<29
-#define EP_OUT_SETUP_3		3<<29
-#define EP_OUT_PKCNT		BIT(19)
+#define EP_OUT_SETUP_1		(1<<29)
+#define EP_OUT_SETUP_2		(2<<29)
+#define EP_OUT_SETUP_3		(3<<29)
+#define EP_OUT_PKCNT_SHIFT	19
+#define EP_OUT_PKCNT		(1 << 19)
 
 	/* We allow 3 back to back setup packets to be received.
 	 */
@@ -363,7 +367,7 @@ handle_reset ( void )
 	hp->all_int = 0xffffffff;
 
 	/* Enable EP0 interrupts */
-	hp->all_mask = 1 << 16 | 1;
+	hp->all_mask = (1 << 16) | 1;
 
 #define OUT_EP_INT_XFERCM	BIT(0)
 #define OUT_EP_INT_DIS		BIT(1)
@@ -405,10 +409,76 @@ handle_sof ( void )
 {
 	    ++sof_count;
 
+	    /*
 	    if ( sof_count == 1 )
 		sof_dump ();
 	    if ( sof_count == 5000 )
 		sof_dump ();
+	    */
+}
+
+static void
+handle_out ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+	int s;
+
+	// s = hp->all_int;
+	show_reg ( "OUT all reg: ", &hp->all_int );
+	show_reg ( "OUT EP0 int reg: ", &hp->out_ep[0].ir );
+	hp->out_ep[0].ir = 0xff;
+}
+
+/* single line byte dump */
+static void
+dump_b ( char *msg, char *buf, int len )
+{
+	int i;
+
+	printf ( "%s", msg );
+
+	for ( i=0; i<len; i++ ) {
+	    printf ( " %x", buf[i] );
+	}
+
+	printf ( "\n" );
+}
+
+/* Bits in rx/rxp register */
+#define RX_EP_MASK	0xf
+#define RX_CNT_SHIFT	4
+#define RX_CNT_MASK	0x7ff
+#define RX_PID_SHIFT	15
+#define RX_PID_MASK	0x3
+#define RX_STAT_SHIFT	17
+#define RX_STAT_MASK	0xf
+
+static void
+read_setup ( void )
+{
+	struct usb_hw *hp = USB_BASE;
+	volatile unsigned int *fifo = USB_FIFO;
+	unsigned int buf[2];
+	unsigned int stat;
+	int count;
+	int ep;
+	int st, pid;
+
+	stat = hp->rxp;
+	count = (stat >> RX_CNT_SHIFT) & RX_CNT_MASK;
+	ep = stat & RX_EP_MASK;
+	st = (stat >> RX_STAT_SHIFT) & RX_STAT_MASK;
+	pid = (stat >> RX_PID_SHIFT) & RX_PID_MASK;
+
+	printf ( "Setup status (rxp): %X %d bytes on EP %d (%x %x)\n", stat, count, ep, st, pid );
+
+	if ( count == 0 )
+	    return;
+
+	buf[0] = *fifo;
+	buf[1] = *fifo;
+	dump_b ( "Setup: ", (char *) buf, 8 );
+	// printf ( "Setup: %X %X\n", val1, val2 );
 }
 
 /* ============================================================== */
@@ -439,8 +509,12 @@ usb_fs ( void )
 	/* These are cleared just by reading their status */
 	if ( status & INT_IN_EP )
 	    printf ( "Int -- IN endpoint %X %d\n", status, sof_count );
-	if ( status & INT_OUT_EP )
+
+	if ( status & INT_OUT_EP ) {
 	    printf ( "Int -- OUT endpoint %X %d\n", status, sof_count );
+	    handle_out ();
+	    return;
+	}
 
 	if ( status & INT_SOF ) {
 	    // printf ( "Int -- SOF\n" );
@@ -463,6 +537,13 @@ usb_fs ( void )
 	    return;
 	}
 
+	if ( status & INT_RXFLVL ) {
+	    printf ( "Int - Rx FIFO not empty %X %d\n", status, sof_count );
+	    read_setup ();
+	    hp->is |= INT_RXFLVL;
+	    return;
+	}
+
 	/* Most interrupts are cleared just
 	 * by the first read to the status register.
 	 */
@@ -476,11 +557,16 @@ usb_fs ( void )
 	    printf ( "Int -- Speed enumeration done %X %d\n", status, sof_count );
 	    handle_enum ();
 	    hp->is |= INT_ENUM;
-	} else if ( status & INT_RESET ) {
+	    return;
+	}
+	if ( status & INT_RESET ) {
 	    printf ( "Int -- Reset %X %d\n", status, sof_count );
 	    handle_reset ();
 	    hp->is |= INT_RESET;
-	} else if ( status & INT_MMIS ) {
+	    return;
+	}
+
+	if ( status & INT_MMIS ) {
 	    printf ( "Int -- mode mismatch %X %d\n", status, sof_count );
 	    hp->is |= INT_MMIS;
 	} else if ( status & INT_SUSP ) {
@@ -563,7 +649,8 @@ enable_usb_ints ( void )
 
 	/* Enable those we want */
 	hp->im = INT_SUSP | INT_WKUP | INT_RESET |
-		    INT_IN_EP | INT_OUT_EP | INT_ENUM | INT_SOF;
+		    INT_IN_EP | INT_OUT_EP | INT_ENUM |
+		    INT_SOF | INT_RXFLVL;
 		    // INT_ISOIN | INT_ISOOUT;
 
 	printf ( "Enable USB interrupt gate\n" );
@@ -708,14 +795,14 @@ usb_init ( void )
 	start += RX_FIFO_SIZE;
 
 	/* HNPTXFSIZ, 0x028 */
-	hp->np_fifo = TX0_FIFO_SIZE << 16 | start;		/* EP0, Tx fifo size */
+	hp->np_fifo = (TX0_FIFO_SIZE << 16) | start;		/* EP0, Tx fifo size */
 	start += TX0_FIFO_SIZE;
 
-	hp->in_fifo[0] = TX1_FIFO_SIZE << 16 | start;		/* EP1, Tx fifo size */
+	hp->in_fifo[0] = (TX1_FIFO_SIZE << 16) | start;		/* EP1, Tx fifo size */
 	start += TX1_FIFO_SIZE;
-	hp->in_fifo[1] = TX2_FIFO_SIZE << 16 | start;		/* EP2, Tx fifo size */
+	hp->in_fifo[1] = (TX2_FIFO_SIZE << 16) | start;		/* EP2, Tx fifo size */
 	start += TX2_FIFO_SIZE;
-	hp->in_fifo[2] = TX3_FIFO_SIZE << 16 | start;		/* EP3, Tx fifo size */
+	hp->in_fifo[2] = (TX3_FIFO_SIZE << 16) | start;		/* EP3, Tx fifo size */
 	// start += TX3_FIFO_SIZE;
 
 	flush_tx_fifo_all ();
@@ -729,6 +816,7 @@ usb_init ( void )
 	hp->out_imask = 0;
 	hp->all_mask = 0;
 
+#ifdef notdef
 	/* This seems odd to me.
 	 * We disable only the inputs that are already enabled.
 	 * On power up the ctl register is zero.
@@ -748,6 +836,16 @@ usb_init ( void )
 	    hp->out_ep[i].size = 0;
 	    hp->out_ep[i].ir = 0xff;
 
+	}
+#endif
+	for ( i=0; i<NUM_EP; i++ ) {
+	    hp->in_ep[i].ctl = 0;
+	    hp->in_ep[i].size = 0;
+	    hp->in_ep[i].ir = 0xff;
+
+	    hp->out_ep[i].ctl = 0;
+	    hp->out_ep[i].size = 0;
+	    hp->out_ep[i].ir = 0xff;
 	}
 
 	/* Entirely bogus */
