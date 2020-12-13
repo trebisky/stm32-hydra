@@ -240,20 +240,6 @@ blink_test ( void )
 	repeat ( 125, toggle_led );
 }
 
-static void
-pulse_test ( void )
-{
-	int pin = 2;
-	gpio_output_pp_config ( GPIOA, pin );
-
-	for ( ;; ) {
-	    delay_us ( 5 );
-	    gpio_bit ( GPIOA, pin, 0 );
-	    delay_us ( 5 );
-	    gpio_bit ( GPIOA, pin, 1 );
-	}
-}
-
 /* ================================================= */
 
 #ifdef notdef
@@ -303,7 +289,7 @@ startup ( void )
 	// blink_test ();
 
 	// Scope loop for delay_us()
-	// pulse_test ();
+	// delay_calibrate ();
 
 	// printf ( "Yo Ho Ho\n" );
 	printf ( "Enter idle loop\n" );

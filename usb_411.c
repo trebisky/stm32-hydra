@@ -56,14 +56,14 @@ struct usb_hw {
 	 * See the RM for the rest if you ever get
 	 * interested.
 	 */
-	volatile unsigned int hcfg;	/* 0x400 host config */
+	volatile unsigned int hcfg;		/* 0x400 host config */
 	    int _pad3[64*4-1];
 
 	/* Device mode registers.
 	 */
-	volatile unsigned int dcfg;	/* 0x800 device config */
-	volatile unsigned int dctl;	/* 0x804 device control */
-	volatile unsigned int dstat;	/* 0x808 device status */
+	volatile unsigned int dcfg;		/* 0x800 device config */
+	volatile unsigned int dctl;		/* 0x804 device control */
+	volatile unsigned int dstat;		/* 0x808 device status */
 	    int _pad4;
 	volatile unsigned int in_imask;		/* 0x810 IN endpoint interrupt mask */
 	volatile unsigned int out_imask;	/* 0x814 OUT endpoint interrupt mask */
@@ -77,7 +77,7 @@ struct usb_hw {
 	    int _pad7[64-14];
 
 	/* device - IN endpoint registers */
-	struct usb_endpoint in_ep[NUM_EP];		/* 0x900 */
+	struct usb_endpoint in_ep[NUM_EP];	/* 0x900 */
 	    int _pad8[128-4*8];
 
 	/* device - OUT endpoint registers */	/* 0xB00 */
@@ -94,6 +94,11 @@ struct usb_hw {
  */
 #define usb_mod_reg(reg,mask,val)	hp->reg = (hp->reg & ~mask) | val
 
+/* And these set or clear -- not that I will necessarily ever use them */
+// #define usb_set_reg(reg,val)		hp->reg = val
+#define usb_clear_bits(reg,mask)	hp->reg &= ~mask
+#define usb_set_bits(reg,mask)		hp->reg |= mask
+
 /* bits in the USB conf register */
 #define CONF_DFORCE	BIT(30)	/* force device mode */
 #define CONF_HFORCE	BIT(29)	/* force host mode */
@@ -109,6 +114,7 @@ struct usb_hw {
 #define INT_MMIS	BIT(1)	/* mode mismatch */
 #define INT_SOF		BIT(3)
 #define INT_OTG		4	/* OTG (read OTG interrupt register) */
+#define INT_ESUSP	BIT(10)	/* early suspend detected */
 #define INT_SUSP	BIT(11)	/* suspend detected */
 #define INT_RESET	BIT(12)	/* reset detected */
 #define INT_ENUM	BIT(13)	/* enum done */
@@ -140,7 +146,7 @@ struct usb_hw {
 
 /* Bits in the Device config register. */
 
-#define DCONF_FI_MASK		0x1800
+#define DCONF_FI_MASK		0x3<<11
 #define DCONF_FI_80		0x0000
 #define DCONF_DAD_MASK		0x7F<<4
 #define DCONF_SPEED_MASK	0x0003
@@ -150,8 +156,8 @@ struct usb_hw {
 #define DCTL_RWU		1	/* remote wakeup signal */
 #define DCTL_SDIS		BIT(1)	/* soft disconnect */
 /* Set the SDIS bit to perform a soft disconnect, clear it to run */
-#define DCTL_GINAK		BIT(2)	/* Global IN Nak */
-#define DCTL_GONAK		BIT(3)	/* Global OUT Nak */
+#define DCTL_GINAK		BIT(2)	/* Global IN Nak status (RO) */
+#define DCTL_GONAK		BIT(3)	/* Global OUT Nak status (RO) */
 #define DCTL_SGINAK		BIT(7)	/* Set Global IN Nak */
 #define DCTL_CGINAK		BIT(8)	/* Clear Global IN Nak */
 #define DCTL_SGONAK		BIT(9)	/* Set Global OUT Nak */
@@ -173,7 +179,9 @@ struct usb_hw {
 #define EP_CTL_DIS	BIT(30)
 #define EP_CTL_SNAK	BIT(27)
 #define EP_CTL_CNAK	BIT(26)
+#define EP_CTL_FIFO_MASK	0xf<<22
 #define EP_CTL_FIFO_SHIFT	22
+#define EP_CTL_AEP	BIT(15)		/* Active Endpoint */
 
 
 /* --------------------- */
@@ -268,6 +276,7 @@ check_fifo_ram ( void )
 
 /* ============================================================== */
 
+/* Called by enum done */
 static void
 enable_ep0 ( void )
 {
@@ -283,6 +292,10 @@ enable_ep0 ( void )
 	 * which is what we want and have already.
 	 */
 	// hp->in_ep[0] &= ~0x3;
+
+	/* Clear global IN Nak flag */
+	hp->dctl |= DCTL_CGINAK;
+	// show_reg ( "enable_ep0; dctl: ", &hp->dctl );
 
 #ifdef notdef
 	/* tjt */
@@ -300,6 +313,7 @@ enable_ep0 ( void )
 #endif
 }
 
+/* Called by reset */
 static void
 start_ep0_out ( void )
 {
@@ -313,6 +327,9 @@ start_ep0_out ( void )
 	/* We allow 3 back to back setup packets to be received.
 	 */
 	hp->out_ep[0].size = EP_OUT_SETUP_3 | EP_OUT_PKCNT | 8*3;
+
+	/* Make the endpoint active */
+	hp->out_ep[0].ctl = EP_CTL_ENA | EP_CTL_AEP;
 }
 
 /* Handle enum interrupt.
@@ -349,13 +366,15 @@ handle_reset ( void )
 	hp->all_mask = 1 << 16 | 1;
 
 #define OUT_EP_INT_XFERCM	BIT(0)
+#define OUT_EP_INT_DIS		BIT(1)
 #define OUT_EP_INT_SETUP	BIT(3)
-#define OUT_EP_INT_DIS		BIT(4)
 	hp->out_imask = OUT_EP_INT_XFERCM | OUT_EP_INT_SETUP | OUT_EP_INT_DIS;
 
 #define IN_EP_INT_XFERCM	BIT(0)
-#define IN_EP_INT_TO		BIT(3)
 #define IN_EP_INT_DIS		BIT(1)
+#define IN_EP_INT_TO		BIT(3)
+#define IN_EP_INT_EMPTY		BIT(7)	/* Empty (not in F411) */
+#define IN_EP_INT_TXU		BIT(8)	/* Tx underrun (not in F411) */
 	hp->in_imask = IN_EP_INT_XFERCM | IN_EP_INT_TO | IN_EP_INT_DIS;
 
 	/* Set device address to 0 */
@@ -402,6 +421,7 @@ usb_wakeup ( void )
 	printf ( "USB wakeup interrupt\n" );
 }
 
+/* Main USB interrupt handler */
 void
 usb_fs ( void )
 {
@@ -410,6 +430,11 @@ usb_fs ( void )
 	int ne;
 
 	status = hp->is;
+
+	if ( status == 0 ) {
+	    printf ( "Int -- spurious %X %d\n", status, sof_count );
+	    return;
+	}
 
 	/* These are cleared just by reading their status */
 	if ( status & INT_IN_EP )
@@ -537,7 +562,7 @@ enable_usb_ints ( void )
 	hp->ir = 0xffffffff;	/* clear pending OTG */
 
 	/* Enable those we want */
-	hp->im |= INT_SUSP | INT_WKUP | INT_RESET |
+	hp->im = INT_SUSP | INT_WKUP | INT_RESET |
 		    INT_IN_EP | INT_OUT_EP | INT_ENUM | INT_SOF;
 		    // INT_ISOIN | INT_ISOOUT;
 
@@ -607,11 +632,15 @@ void
 usb_init ( void )
 {
 	struct usb_hw *hp = USB_BASE;
-	unsigned int xyz;
+	// unsigned int xyz;
 	int start;
+	int i;
 
 	puts ( "---------------------------\n" );
 	printf ( "In USB init\n" );
+
+	/* Disable USB interrupts */
+	hp->ahb_conf &= ~AHB_GINT;
 
 	nvic_enable ( IRQ_USB_WAKEUP );
 	nvic_enable ( IRQ_USB_FS );
@@ -620,6 +649,9 @@ usb_init ( void )
 
 	gpio_usb_init ();
 
+	/* Restart the PHY clock in case it has stopped */
+	hp->clock = 0;
+
 	/* This turns out to be quite important.
 	 * Before setting this bit, the device decided
 	 * for some reason to switch to host mode
@@ -627,28 +659,34 @@ usb_init ( void )
 	 */
 	show_reg ( "USB usb_conf", &hp->usb_conf );
 	hp->usb_conf |= CONF_DFORCE;
+
 	// 25 ms delay required to switch modes.
 	// We probably don't need to delay as we
 	// are already in device mode on boot.
 	usb_delay_ms ( 50 );
 
-	show_reg ( "USB usb_conf", &hp->usb_conf );
+	// show_reg ( "USB usb_conf", &hp->usb_conf );
 
+	/* General core config register, 0x038 */
+	// deactivate power down.
+	// disable Vbus sensing
 	hp->conf = CONF_NOVBUS | CONF_PWRDOWN;
 
-	/* Restart the PHY clock in case it has stopped */
-	hp->clock = 0;
-
 	show_reg ( "USB dcfg", &hp->dcfg );
+	// usb_mod_reg ( dcfg, DCONF_FI_MASK, DCONF_FI_80);
+	// usb_mod_reg ( dcfg, DCONF_SPEED_MASK, DCONF_SPEED_FS);
+	// write all fields ensuring device address set 0
+	hp->dcfg = DCONF_FI_80 | DCONF_SPEED_FS;
+
+	/*
 	xyz = hp->dcfg;
 	xyz &= ~DCONF_FI_MASK;
 	xyz |= DCONF_FI_80;
 	xyz &= ~DCONF_SPEED_MASK;
 	xyz |= DCONF_SPEED_FS;
 	hp->dcfg = xyz;
-	show_reg ( "USB dcfg", &hp->dcfg );
-
-	usb_mod_reg ( dcfg, DCONF_FI_MASK, DCONF_FI_80);
+	*/
+	// show_reg ( "USB dcfg", &hp->dcfg );
 
 	/* Fifo sizes are in 32 bit words.
 	 * We have 1.25 kb = 1280 bytes = 320 words.
@@ -658,15 +696,18 @@ usb_init ( void )
 	 * Each IN endpoint has its own Tx FIFO
 	 * See 22.11.1 and 22.11.2 and 22.13.1
 	 */
+
 #define RX_FIFO_SIZE	128
 #define TX0_FIFO_SIZE	64
 #define TX1_FIFO_SIZE	128
 #define TX2_FIFO_SIZE	0
 #define TX3_FIFO_SIZE	0
+
 	start = 0;
 	hp->rx_fifo = RX_FIFO_SIZE;	/* 16-256 allowed */
 	start += RX_FIFO_SIZE;
 
+	/* HNPTXFSIZ, 0x028 */
 	hp->np_fifo = TX0_FIFO_SIZE << 16 | start;		/* EP0, Tx fifo size */
 	start += TX0_FIFO_SIZE;
 
@@ -675,48 +716,42 @@ usb_init ( void )
 	hp->in_fifo[1] = TX2_FIFO_SIZE << 16 | start;		/* EP2, Tx fifo size */
 	start += TX2_FIFO_SIZE;
 	hp->in_fifo[2] = TX3_FIFO_SIZE << 16 | start;		/* EP3, Tx fifo size */
-	start += TX3_FIFO_SIZE;
+	// start += TX3_FIFO_SIZE;
 
 	flush_tx_fifo_all ();
 	flush_rx_fifo ();
 
 	/* Clear pending interrupts */
+	hp->all_int = 0xffffffff;
+
+	/* Mask off all endpoint interrupts */
 	hp->in_imask = 0;
 	hp->out_imask = 0;
-	hp->all_int = 0xffffffff;
 	hp->all_mask = 0;
 
-	hp->in_ep[0].ctl = EP_CTL_DIS | EP_CTL_SNAK;
-	hp->in_ep[1].ctl = EP_CTL_DIS | EP_CTL_SNAK;
-	hp->in_ep[2].ctl = 0;
-	hp->in_ep[3].ctl = 0;
+	/* This seems odd to me.
+	 * We disable only the inputs that are already enabled.
+	 * On power up the ctl register is zero.
+	 */
+	for ( i=0; i<NUM_EP; i++ ) {
+	    if ( hp->in_ep[i].ctl & EP_CTL_ENA )
+		hp->in_ep[i].ctl = EP_CTL_DIS | EP_CTL_SNAK;
+	    else
+		hp->in_ep[i].ctl = 0;
+	    hp->in_ep[i].size = 0;
+	    hp->in_ep[i].ir = 0xff;
 
-	hp->in_ep[0].size = 0;
-	hp->in_ep[1].size = 0;
-	hp->in_ep[2].size = 0;
-	hp->in_ep[3].size = 0;
+	    if ( hp->out_ep[i].ctl & EP_CTL_ENA )
+		hp->out_ep[i].ctl = EP_CTL_DIS | EP_CTL_SNAK;
+	    else
+		hp->out_ep[i].ctl = 0;
+	    hp->out_ep[i].size = 0;
+	    hp->out_ep[i].ir = 0xff;
 
-	hp->in_ep[0].ir = 0xff;
-	hp->in_ep[1].ir = 0xff;
-	hp->in_ep[2].ir = 0xff;
-	hp->in_ep[3].ir = 0xff;
+	}
 
-	hp->out_ep[0].ctl = EP_CTL_DIS | EP_CTL_SNAK;
-	hp->out_ep[1].ctl = 0;
-	hp->out_ep[2].ctl = 0;
-	hp->out_ep[3].ctl = 0;
-
-	hp->out_ep[0].size = 0;
-	hp->out_ep[1].size = 0;
-	hp->out_ep[2].size = 0;
-	hp->out_ep[3].size = 0;
-
-	hp->out_ep[0].ir = 0xff;
-	hp->out_ep[1].ir = 0xff;
-	hp->out_ep[2].ir = 0xff;
-	hp->out_ep[3].ir = 0xff;
-
-	// hp->in_imask = 0;
+	/* Entirely bogus */
+	// hp->in_imask = IN_EP_INT_TXU;	/* XXX - enable underrun interrupt */
 
 	enable_usb_ints ();
 

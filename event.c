@@ -483,19 +483,39 @@ unblock ( void )
 
 /* =================================================================== */
 
-/* An orphan, but this needs to live someplace.
- * Time really short delays with the usual delay loop.
+/* delay_us() is sort of an orphan, but it needs to live someplace.
+ * We use it to time really short delays using an evil delay loop.
  * The iic.c bit/bang i2c driver uses this to clock pulses.
  */
 
-#ifdef notdef
-void
-delay_us ( int us )
-{
-}
-#endif
+/* This is a scope loop to allow the delay constants to
+ * be calibrated.  I have done this for a 96 Mhz STM32F411.
+ */
+#define DELAY_CAL_GPIO	GPIOA
+#define DELAY_CAL_PIN	2
 
-/* XXX XXX should calibrate the above delay and ditch what follows */
+void delay_us ( int );
+void delay_400k ( void );
+
+void
+delay_calibrate ( void )
+{
+	int pin = DELAY_CAL_PIN;
+
+	/* Gotta use push pull to see anything on
+	 * the scope.
+	 */
+	gpio_output_pp_config ( GPIOA, pin );
+
+	for ( ;; ) {
+	    // delay_us ( 5 );
+	    delay_400k ();
+	    gpio_bit ( GPIOA, pin, 0 );
+	    // delay_us ( 5 );
+	    delay_400k ();
+	    gpio_bit ( GPIOA, pin, 1 );
+	}
+}
 
 /* The following numbers were worked up using an oscilloscope and
  * a basic simple scope loop with delay_us(5).
@@ -503,18 +523,22 @@ delay_us ( int us )
  * which needs to generated 100 kHz.
  */
 
-/* For 72 Mhz cpu */
+/* For 72 Mhz cpu - not verified */
 #ifdef CHIP_F103
 // #define DELAY_US_MULT	120	// 89 kHz
 // #define DELAY_US_MULT	110	// 95.4 kHz
 #define DELAY_US_MULT	105	// 100 kHz
 // #define DELAY_US_MULT	100	// 105 kHz
+#define DELAY_US_400K	11
 #endif
 
-/* For 96 Mhz cpu */
+/* For 96 Mhz cpu - verified 12-2020 */
 #ifdef CHIP_F411
 // #define DELAY_US_MULT	300	// 101 kHz
 #define DELAY_US_MULT	302	// 100 kHz
+
+// #define DELAY_US_400K	38	// 1.4 us
+#define DELAY_US_400K	32	// 403 kHz
 #endif
 
 /* From libmaple.
@@ -536,6 +560,22 @@ delay_us ( int us )
                  "   bhi 1b                 \n\t"
                  :
                  : [us] "r" (us)
+                 : "r0");
+}
+
+/* This generates the delay for i2c at 400K, which would
+ * be a 1.25 us delay
+ */
+void
+delay_400k ( void )
+{
+    int count = DELAY_US_400K;
+
+    asm volatile("   mov r0, %[count]          \n\t"
+                 "1: subs r0, #1            \n\t"
+                 "   bhi 1b                 \n\t"
+                 :
+                 : [count] "r" (count)
                  : "r0");
 }
 
