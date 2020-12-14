@@ -193,6 +193,12 @@ struct usb_hw {
 
 /* Register base */
 #define USB_BASE	(struct usb_hw *) 0x50000000
+// #define USB_FIFO	(unsigned int *) 0x50001000
+
+static unsigned int *usb_fifo_base[] =
+    { (unsigned int *) 0x50001000, (unsigned int *) 0x50002000,
+    (unsigned int *) 0x50003000, (unsigned int *) 0x50004000 };
+
 #define USB_FIFO	(unsigned int *) 0x50001000
 
 /* Direct access here only for debugging */
@@ -457,7 +463,7 @@ static void
 read_setup ( void )
 {
 	struct usb_hw *hp = USB_BASE;
-	volatile unsigned int *fifo = USB_FIFO;
+	volatile unsigned int *fifo = usb_fifo_base[0];
 	unsigned int buf[2];
 	unsigned int stat;
 	int count;
@@ -478,7 +484,28 @@ read_setup ( void )
 	buf[0] = *fifo;
 	buf[1] = *fifo;
 	dump_b ( "Setup: ", (char *) buf, 8 );
+	usb_console_setup ( buf );
+
 	// printf ( "Setup: %X %X\n", val1, val2 );
+}
+
+static void
+usb_write_ep ( int ep, char *buf, int len )
+{
+	volatile unsigned int *fifo = usb_fifo_base[ep];
+	int wlen = (len+3) / 4;
+
+	while ( wlen-- ) {
+	    *fifo = * (unsigned int *) buf;
+	    buf += sizeof(unsigned int);
+	}
+}
+
+/* Write a response from a setup packet */
+void
+usb_write_data ( char *buf, int len )
+{
+	usb_write_ep ( 0, buf, len );
 }
 
 /* ============================================================== */
