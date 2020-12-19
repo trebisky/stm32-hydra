@@ -22,7 +22,7 @@ struct usb_endpoint {
 	    int _pad1;
 	volatile unsigned int size;		/* 0x910 Xfer size */
 	volatile unsigned int dma;		/* 0x914 DMA address */
-	volatile unsigned int status;		/* 0x918 Tx fifo status */
+	volatile unsigned int status;		/* 0x918 Tx fifo status (available space) */
 	    int _pad2;
 };
 
@@ -86,6 +86,13 @@ struct usb_hw {
 
 	/* power and clock gating */
 	volatile unsigned int clock;		/* 0xE00 - power and clock gating */
+
+	    int _pad10[2*64-1];
+
+	struct {
+	    volatile unsigned int reg;		/* 0x1000, 0x2000, ... */
+	    int _pad[1023];
+	} fifo[4];
 };
 
 /* clear a bit or field, then set a value in it.
@@ -195,9 +202,9 @@ struct usb_hw {
 #define USB_BASE	(struct usb_hw *) 0x50000000
 // #define USB_FIFO	(unsigned int *) 0x50001000
 
-static unsigned int *usb_fifo_base[] =
-    { (unsigned int *) 0x50001000, (unsigned int *) 0x50002000,
-    (unsigned int *) 0x50003000, (unsigned int *) 0x50004000 };
+// static unsigned int *usb_fifo_base[] =
+//     { (unsigned int *) 0x50001000, (unsigned int *) 0x50002000,
+//     (unsigned int *) 0x50003000, (unsigned int *) 0x50004000 };
 
 #define USB_FIFO	(unsigned int *) 0x50001000
 
@@ -285,6 +292,17 @@ check_fifo_ram ( void )
 
 /* ============================================================== */
 
+static void
+show_in_ep ( int ep )
+{
+	struct usb_hw *hp = USB_BASE;
+
+	printf ( "IN ep %d\n", ep );
+	show_reg ( "IN ep ctl: ", &hp->in_ep[ep].ctl );
+	show_reg ( "IN ep size: ", &hp->in_ep[ep].size );
+	show_reg ( "IN ep status: ", &hp->in_ep[ep].status );
+}
+
 /* Called by enum done */
 static void
 enable_ep0 ( void )
@@ -300,26 +318,13 @@ enable_ep0 ( void )
 	 * setting them to zero gives a max packet size of 64,
 	 * which is what we want and have already.
 	 */
+
+	/* A more general driver would also set the speed bits */
 	// hp->in_ep[0] &= ~0x3;
 
 	/* Clear global IN Nak flag */
 	hp->dctl |= DCTL_CGINAK;
 	// show_reg ( "enable_ep0; dctl: ", &hp->dctl );
-
-#ifdef notdef
-	/* tjt */
-	// hp->in_ep[0].ctl &= ~EP_CTL_DIS;
-	hp->in_ep[0].ctl |= EP_CTL_ENA;
-	hp->in_ep[0].ctl |= EP_CTL_CNAK;
-
-	// hp->out_ep[0].ctl &= ~EP_CTL_DIS;
-	hp->out_ep[0].ctl |= EP_CTL_ENA;
-	hp->out_ep[0].ctl |= EP_CTL_CNAK;
-
-	/* Clear global IN NAK bit */
-	hp->dctl |= DCTL_CGINAK;
-	hp->dctl |= DCTL_CGONAK;	/* tjt */
-#endif
 }
 
 /* Called by reset */
@@ -331,15 +336,29 @@ start_ep0_out ( void )
 #define EP_OUT_SETUP_1		(1<<29)
 #define EP_OUT_SETUP_2		(2<<29)
 #define EP_OUT_SETUP_3		(3<<29)
-#define EP_OUT_PKCNT_SHIFT	19
-#define EP_OUT_PKCNT		(1 << 19)
+#define EP_IN_PKTCNT_SHIFT	19
+#define EP_OUT_PKTCNT_SHIFT	19
+#define EP_OUT_PKTCNT		(1 << 19)
 
 	/* We allow 3 back to back setup packets to be received.
 	 */
-	hp->out_ep[0].size = EP_OUT_SETUP_3 | EP_OUT_PKCNT | 8*3;
+	hp->out_ep[0].size = EP_OUT_SETUP_3 | EP_OUT_PKTCNT | 8*3;
 
 	/* Make the endpoint active */
 	hp->out_ep[0].ctl = EP_CTL_ENA | EP_CTL_AEP;
+}
+
+static void
+start_ep_in ( int ep )
+{
+	struct usb_hw *hp = USB_BASE;
+
+	/* We allow 3 back to back setup packets to be received.
+	 */
+	// hp->out_ep[0].size = EP_OUT_SETUP_3 | EP_OUT_PKTCNT | 8*3;
+
+	/* Make the endpoint active */
+	hp->in_ep[ep].ctl = EP_CTL_ENA | EP_CTL_AEP;
 }
 
 /* Handle enum interrupt.
@@ -349,6 +368,9 @@ static void
 handle_enum ( void )
 {
 	enable_ep0 ();
+	show_in_ep ( 0 );
+	start_ep_in ( 0 );
+	show_in_ep ( 0 );
 }
 
 /* Handle reset interrupt */
@@ -463,7 +485,8 @@ static void
 read_setup ( void )
 {
 	struct usb_hw *hp = USB_BASE;
-	volatile unsigned int *fifo = usb_fifo_base[0];
+	// volatile unsigned int *fifo = usb_fifo_base[0];
+	volatile unsigned int *fifo = &hp->fifo[0].reg;
 	unsigned int buf[2];
 	unsigned int stat;
 	int count;
@@ -492,7 +515,8 @@ read_setup ( void )
 static void
 usb_write_ep ( int ep, char *buf, int len )
 {
-	volatile unsigned int *fifo = usb_fifo_base[ep];
+	// volatile unsigned int *fifo = usb_fifo_base[ep];
+	volatile unsigned int *fifo = &(USB_BASE)->fifo[ep].reg;
 	int wlen = (len+3) / 4;
 
 	while ( wlen-- ) {
@@ -505,7 +529,24 @@ usb_write_ep ( int ep, char *buf, int len )
 void
 usb_write_data ( char *buf, int len )
 {
+	struct usb_hw *hp = USB_BASE;
+	volatile unsigned int *fifo;
+
+	printf ( "Write data, %d bytes\n", len );
+
+	/* XXX - hackish */
+	hp->in_ep[0].size = len | 1<<EP_IN_PKTCNT_SHIFT;
 	usb_write_ep ( 0, buf, len );
+	show_in_ep ( 0 );
+
+#ifdef notdef
+	fifo = &hp->fifo[0].reg;
+	printf ( "FIFO at %X\n", fifo );
+
+	// fifo = &hp->fifo[3].reg;
+	fifo = &(USB_BASE)->fifo[3].reg;
+	printf ( "FIFO at %X\n", fifo );
+#endif
 }
 
 /* ============================================================== */
@@ -843,28 +884,6 @@ usb_init ( void )
 	hp->out_imask = 0;
 	hp->all_mask = 0;
 
-#ifdef notdef
-	/* This seems odd to me.
-	 * We disable only the inputs that are already enabled.
-	 * On power up the ctl register is zero.
-	 */
-	for ( i=0; i<NUM_EP; i++ ) {
-	    if ( hp->in_ep[i].ctl & EP_CTL_ENA )
-		hp->in_ep[i].ctl = EP_CTL_DIS | EP_CTL_SNAK;
-	    else
-		hp->in_ep[i].ctl = 0;
-	    hp->in_ep[i].size = 0;
-	    hp->in_ep[i].ir = 0xff;
-
-	    if ( hp->out_ep[i].ctl & EP_CTL_ENA )
-		hp->out_ep[i].ctl = EP_CTL_DIS | EP_CTL_SNAK;
-	    else
-		hp->out_ep[i].ctl = 0;
-	    hp->out_ep[i].size = 0;
-	    hp->out_ep[i].ir = 0xff;
-
-	}
-#endif
 	for ( i=0; i<NUM_EP; i++ ) {
 	    hp->in_ep[i].ctl = 0;
 	    hp->in_ep[i].size = 0;
