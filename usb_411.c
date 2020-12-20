@@ -551,17 +551,22 @@ usb_write_data ( char *buf, int len )
 
 /* ============================================================== */
 
-/* Interrupt handlers.
+/* USB wakeup handler
+ * hook in locore.s
  */
 void
-usb_wakeup ( void )
+usb_wakeup_handler ( void )
 {
+	/* I've never seen this one yet.
+	 */
 	printf ( "USB wakeup interrupt\n" );
 }
 
-/* Main USB interrupt handler */
+/* Main USB interrupt handler.
+ * hook in locore.s
+ */
 void
-usb_fs ( void )
+usb_irq_handler ( void )
 {
 	struct usb_hw *hp = USB_BASE;
 	unsigned int status;
