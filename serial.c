@@ -350,6 +350,22 @@ printf ( char *fmt, ... )
         serial_puts ( std_serial, buf );
 }
 
+#ifdef HYDRA_USB
+void
+usb_printf ( char *fmt, ... )
+{
+	char buf[PRINTF_BUF_SIZE];
+        va_list args;
+
+        va_start ( args, fmt );
+        asnprintf ( buf, PRINTF_BUF_SIZE, fmt, args );
+        va_end ( args );
+
+        usb_puts ( buf );
+}
+#endif
+
+
 /* The limit is absurd, so take care */
 void
 sprintf ( char *buf, char *fmt, ... )
@@ -510,7 +526,6 @@ asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args)
 	buf = end;
     PUTCHAR('\0');
 }
-
 
 void
 serial_printf ( int fd, char *fmt, ... )

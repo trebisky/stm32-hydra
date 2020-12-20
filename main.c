@@ -240,6 +240,52 @@ blink_test ( void )
 	repeat ( 125, toggle_led );
 }
 
+static void
+usb_test_1 ( void )
+{
+	int count = 0;
+
+	for ( ;; ) {
+	    ++count;
+	    // usb_write ( "hello\n", 6 );
+	    // usb_puts ( "hello\n" );
+	    usb_printf ( "hello %d\n", count );
+	    delay ( 1000 );
+	}
+}
+
+static void
+usb_test_2 ( void )
+{
+	int n;
+	char buf[64];
+	int count;
+
+	count = 0;
+	for ( ;; ) {
+	    ++count;
+	    n = usb_read ( buf, 64 );
+	    if ( n )
+		printf ( "USB: %d (%d)\n", n, count );
+	}
+}
+
+static void
+usb_handler ( char *buf, int len )
+{
+	printf ( "USB: %d\n", len );
+	while ( len-- )
+	    putc ( *buf++ );
+	putc ( '\n' );
+}
+
+static void
+usb_test ( void )
+{
+	usb_hookup ( usb_handler );
+}
+
+
 /* ================================================= */
 
 #ifdef notdef
@@ -292,6 +338,10 @@ startup ( void )
 	// delay_calibrate ();
 
 	// printf ( "Yo Ho Ho\n" );
+
+	printf ( "USB test running\n" );
+	usb_test ();
+
 	printf ( "Enter idle loop\n" );
 
 	idle ();

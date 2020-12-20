@@ -72,7 +72,7 @@
 .word	bogus		/* IRQ 39 -- UART 3 */
 .word	bogus		/* IRQ 40 */
 .word	bogus		/* IRQ 41 */
-.word	usb_wakeup	/* IRQ 42 */
+.word	usb_wakeup_handler	/* IRQ 42 */
 .word	bogus		/* IRQ 43 */
 .word	bogus		/* IRQ 44 */
 .word	bogus		/* IRQ 45 */
@@ -97,7 +97,7 @@
 .word	bogus		/* IRQ 64 */
 .word	bogus		/* IRQ 65 */
 .word	bogus		/* IRQ 66 */
-.word	usb_fs		/* IRQ 67 */
+.word	usb_irq_handler		/* IRQ 67 */
 
 
 .section .text

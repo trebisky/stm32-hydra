@@ -23,11 +23,15 @@ GDB = $(TOOLS)-gdb
 
 BASE_OBJS = init.o main.o flash.o led.o serial.o nvic.o exti.o systick.o event.o iic.o
 
+# One or the other
+USB_OBJS = usbf4.o
+#USB_OBJS = usb411.o usb_console.o
+
 ifeq ($(TARGET),black)
 CHIP = CHIP_F411
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
-OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o usb_411.o usb_console.o
+OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
 OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else
 CHIP = CHIP_F103
@@ -47,9 +51,16 @@ endif
 #  these demos, I can't be busy to set up prototypes as I should.
 # CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Wno-implicit-function-declaration -fno-builtin
 
-CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  -D$(CHIP) -O
+CDEFS = -D$(CHIP) -DHYDRA -DHYDRA_USB
+
+CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) -O
 
 all: show hydra.elf hydra.dump hydra.bin
+
+usbf4.o:	bogus
+	cd usbF4; make
+
+bogus:
 
 show:
 ifeq ($(TARGET),black)
@@ -98,4 +109,5 @@ gdbtui:
 	$(GDB) -tui --eval-command="target remote localhost:3333" hydra.elf
 
 clean:
+	cd usbF4; make clean
 	rm -f *.o hydra.elf hydra.dump hydra.bin
