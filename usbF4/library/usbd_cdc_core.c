@@ -63,45 +63,6 @@
 #include <vcp/usbd_desc.h>
 #include <library/usbd_req.h>
 
-
-/** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-  * @{
-  */
-
-
-/** @defgroup usbd_cdc 
-  * @brief usbd core module
-  * @{
-  */ 
-
-/** @defgroup usbd_cdc_Private_TypesDefinitions
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup usbd_cdc_Private_Defines
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup usbd_cdc_Private_Macros
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup usbd_cdc_Private_FunctionPrototypes
-  * @{
-  */
-
 /*********************************************
    CDC Device library callbacks
  *********************************************/
@@ -121,9 +82,6 @@ static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length);
 #ifdef USE_USB_OTG_HS  
 static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
 #endif
-/**
-  * @}
-  */ 
 
 /** @defgroup usbd_cdc_Private_Variables
   * @{
@@ -624,6 +582,9 @@ static uint8_t  usbd_cdc_DataIn (void *pdev, uint8_t epnum)
 
     uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
     uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
+
+    printf ( "usbd_cdc_DataIn called with %d bytes waiting to send on endpoint %d\n", USB_Tx_length, epnum );
+
     if (USB_Tx_length == 0)
     {
         //USB_Tx_State = 0;
@@ -772,16 +733,5 @@ static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
   return usbd_cdc_OtherCfgDesc;
 }
 #endif
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

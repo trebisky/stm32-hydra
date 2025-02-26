@@ -27,10 +27,6 @@
 #include "usbd_cdc_vcp.h"
 // #include <libmaple/bkp.h>
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 LINE_CODING linecoding =
   {
     115200, /* baud rate*/
@@ -54,6 +50,7 @@ extern volatile uint16_t APP_Tx_ptr_out;
 
 #define UsbRecBufferSize 2048
 #define UsbRecBufferSizeMask (UsbRecBufferSize-1)
+
 uint8_t __CCMRAM__ UsbRecBuffer[UsbRecBufferSize];
 volatile int UsbRecRead = 0;
 volatile int UsbRecWrite = 0;
@@ -71,12 +68,15 @@ uint32_t VCPBytesAvailable(void)
 	return (UsbRecWrite - UsbRecRead) & UsbRecBufferSizeMask;
 }
 
+extern void usbd_cdc_PrepareRx (void *pdev);
+
 /* tjt -- This never blocks, just returns 0 immediately if there
  * is nothing available.
  */
 uint32_t VCPGetBytes(uint8_t * rxBuf, uint32_t len)
 {
 	int usbRxRead = UsbRecRead; // take volatile
+
 	uint32_t rx_unread = (UsbRecWrite - usbRxRead) & UsbRecBufferSizeMask;
 
 	if (rx_unread==0) {
@@ -85,20 +85,20 @@ uint32_t VCPGetBytes(uint8_t * rxBuf, uint32_t len)
 
 	if (len>rx_unread) len = rx_unread;
 	
-	for (uint32_t i = 0; i<len; i++)
-	{
+	for (uint32_t i = 0; i<len; i++) {
 		*rxBuf++ = UsbRecBuffer[usbRxRead++];
 		usbRxRead &= UsbRecBufferSizeMask;
 	}
+
 	UsbRecRead = usbRxRead; // update volatile
+
 	// check if the OUT endpoint has to be re-enabled
 	uint32_t free_rx_space = (usbRxRead-UsbRecWrite-1) & UsbRecBufferSizeMask;
-	if ( free_rx_space>=CDC_DATA_MAX_PACKET_SIZE && rxDisabled )
-	{
+	if ( free_rx_space>=CDC_DATA_MAX_PACKET_SIZE && rxDisabled ) {
 		rxDisabled = 0;
-		extern void usbd_cdc_PrepareRx (void *pdev);
 		if (usbDevice) usbd_cdc_PrepareRx(usbDevice);
 	}
+
 	return len;
 }
 
@@ -240,34 +240,33 @@ uint32_t VCP_DataTx (const uint8_t* Buf, uint32_t Len)
 	uint32_t ptrIn = APP_Tx_ptr_in; // get volatile
 	uint32_t cnt = 0;
 	uint16_t cdc_buf_cnt = 0;
-	while ( cnt<Len )
-	{
-		while ( ((ptrIn+1)&APP_TX_DATA_SIZE_MASK)==APP_Tx_ptr_out )
-		{
-			if( !UsbTXBlock || !VCP_DTRHIGH )
-			{
+
+	printf ( "- VCP DataTx %d bytes: %c%c%c\n", Len, Buf[0], Buf[1], Buf[2] );
+
+	while ( cnt<Len ) {
+		while ( ((ptrIn+1)&APP_TX_DATA_SIZE_MASK)==APP_Tx_ptr_out ) {
+			if( !UsbTXBlock || !VCP_DTRHIGH ) {
 				goto tx_exit;
 			}
 		}
 		APP_Tx_Buffer[ptrIn++] = *Buf++;
 		ptrIn &= APP_TX_DATA_SIZE_MASK;
 		// update volatile pointer if the nr of bytes can fill up the CDC_DATA buffer
-		if ( cdc_buf_cnt==CDC_DATA_MAX_PACKET_SIZE )
-		{
+		if ( cdc_buf_cnt==CDC_DATA_MAX_PACKET_SIZE ) {
 			cdc_buf_cnt = 0;
 			APP_Tx_ptr_in = ptrIn; // update volatile
-		}
-		else
-		{
+		} else {
 			cdc_buf_cnt ++;
 		}
 		cnt ++;
 	}
+
 tx_exit:
 	APP_Tx_ptr_in = ptrIn; // update volatile
 	return cnt;
 }
 
+#ifndef HYDRA
 typedef volatile unsigned long      vu32;
 
 typedef struct {
@@ -304,7 +303,9 @@ void systemHardReset(void) {
         asm volatile("nop");
     }
 }
+#endif
 
+/* tjt -- added for Hydra */
 typedef void (*bfptr) ( char *, int );
 
 static bfptr usb_read_hook = (bfptr) 0;

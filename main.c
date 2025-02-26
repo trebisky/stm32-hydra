@@ -243,13 +243,14 @@ blink_test ( void )
 static void
 usb_test_1 ( void )
 {
-	int count = 0;
+	int count;
 
-	for ( ;; ) {
-	    ++count;
+	// for ( ;; ) {
+	for ( count=1; count<9; count++ ) {
 	    // usb_write ( "hello\n", 6 );
 	    // usb_puts ( "hello\n" );
-	    usb_printf ( "hello %d\n", count );
+	    usb_printf ( "%d hello\n", count );
+	    printf ( "%d hello\n", count );
 	    delay ( 1000 );
 	}
 }
@@ -280,7 +281,7 @@ usb_handler ( char *buf, int len )
 }
 
 static void
-usb_test ( void )
+usb_test_3 ( void )
 {
 	usb_hookup ( usb_handler );
 }
@@ -309,8 +310,10 @@ startup ( void )
 #endif
 
 	puts ( "\n" );
-	// puts ( "******************************\n" );
-	// puts ( "******************************\n" );
+	puts ( "******************************\n" );
+	puts ( "******************************\n" );
+	puts ( "******************************\n" );
+	puts ( "******************************\n" );
 	puts ( "Up and running mainline code\n" );
 
 	// printf ( "CPU running at %d Hz\n", get_cpu_hz() );
@@ -340,7 +343,8 @@ startup ( void )
 	// printf ( "Yo Ho Ho\n" );
 
 	printf ( "USB test running\n" );
-	usb_test ();
+	usb_test_1 ();
+	printf ( "USB test done\n" );
 
 	printf ( "Enter idle loop\n" );
 

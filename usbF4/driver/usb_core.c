@@ -165,12 +165,14 @@ USB_OTG_STS USB_OTG_WritePacket(USB_OTG_CORE_HANDLE *pdev,
                                 uint16_t            len)
 {
   USB_OTG_STS status = USB_OTG_OK;
-  if (pdev->cfg.dma_enable == 0)
-  {
+
+  printf ( "Endpoint %d, write packet %d bytes to FIFO: %c%c%c\n", ch_ep_num, len, src[0], src[1], src[2] );
+
+  if (pdev->cfg.dma_enable == 0) {
     __IO uint32_t *fifo = pdev->regs.DFIFO[ch_ep_num];
     uint32_t count32b =  (len + 3) / 4;
-    for (uint32_t i = 0; i < count32b; i++, src+=4)
-    {
+
+    for (uint32_t i = 0; i < count32b; i++, src+=4) {
       USB_OTG_WRITE_REG32( fifo, *((uint32_t *)src) );
     }
   }
@@ -190,13 +192,15 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HANDLE *pdev,
                          uint16_t len)
 {
   uint32_t count32b = (len + 3) / 4;
+
+  printf ( "Endpoint 0, read packet %d bytes from FIFO\n", len );
   
   __IO uint32_t *fifo = pdev->regs.DFIFO[0];
   
-  for (uint32_t i = 0; i < count32b; i++, dest += 4 )
-  {
+  for (uint32_t i = 0; i < count32b; i++, dest += 4 ) {
     *(uint32_t *)dest = USB_OTG_READ_REG32(fifo);
   }
+
   return ((void *)dest);
 }
 
@@ -470,19 +474,21 @@ USB_OTG_STS USB_OTG_FlushTxFifo (USB_OTG_CORE_HANDLE *pdev , uint32_t num )
   __IO USB_OTG_GRSTCTL_TypeDef  greset;
   
   uint32_t count = 0;
+
+  printf ( "USB - flush Tx Fifo %d\n", num ); 
+
   greset.d32 = 0;
   greset.b.txfflsh = 1;
   greset.b.txfnum  = num;
   USB_OTG_WRITE_REG32( &pdev->regs.GREGS->GRSTCTL, greset.d32 );
-  do
-  {
+
+  do {
     greset.d32 = USB_OTG_READ_REG32( &pdev->regs.GREGS->GRSTCTL);
-    if (++count > 200000)
-    {
+    if (++count > 200000) {
       break;
     }
-  }
-  while (greset.b.txfflsh == 1);
+  } while (greset.b.txfflsh == 1);
+
   /* Wait for 3 PHY Clocks*/
   USB_OTG_BSP_uDelay(3);
   return status;
@@ -499,19 +505,20 @@ USB_OTG_STS USB_OTG_FlushRxFifo( USB_OTG_CORE_HANDLE *pdev )
   USB_OTG_STS status = USB_OTG_OK;
   __IO USB_OTG_GRSTCTL_TypeDef  greset;
   uint32_t count = 0;
+
+  printf ( "USB - flush Rx Fifo\n" ); 
   
   greset.d32 = 0;
   greset.b.rxfflsh = 1;
   USB_OTG_WRITE_REG32( &pdev->regs.GREGS->GRSTCTL, greset.d32 );
-  do
-  {
+
+  do {
     greset.d32 = USB_OTG_READ_REG32( &pdev->regs.GREGS->GRSTCTL);
-    if (++count > 200000)
-    {
+    if (++count > 200000) {
       break;
     }
-  }
-  while (greset.b.rxfflsh == 1);
+  } while (greset.b.rxfflsh == 1);
+
   /* Wait for 3 PHY Clocks*/
   USB_OTG_BSP_uDelay(3);
   return status;
@@ -1603,19 +1610,18 @@ USB_OTG_STS USB_OTG_EPStartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   
   depctl.d32 = 0;
   deptsiz.d32 = 0;
+
+  printf ( "- EP %d StartXfer %d bytes\n", ep->num, ep->xfer_len );
+
   /* IN endpoint */
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     depctl.d32  = USB_OTG_READ_REG32(&(pdev->regs.INEP_REGS[ep->num]->DIEPCTL));
     deptsiz.d32 = USB_OTG_READ_REG32(&(pdev->regs.INEP_REGS[ep->num]->DIEPTSIZ));
     /* Zero Length Packet? */
-    if (ep->xfer_len == 0)
-    {
+    if (ep->xfer_len == 0) {
       deptsiz.b.xfersize = 0;
       deptsiz.b.pktcnt = 1;
-    }
-    else
-    {
+    } else {
       /* Program the transfer size and packet count
       * as follows: xfersize = N * maxpacket +
       * short_packet pktcnt = N + (short_packet
@@ -1624,41 +1630,32 @@ USB_OTG_STS USB_OTG_EPStartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
       deptsiz.b.xfersize = ep->xfer_len;
       deptsiz.b.pktcnt = (ep->xfer_len - 1 + ep->maxpacket) / ep->maxpacket;
 
-      if (ep->type == EP_TYPE_ISOC)
-      {
+      if (ep->type == EP_TYPE_ISOC) {
         deptsiz.b.mc = 1;
       }       
     }
     USB_OTG_WRITE_REG32(&pdev->regs.INEP_REGS[ep->num]->DIEPTSIZ, deptsiz.d32);
     
-    if (pdev->cfg.dma_enable == 1)
-    {
+    if (pdev->cfg.dma_enable == 1) {
       USB_OTG_WRITE_REG32(&pdev->regs.INEP_REGS[ep->num]->DIEPDMA, ep->dma_addr);
-    }
-    else
-    {
-      if (ep->type != EP_TYPE_ISOC)
-      {
+    } else {
+      if (ep->type != EP_TYPE_ISOC) {
         /* Enable the Tx FIFO Empty Interrupt for this EP */
-        if (ep->xfer_len > 0)
-        {
+        if (ep->xfer_len > 0) {
           fifoemptymsk = 1 << ep->num;
           USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, 0, fifoemptymsk);
+	  printf ( "- TxE interrupt enabled for endpoint %d\n", ep->num );
         }
       }
     }
     
     
-    if (ep->type == EP_TYPE_ISOC)
-    {
+    if (ep->type == EP_TYPE_ISOC) {
       dsts.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DSTS);
       
-      if (((dsts.b.soffn)&0x1) == 0)
-      {
+      if (((dsts.b.soffn)&0x1) == 0) {
         depctl.b.setd1pid = 1;
-      }
-      else
-      {
+      } else {
         depctl.b.setd0pid = 1;
       }
     } 
@@ -1668,13 +1665,12 @@ USB_OTG_STS USB_OTG_EPStartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
     depctl.b.epena = 1;
     USB_OTG_WRITE_REG32(&pdev->regs.INEP_REGS[ep->num]->DIEPCTL, depctl.d32);
     
-    if (ep->type == EP_TYPE_ISOC)
-    {
+    if (ep->type == EP_TYPE_ISOC) {
       USB_OTG_WritePacket(pdev, ep->xfer_buff, ep->num, ep->xfer_len);   
     }    
-  }
-  else
-  {
+
+  } else {
+
     /* OUT endpoint */
     depctl.d32  = USB_OTG_READ_REG32(&(pdev->regs.OUTEP_REGS[ep->num]->DOEPCTL));
     deptsiz.d32 = USB_OTG_READ_REG32(&(pdev->regs.OUTEP_REGS[ep->num]->DOEPTSIZ));
@@ -1682,35 +1678,29 @@ USB_OTG_STS USB_OTG_EPStartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
     * pktcnt = N
     * xfersize = N * maxpacket
     */
-    if (ep->xfer_len == 0)
-    {
+    if (ep->xfer_len == 0) {
       deptsiz.b.xfersize = ep->maxpacket;
       deptsiz.b.pktcnt = 1;
-    }
-    else
-    {
+    } else {
       deptsiz.b.pktcnt = (ep->xfer_len + (ep->maxpacket - 1)) / ep->maxpacket;
       deptsiz.b.xfersize = deptsiz.b.pktcnt * ep->maxpacket;
       ep->xfer_len = deptsiz.b.xfersize ;
     }
+
     USB_OTG_WRITE_REG32(&pdev->regs.OUTEP_REGS[ep->num]->DOEPTSIZ, deptsiz.d32);
     
-    if (pdev->cfg.dma_enable == 1)
-    {
+    if (pdev->cfg.dma_enable == 1) {
       USB_OTG_WRITE_REG32(&pdev->regs.OUTEP_REGS[ep->num]->DOEPDMA, ep->dma_addr);
     }
     
-    if (ep->type == EP_TYPE_ISOC)
-    {
-      if (ep->even_odd_frame)
-      {
+    if (ep->type == EP_TYPE_ISOC) {
+      if (ep->even_odd_frame) {
         depctl.b.setd1pid = 1;
-      }
-      else
-      {
+      } else {
         depctl.b.setd0pid = 1;
       }
     }
+
     /* EP enable */
     depctl.b.cnak = 1;
     depctl.b.epena = 1;
@@ -1736,36 +1726,32 @@ USB_OTG_STS USB_OTG_EP0StartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   
   depctl.d32   = 0;
   deptsiz.d32  = 0;
+
+  printf ( "- EP 0 StartXfer %d bytes\n", ep->xfer_len );
+
   /* IN endpoint */
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     in_regs = pdev->regs.INEP_REGS[0];
     depctl.d32  = USB_OTG_READ_REG32(&in_regs->DIEPCTL);
     deptsiz.d32 = USB_OTG_READ_REG32(&in_regs->DIEPTSIZ);
+
     /* Zero Length Packet? */
-    if (ep->xfer_len == 0)
-    {
+    if (ep->xfer_len == 0) {
       deptsiz.b.xfersize = 0;
       deptsiz.b.pktcnt = 1;
       
-    }
-    else
-    {
-      if (ep->xfer_len > ep->maxpacket)
-      {
+    } else {
+      if (ep->xfer_len > ep->maxpacket) {
         ep->xfer_len = ep->maxpacket;
         deptsiz.b.xfersize = ep->maxpacket;
-      }
-      else
-      {
+      } else {
         deptsiz.b.xfersize = ep->xfer_len;
       }
       deptsiz.b.pktcnt = 1;
     }
     USB_OTG_WRITE_REG32(&in_regs->DIEPTSIZ, deptsiz.d32);
     
-    if (pdev->cfg.dma_enable == 1)
-    {
+    if (pdev->cfg.dma_enable == 1) {
       USB_OTG_WRITE_REG32(&pdev->regs.INEP_REGS[ep->num]->DIEPDMA, ep->dma_addr);  
     }
     
@@ -1775,15 +1761,14 @@ USB_OTG_STS USB_OTG_EP0StartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
     USB_OTG_WRITE_REG32(&in_regs->DIEPCTL, depctl.d32);
     
     
-    
-    if (pdev->cfg.dma_enable == 0)
-    {
+    if (pdev->cfg.dma_enable == 0) {
       /* Enable the Tx FIFO Empty Interrupt for this EP */
       if (ep->xfer_len > 0)
       {
         {
           fifoemptymsk |= 1 << ep->num;
           USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, 0, fifoemptymsk);
+	  printf ( "- TxE interrupt enabled for endpoint 0\n" );
         }
       }
     }

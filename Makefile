@@ -5,11 +5,11 @@
 TARGET = black
 #TARGET = blue
 
+TOOLS = arm-none-eabi
+
 # --------------------------------------
 # Resist any urge to fool around below here.
 # --------------------------------------
-
-TOOLS = arm-none-eabi
 
 # Assembling with gcc makes it want crt0 at link time.
 #AS = $(TOOLS)-gcc
