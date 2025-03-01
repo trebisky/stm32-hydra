@@ -44,20 +44,10 @@
   *  @endverbatim
   *                                  
   ******************************************************************************               
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */ 
 
-/* Includes ------------------------------------------------------------------*/
 #include <vcp/usb_conf.h>
 #include <library/usbd_cdc_core.h>
 #include <vcp/usbd_desc.h>
@@ -83,9 +73,6 @@ static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length);
 static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
 #endif
 
-/** @defgroup usbd_cdc_Private_Variables
-  * @{
-  */ 
 extern CDC_IF_Prop_TypeDef  APP_FOPS;
 extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
 
@@ -365,14 +352,6 @@ __ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_EN
   0x00                              /* bInterval */
 };
 #endif /* USE_USB_OTG_HS  */
-
-/**
-  * @}
-  */ 
-
-/** @defgroup usbd_cdc_Private_Functions
-  * @{
-  */ 
 
 /**
   * @brief  usbd_cdc_Init

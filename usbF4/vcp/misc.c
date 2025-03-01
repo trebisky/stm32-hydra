@@ -53,22 +53,11 @@
   *  @endverbatim
   *
   ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 typedef enum {DISABLE = 0, ENABLE = !DISABLE} FunctionalState;
-
 
 #include "misc.h"
 #define assert_param(x)
@@ -78,14 +67,6 @@ typedef int IRQn_Type;
 #define __Vendor_SysTickConfig    1
 #include "core_cm4.h"
 
-/** @addtogroup STM32F4xx_StdPeriph_Driver
-  * @{
-  */
-
-/** @defgroup MISC 
-  * @brief MISC driver modules
-  * @{
-  */
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -95,10 +76,6 @@ typedef int IRQn_Type;
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-
-/** @defgroup MISC_Private_Functions
-  * @{
-  */
 
 /**
   * @brief  Configures the priority grouping: pre-emption priority and subpriority.
@@ -236,17 +213,5 @@ void SysTick_CLKSourceConfig(uint32_t SysTick_CLKSource)
     SysTick->CTRL &= SysTick_CLKSource_HCLK_Div8;
   }
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

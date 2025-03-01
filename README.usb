@@ -1,0 +1,33 @@
+Some notes and explanation about USB in the Hydra project.
+
+3-1-2025
+
+I began Hydra back in 2020 and wrote some code from scratch
+for USB.  You can find this in usb_411.c and usb_console.c
+This work has been set aside and is no longer included in
+the build done by the current Makefile.
+
+I next decided to try to transplant a working USB system into
+this code base.  I considered libmaple, but decided instead
+to take code from Arduino_STM32.  As near as I can tell, this
+code is derived from libmaple.  My hope was that this was
+a better choice given that libmaple is (as near as I can tell)
+and abandoned project, whereas Arduino_STM32 seems to be
+active.
+
+Whatever the case, the code works.  It can all be found in
+the usbF4 directory and subdirectories therein.
+The file usbF4/usb.c is my work and a "glue" layer between
+hydra and the USB code.   When built, the code will
+enumerate a virtual console port (VCP) that linux sets up as
+/dev/ttyACM0 (or such) and that can be used by code in
+Hydra to read and to write.
+
+At this time, the code has been liberally sprinkled with
+a variety of printf statements that are helping me to
+understand what the code is doing.  These could be
+commented out and the VCP used for projects.
+
+usb_printf() and usb_puts() write
+calling usb_hookup() specifies a handler that will be called
+(from interrupt level) when data is received.

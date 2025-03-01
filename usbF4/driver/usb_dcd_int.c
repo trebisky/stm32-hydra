@@ -6,20 +6,10 @@
   * @date    22-July-2011
   * @brief   Peripheral Device interrupt subroutines
   ******************************************************************************
-  * @attention 
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 #include <driver/usb_dcd_int.h>
 
 typedef int IRQn_Type;
@@ -27,9 +17,6 @@ typedef int IRQn_Type;
 #define __Vendor_SysTickConfig    1
 #include <vcp/core_cm4.h>
 
-/** @defgroup USB_DCD_INT_Private_FunctionPrototypes
-* @{
-*/ 
 /* static functions */
 static uint32_t DCD_ReadDevInEP (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum);
 
@@ -55,96 +42,96 @@ static uint32_t DCD_OTG_ISR(USB_OTG_CORE_HANDLE *pdev);
 
 
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED  
-/**
-* @brief  USBD_OTG_EP1OUT_ISR_Handler
-*         handles all USB Interrupts
-* @param  pdev: device instance
-* @retval status
-*/
-uint32_t USBD_OTG_EP1OUT_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
-{
-  
-  USB_OTG_DOEPINTn_TypeDef  doepint;
-  USB_OTG_DEPXFRSIZ_TypeDef  deptsiz;  
-  
-  doepint.d32 = USB_OTG_READ_REG32(&pdev->regs.OUTEP_REGS[1]->DOEPINT);
-  doepint.d32&= USB_OTG_READ_REG32(&pdev->regs.DREGS->DOUTEP1MSK);
-  
-  /* Transfer complete */
-  if ( doepint.b.xfercompl )
-  {
-    /* Clear the bit in DOEPINTn for this interrupt */
-    CLEAR_OUT_EP_INTR(1, xfercompl);
-    if (pdev->cfg.dma_enable == 1)
-    {
-      deptsiz.d32 = USB_OTG_READ_REG32(&(pdev->regs.OUTEP_REGS[1]->DOEPTSIZ));
-      pdev->dev.out_ep[1].xfer_count = pdev->dev.out_ep[1].xfer_len- \
-        deptsiz.b.xfersize;
-    }    
-    /* Inform upper layer: data ready */
-    /* RX COMPLETE */
-    USBD_DCD_INT_fops->DataOutStage(pdev , 1);
-    
-  }
-  
-  /* Endpoint disable  */
-  if ( doepint.b.epdisabled )
-  {
-    /* Clear the bit in DOEPINTn for this interrupt */
-    CLEAR_OUT_EP_INTR(1, epdisabled);
-  }
-
-  return 1;
-}
-
-/**
-* @brief  USBD_OTG_EP1IN_ISR_Handler
-*         handles all USB Interrupts
-* @param  pdev: device instance
-* @retval status
-*/
-uint32_t USBD_OTG_EP1IN_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
-{
-  
-  USB_OTG_DIEPINTn_TypeDef  diepint;
-  uint32_t fifoemptymsk, msk, emp;
-  
-  msk = USB_OTG_READ_REG32(&pdev->regs.DREGS->DINEP1MSK);
-  emp = USB_OTG_READ_REG32(&pdev->regs.DREGS->DIEPEMPMSK);
-  msk |= ((emp >> 1 ) & 0x1) << 7;
-  diepint.d32  = USB_OTG_READ_REG32(&pdev->regs.INEP_REGS[1]->DIEPINT) & msk;  
-  
-  if ( diepint.b.xfercompl )
-  {
-    fifoemptymsk = 0x1 << 1;
-    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, fifoemptymsk, 0);
-    CLEAR_IN_EP_INTR(1, xfercompl);
-    /* TX COMPLETE */
-    USBD_DCD_INT_fops->DataInStage(pdev , 1);
-  }
-  if ( diepint.b.epdisabled )
-  {
-    CLEAR_IN_EP_INTR(1, epdisabled);
-  }  
-  if ( diepint.b.timeout )
-  {
-    CLEAR_IN_EP_INTR(1, timeout);
-  }
-  if (diepint.b.intktxfemp)
-  {
-    CLEAR_IN_EP_INTR(1, intktxfemp);
-  }
-  if (diepint.b.inepnakeff)
-  {
-    CLEAR_IN_EP_INTR(1, inepnakeff);
-  }
-  if (diepint.b.emptyintr)
-  {
-    DCD_WriteEmptyTxFifo(pdev , 1);
-    CLEAR_IN_EP_INTR(1, emptyintr);
-  }
-  return 1;
-}
+--/**
+--* @brief  USBD_OTG_EP1OUT_ISR_Handler
+--*         handles all USB Interrupts
+--* @param  pdev: device instance
+--* @retval status
+--*/
+--uint32_t USBD_OTG_EP1OUT_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
+--{
+--  
+--  USB_OTG_DOEPINTn_TypeDef  doepint;
+--  USB_OTG_DEPXFRSIZ_TypeDef  deptsiz;  
+--  
+--  doepint.d32 = USB_OTG_READ_REG32(&pdev->regs.OUTEP_REGS[1]->DOEPINT);
+--  doepint.d32&= USB_OTG_READ_REG32(&pdev->regs.DREGS->DOUTEP1MSK);
+--  
+--  /* Transfer complete */
+--  if ( doepint.b.xfercompl )
+--  {
+--    /* Clear the bit in DOEPINTn for this interrupt */
+--    CLEAR_OUT_EP_INTR(1, xfercompl);
+--    if (pdev->cfg.dma_enable == 1)
+--    {
+--      deptsiz.d32 = USB_OTG_READ_REG32(&(pdev->regs.OUTEP_REGS[1]->DOEPTSIZ));
+--      pdev->dev.out_ep[1].xfer_count = pdev->dev.out_ep[1].xfer_len- \
+--        deptsiz.b.xfersize;
+--    }    
+--    /* Inform upper layer: data ready */
+--    /* RX COMPLETE */
+--    USBD_DCD_INT_fops->DataOutStage(pdev , 1);
+--    
+--  }
+--  
+--  /* Endpoint disable  */
+--  if ( doepint.b.epdisabled )
+--  {
+--    /* Clear the bit in DOEPINTn for this interrupt */
+--    CLEAR_OUT_EP_INTR(1, epdisabled);
+--  }
+--
+--  return 1;
+--}
+--
+--/**
+--* @brief  USBD_OTG_EP1IN_ISR_Handler
+--*         handles all USB Interrupts
+--* @param  pdev: device instance
+--* @retval status
+--*/
+--uint32_t USBD_OTG_EP1IN_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
+--{
+--  
+--  USB_OTG_DIEPINTn_TypeDef  diepint;
+--  uint32_t fifoemptymsk, msk, emp;
+--  
+--  msk = USB_OTG_READ_REG32(&pdev->regs.DREGS->DINEP1MSK);
+--  emp = USB_OTG_READ_REG32(&pdev->regs.DREGS->DIEPEMPMSK);
+--  msk |= ((emp >> 1 ) & 0x1) << 7;
+--  diepint.d32  = USB_OTG_READ_REG32(&pdev->regs.INEP_REGS[1]->DIEPINT) & msk;  
+--  
+--  if ( diepint.b.xfercompl )
+--  {
+--    fifoemptymsk = 0x1 << 1;
+--    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, fifoemptymsk, 0);
+--    CLEAR_IN_EP_INTR(1, xfercompl);
+--    /* TX COMPLETE */
+--    USBD_DCD_INT_fops->DataInStage(pdev , 1);
+--  }
+--  if ( diepint.b.epdisabled )
+--  {
+--    CLEAR_IN_EP_INTR(1, epdisabled);
+--  }  
+--  if ( diepint.b.timeout )
+--  {
+--    CLEAR_IN_EP_INTR(1, timeout);
+--  }
+--  if (diepint.b.intktxfemp)
+--  {
+--    CLEAR_IN_EP_INTR(1, intktxfemp);
+--  }
+--  if (diepint.b.inepnakeff)
+--  {
+--    CLEAR_IN_EP_INTR(1, inepnakeff);
+--  }
+--  if (diepint.b.emptyintr)
+--  {
+--    DCD_WriteEmptyTxFifo(pdev , 1);
+--    CLEAR_IN_EP_INTR(1, emptyintr);
+--  }
+--  return 1;
+--}
 #endif
 
 /**
@@ -670,7 +657,7 @@ static uint32_t DCD_HandleUsbReset_ISR(USB_OTG_CORE_HANDLE *pdev)
   doepmsk.b.epdisabled = 1;
   USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DOEPMSK, doepmsk.d32 );
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED   
-  USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DOUTEP1MSK, doepmsk.d32 );
+--  USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DOUTEP1MSK, doepmsk.d32 );
 #endif
   diepmsk.b.xfercompl = 1;
   diepmsk.b.timeout = 1;
@@ -678,7 +665,7 @@ static uint32_t DCD_HandleUsbReset_ISR(USB_OTG_CORE_HANDLE *pdev)
 
   USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DIEPMSK, diepmsk.d32 );
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED  
-  USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DINEP1MSK, diepmsk.d32 );
+--  USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DINEP1MSK, diepmsk.d32 );
 #endif
   /* Reset Device Address */
   dcfg.d32 = USB_OTG_READ_REG32( &pdev->regs.DREGS->DCFG);
@@ -794,17 +781,5 @@ static uint32_t DCD_ReadDevInEP (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum)
   v = USB_OTG_READ_REG32(&pdev->regs.INEP_REGS[epnum]->DIEPINT) & msk;
   return v;
 }
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

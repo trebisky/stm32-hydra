@@ -6,66 +6,16 @@
   * @date    22-July-2011 
   * @brief   This file provides all the USBD core functions.
   ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */ 
 
-/* Includes ------------------------------------------------------------------*/
 #include <library/usbd_core.h>
 #include <library/usbd_req.h>
 #include <library/usbd_ioreq.h>
 #include <driver/usb_dcd_int.h>
 #include <driver/usb_bsp.h>
 
-/** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-* @{
-*/
-
-
-/** @defgroup USBD_CORE 
-* @brief usbd core module
-* @{
-*/ 
-
-/** @defgroup USBD_CORE_Private_TypesDefinitions
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBD_CORE_Private_Defines
-* @{
-*/ 
-
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBD_CORE_Private_Macros
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-
-
-/** @defgroup USBD_CORE_Private_FunctionPrototypes
-* @{
-*/ 
 static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev);
 static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
 static uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
@@ -79,14 +29,6 @@ static uint8_t USBD_DevDisconnected(USB_OTG_CORE_HANDLE  *pdev);
 #endif
 static uint8_t USBD_IsoINIncomplete(USB_OTG_CORE_HANDLE  *pdev);
 static uint8_t USBD_IsoOUTIncomplete(USB_OTG_CORE_HANDLE  *pdev);
-/**
-* @}
-*/ 
-
-/** @defgroup USBD_CORE_Private_Variables
-* @{
-*/ 
-
 
 
 USBD_DCD_INT_cb_TypeDef USBD_DCD_INT_cb = 
@@ -107,13 +49,7 @@ USBD_DCD_INT_cb_TypeDef USBD_DCD_INT_cb =
 };
 
 USBD_DCD_INT_cb_TypeDef  *USBD_DCD_INT_fops = &USBD_DCD_INT_cb;
-/**
-* @}
-*/ 
 
-/** @defgroup USBD_CORE_Private_Functions
-* @{
-*/ 
 
 /**
 * @brief  USBD_Init
@@ -470,19 +406,6 @@ static uint8_t USBD_DevDisconnected(USB_OTG_CORE_HANDLE  *pdev)
   return USBD_OK;
 }
 #endif
-/**
-* @}
-*/ 
-
-
-/**
-* @}
-*/ 
-
-
-/**
-* @}
-*/ 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 

@@ -6,81 +6,12 @@
   * @date    22-July-2011
   * @brief   Peripheral Device Interface Layer
   ******************************************************************************
-  * @attention 
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 #include <driver/usb_dcd.h>
 #include <driver/usb_bsp.h>
-
-
-/** @addtogroup USB_OTG_DRIVER
-* @{
-*/
-
-/** @defgroup USB_DCD 
-* @brief This file is the interface between EFSL ans Host mass-storage class
-* @{
-*/
-
-
-/** @defgroup USB_DCD_Private_Defines
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_DCD_Private_TypesDefinitions
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-
-/** @defgroup USB_DCD_Private_Macros
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_DCD_Private_Variables
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_DCD_Private_FunctionPrototypes
-* @{
-*/ 
-
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_DCD_Private_Functions
-* @{
-*/ 
-
-
 
 void DCD_Init(USB_OTG_CORE_HANDLE *pdev , 
               USB_OTG_CORE_ID_TypeDef coreID)
@@ -466,17 +397,5 @@ void DCD_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum , uint32_t Statu
   
    USB_OTG_SetEPStatus(pdev ,ep , Status);
 }
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

@@ -6,54 +6,20 @@
   * @date    22-July-2011
   * @brief   This file provides the USBD descriptors and string formating method.
   ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */ 
 
-/* Includes ------------------------------------------------------------------*/
 #include <library/usbd_core.h>
 #include "usbd_desc.h"
 #include <library/usbd_req.h>
 #include "usbd_conf.h"
 #include <driver/usb_regs.h>
 
-/** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-  * @{
-  */
-
-
-/** @defgroup USBD_DESC 
-  * @brief USBD descriptors module
-  * @{
-  */ 
-
-/** @defgroup USBD_DESC_Private_TypesDefinitions
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USBD_DESC_Private_Defines
-  * @{
-  */ 
 #define USBD_VID                        0x0483
 
 #define USBD_PID                        0x5740
 
-/** @defgroup USB_String_Descriptors
-  * @{
-  */ 
 #define USBD_LANGID_STRING              0x409
 // #define USBD_MANUFACTURER_STRING        (uint8_t*)"STMicroelectronics"
 #define USBD_MANUFACTURER_STRING        (uint8_t*)"ACME bar and grill"
@@ -69,22 +35,6 @@
 
 #define USBD_CONFIGURATION_FS_STRING    (uint8_t*)"VCP Config"
 #define USBD_INTERFACE_FS_STRING        (uint8_t*)"VCP Interface"
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USBD_DESC_Private_Macros
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USBD_DESC_Private_Variables
-  * @{
-  */ 
 
 USBD_DEVICE USR_desc =
 {
@@ -159,22 +109,6 @@ __ALIGN_BEGIN uint8_t USBD_LangIDDesc[USB_SIZ_STRING_LANGID] __ALIGN_END =
      LOBYTE(USBD_LANGID_STRING),
      HIBYTE(USBD_LANGID_STRING), 
 };
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USBD_DESC_Private_FunctionPrototypes
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USBD_DESC_Private_Functions
-  * @{
-  */ 
 
 /**
 * @brief  USBD_USR_DeviceDescriptor 
@@ -298,20 +232,6 @@ uint8_t *  USBD_USR_InterfaceStrDescriptor( uint8_t speed , uint16_t *length)
   }
   return USBD_StrDesc;  
 }
-
-/**
-  * @}
-  */ 
-
-
-/**
-  * @}
-  */ 
-
-
-/**
-  * @}
-  */ 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 

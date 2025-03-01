@@ -6,79 +6,12 @@
   * @date    22-July-2011
   * @brief   USB-OTG Core Layer
   ******************************************************************************
-  * @attention 
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE 
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 #include <driver/usb_bsp.h>
 #include <driver/usb_core.h>
-
-
-/** @addtogroup USB_OTG_DRIVER
-* @{
-*/
-
-/** @defgroup USB_CORE 
-* @brief This file includes the USB-OTG Core Layer
-* @{
-*/
-
-
-/** @defgroup USB_CORE_Private_Defines
-* @{
-*/ 
-
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_CORE_Private_TypesDefinitions
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-
-/** @defgroup USB_CORE_Private_Macros
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_CORE_Private_Variables
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_CORE_Private_FunctionPrototypes
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_CORE_Private_Functions
-* @{
-*/ 
 
 /**
 * @brief  USB_OTG_EnableCommonInt
@@ -1541,13 +1474,14 @@ USB_OTG_STS USB_OTG_EPActivate(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
     depctl.b.usbactep = 1;
     USB_OTG_WRITE_REG32(addr, depctl.d32);
   }
+
   /* Enable the Interrupt for this EP */
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED
-  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID))
-  {
-    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, 0, daintmsk.d32);
-  }
-  else
+--  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID))
+--  {
+--    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, 0, daintmsk.d32);
+--  }
+--  else
 #endif   
     USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DAINTMSK, 0, daintmsk.d32);
   return status;
@@ -1584,11 +1518,11 @@ USB_OTG_STS USB_OTG_EPDeactivate(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   /* Disable the Interrupt for this EP */
   
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED
-  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID))
-  {
-    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, daintmsk.d32, 0);
-  }
-  else
+--  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID))
+--  {
+--    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, daintmsk.d32, 0);
+--  }
+--  else
 #endif    
     USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DAINTMSK, daintmsk.d32, 0);
   return status;
@@ -2171,16 +2105,5 @@ void USB_OTG_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep , uint32_t 
 }
 
 #endif
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
