@@ -157,6 +157,9 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_GINTSTS_TypeDef  gintr_status;
   uint32_t retval = 0;
+
+  // Bad idea, we get non-stop SOF interrupts
+  // printf ( "OTG ISR called" );
   
   if (USB_OTG_IsDeviceMode(pdev)) /* ensure that we are in device mode */
   {
@@ -166,12 +169,12 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
     
     if (gintr_status.b.outepintr) {
-      // printf ( "USBint - OUT Endpoint\n" );
+      printf ( "USBint - OUT Endpoint\n" );
       retval |= DCD_HandleOutEP_ISR(pdev);
     }    
     
     if (gintr_status.b.inepint) {
-      // printf ( "USBint - IN Endpoint\n" );
+      printf ( "USBint - IN Endpoint\n" );
       retval |= DCD_HandleInEP_ISR(pdev);
     }
     

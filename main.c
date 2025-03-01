@@ -274,7 +274,7 @@ usb_test_2 ( void )
 static void
 usb_handler ( char *buf, int len )
 {
-	printf ( "USB: %d\n", len );
+	printf ( "Hydra USB got: %d\n", len );
 	while ( len-- )
 	    putc ( *buf++ );
 	putc ( '\n' );
@@ -344,6 +344,8 @@ startup ( void )
 
 	printf ( "USB test running\n" );
 	usb_test_1 ();
+	printf ( "hook set by Hydra\n" );
+	usb_test_3 ();
 	printf ( "USB test done\n" );
 
 	printf ( "Enter idle loop\n" );

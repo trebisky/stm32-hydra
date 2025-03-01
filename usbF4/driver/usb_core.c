@@ -193,7 +193,7 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HANDLE *pdev,
 {
   uint32_t count32b = (len + 3) / 4;
 
-  printf ( "Endpoint 0, read packet %d bytes from FIFO\n", len );
+  printf ( "Endpoint ??, read packet %d bytes from FIFO\n", len );
   
   __IO uint32_t *fifo = pdev->regs.DFIFO[0];
   
