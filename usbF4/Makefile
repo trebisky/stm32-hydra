@@ -21,11 +21,12 @@ VCP_OBJS = misc.o  usb_bsp.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
 DRIVER_OBJS = usb_core.o  usb_dcd.o  usb_dcd_int.o
 LIBR_OBJS = usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o
 
+# We don't need to set CHIP here, this is usbF4 after all.
 ifeq ($(TARGET),black)
-CHIP = CHIP_F411
+#CHIP = CHIP_F411
 ARM_CPU = cortex-m4
 else
-CHIP = CHIP_F103
+#CHIP = CHIP_F103
 ARM_CPU = cortex-m3
 endif
 
@@ -40,7 +41,8 @@ OBJS = $(BASE_OBJS) $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
 #  these demos, I can't be busy to set up prototypes as I should.
 # CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Wno-implicit-function-declaration -fno-builtin
 
-CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -D$(CHIP) -O -I.
+#CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -D$(CHIP) -O -I.
+CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -O -I.
 
 all: ../usbf4.o
 
