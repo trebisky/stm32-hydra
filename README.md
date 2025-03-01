@@ -11,3 +11,5 @@ demo and going from there.
 
 Why "Hydra" -- well, why not.  It seemed like a good name, and there are a lot
 of STM32 chip variants, so it might become a Hydra.
+
+The USB subsystem for the F411 is of particular interest, see README.usb
