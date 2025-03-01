@@ -6,40 +6,15 @@
   * @date    22-July-2011
   * @brief   Peripheral Driver Header file
   ******************************************************************************
-  * @attention 
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
   */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __DCD_H__
 #define __DCD_H__
 
-/* Includes ------------------------------------------------------------------*/
 #include "usb_core.h"
 
-
-/** @addtogroup USB_OTG_DRIVER
-* @{
-*/
-
-/** @defgroup USB_DCD
-* @brief This file is the 
-* @{
-*/ 
-
-
-/** @defgroup USB_DCD_Exported_Defines
-* @{
-*/ 
 #define USB_OTG_EP_CONTROL                       0
 #define USB_OTG_EP_ISOC                          1
 #define USB_OTG_EP_BULK                          2
@@ -52,17 +27,6 @@
 #define USB_OTG_CONFIGURED                       3
 #define USB_OTG_SUSPENDED                        4
 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_DCD_Exported_Types
-* @{
-*/ 
-/********************************************************************************
-Data structure type
-********************************************************************************/
 typedef struct
 {
   uint8_t  bLength;
@@ -74,28 +38,6 @@ typedef struct
 }
 EP_DESCRIPTOR , *PEP_DESCRIPTOR;
 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USB_DCD_Exported_Macros
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-/** @defgroup USB_DCD_Exported_Variables
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-/** @defgroup USB_DCD_Exported_FunctionsPrototype
-* @{
-*/ 
 /********************************************************************************
 EXPORTED FUNCTION FROM THE USB-OTG LAYER
 ********************************************************************************/
@@ -139,20 +81,7 @@ void DCD_SetEPStatus (USB_OTG_CORE_HANDLE *pdev ,
                       uint8_t epnum , 
                       uint32_t Status);
 
-/**
-* @}
-*/ 
-
-
 #endif //__DCD_H__
 
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 

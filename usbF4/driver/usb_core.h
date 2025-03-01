@@ -6,42 +6,16 @@
   * @date    22-July-2011
   * @brief   Header of the Core Layer
   ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
   */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USB_CORE_H__
 #define __USB_CORE_H__
 
-/* Includes ------------------------------------------------------------------*/
 #include <vcp/usbd_conf.h>
 #include "usb_regs.h"
 #include "usb_defines.h"
-
-
-/** @addtogroup USB_OTG_DRIVER
-  * @{
-  */
-  
-/** @defgroup USB_CORE
-  * @brief usb otg driver core layer
-  * @{
-  */ 
-
-
-/** @defgroup USB_CORE_Exported_Defines
-  * @{
-  */ 
 
 #define USB_OTG_EP0_IDLE                          0
 #define USB_OTG_EP0_SETUP                         1
@@ -60,14 +34,8 @@
 #define USB_OTG_EP_RX_STALL     0x1000
 #define USB_OTG_EP_RX_NAK       0x2000
 #define USB_OTG_EP_RX_VALID     0x3000
-/**
-  * @}
-  */ 
-#define   MAX_DATA_LENGTH                        0x100
 
-/** @defgroup USB_CORE_Exported_Types
-  * @{
-  */ 
+#define   MAX_DATA_LENGTH                        0x100
 
 
 typedef enum {
@@ -146,11 +114,9 @@ typedef struct USB_OTG_ep
   uint32_t       rem_data_len;
   uint32_t       total_data_len;
   uint32_t       ctl_data_len;  
-
 }
 
 USB_OTG_EP , *PUSB_OTG_EP;
-
 
 
 typedef struct USB_OTG_core_cfg
@@ -170,9 +136,7 @@ typedef struct USB_OTG_core_cfg
 USB_OTG_CORE_CFGS, *PUSB_OTG_CORE_CFGS;
 
 
-
 typedef  struct  usb_setup_req {
-    
     uint8_t   bmRequest;                      
     uint8_t   bRequest;                           
     uint16_t  wValue;                             
@@ -230,7 +194,6 @@ typedef struct _Device_cb
 #endif  
   
 } USBD_Class_cb_TypeDef;
-
 
 
 typedef struct _USBD_USR_PROP
@@ -300,37 +263,13 @@ typedef struct USB_OTG_handle
   DCD_DEV     dev;
 #endif
 #ifdef USE_HOST_MODE
-  HCD_DEV     host;
+..   HCD_DEV     host;
 #endif
 #ifdef USE_OTG_MODE
   OTG_DEV     otg;
 #endif
 }
 USB_OTG_CORE_HANDLE , *PUSB_OTG_CORE_HANDLE;
-
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USB_CORE_Exported_Macros
-  * @{
-  */ 
-
-/**
-  * @}
-  */ 
-
-/** @defgroup USB_CORE_Exported_Variables
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-/** @defgroup USB_CORE_Exported_FunctionsPrototype
-  * @{
-  */ 
 
 
 USB_OTG_STS  USB_OTG_CoreInit        (USB_OTG_CORE_HANDLE *pdev);
@@ -359,20 +298,21 @@ USB_OTG_STS  USB_OTG_SetCurrentMode  (USB_OTG_CORE_HANDLE *pdev,
 
 /*********************** HOST APIs ********************************************/
 #ifdef USE_HOST_MODE
-USB_OTG_STS  USB_OTG_CoreInitHost    (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_EnableHostInt   (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_HC_Init         (USB_OTG_CORE_HANDLE *pdev, uint8_t hc_num);
-USB_OTG_STS  USB_OTG_HC_Halt         (USB_OTG_CORE_HANDLE *pdev, uint8_t hc_num);
-USB_OTG_STS  USB_OTG_HC_StartXfer    (USB_OTG_CORE_HANDLE *pdev, uint8_t hc_num);
-USB_OTG_STS  USB_OTG_HC_DoPing       (USB_OTG_CORE_HANDLE *pdev , uint8_t hc_num);
-uint32_t     USB_OTG_ReadHostAllChannels_intr    (USB_OTG_CORE_HANDLE *pdev);
-uint32_t     USB_OTG_ResetPort       (USB_OTG_CORE_HANDLE *pdev);
-uint32_t     USB_OTG_ReadHPRT0       (USB_OTG_CORE_HANDLE *pdev);
-void         USB_OTG_DriveVbus       (USB_OTG_CORE_HANDLE *pdev, uint8_t state);
-void         USB_OTG_InitFSLSPClkSel (USB_OTG_CORE_HANDLE *pdev ,uint8_t freq);
-uint8_t      USB_OTG_IsEvenFrame     (USB_OTG_CORE_HANDLE *pdev) ;
-void         USB_OTG_StopHost        (USB_OTG_CORE_HANDLE *pdev);
+-- USB_OTG_STS  USB_OTG_CoreInitHost    (USB_OTG_CORE_HANDLE *pdev);
+-- USB_OTG_STS  USB_OTG_EnableHostInt   (USB_OTG_CORE_HANDLE *pdev);
+-- USB_OTG_STS  USB_OTG_HC_Init         (USB_OTG_CORE_HANDLE *pdev, uint8_t hc_num);
+-- USB_OTG_STS  USB_OTG_HC_Halt         (USB_OTG_CORE_HANDLE *pdev, uint8_t hc_num);
+-- USB_OTG_STS  USB_OTG_HC_StartXfer    (USB_OTG_CORE_HANDLE *pdev, uint8_t hc_num);
+-- USB_OTG_STS  USB_OTG_HC_DoPing       (USB_OTG_CORE_HANDLE *pdev , uint8_t hc_num);
+-- uint32_t     USB_OTG_ReadHostAllChannels_intr    (USB_OTG_CORE_HANDLE *pdev);
+-- uint32_t     USB_OTG_ResetPort       (USB_OTG_CORE_HANDLE *pdev);
+-- uint32_t     USB_OTG_ReadHPRT0       (USB_OTG_CORE_HANDLE *pdev);
+-- void         USB_OTG_DriveVbus       (USB_OTG_CORE_HANDLE *pdev, uint8_t state);
+-- void         USB_OTG_InitFSLSPClkSel (USB_OTG_CORE_HANDLE *pdev ,uint8_t freq);
+-- uint8_t      USB_OTG_IsEvenFrame     (USB_OTG_CORE_HANDLE *pdev) ;
+-- void         USB_OTG_StopHost        (USB_OTG_CORE_HANDLE *pdev);
 #endif
+
 /********************* DEVICE APIs ********************************************/
 #ifdef USE_DEVICE_MODE
 USB_OTG_STS  USB_OTG_CoreInitDev         (USB_OTG_CORE_HANDLE *pdev);
@@ -398,19 +338,8 @@ void         USB_OTG_StopDevice(USB_OTG_CORE_HANDLE *pdev);
 void         USB_OTG_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep , uint32_t Status);
 uint32_t     USB_OTG_GetEPStatus(USB_OTG_CORE_HANDLE *pdev ,USB_OTG_EP *ep);
 #endif
-/**
-  * @}
-  */ 
 
 #endif  /* __USB_CORE_H__ */
 
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 

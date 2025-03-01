@@ -6,38 +6,14 @@
   * @date    22-July-2011
   * @brief   general low level driver configuration
   ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
   */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USB_CONF__H__
 #define __USB_CONF__H__
 
-/* Includes ------------------------------------------------------------------*/
 #include "usb_conf.h"
-
-/** @addtogroup USB_OTG_DRIVER
-  * @{
-  */
-  
-/** @defgroup USB_CONF
-  * @brief USB low level driver configuration file
-  * @{
-  */ 
-
-/** @defgroup USB_CONF_Exported_Defines
-  * @{
-  */ 
 
 /* USB Core and PHY interface configuration.
    Tip: To avoid modifying these defines each time you need to change the USB
@@ -50,6 +26,7 @@
 *  The USE_EMBEDDED_PHY symbol is defined in the project compiler preprocessor 
 *  when FS core is used.
 *******************************************************************************/
+
 #ifndef USE_USB_OTG_FS
  //#define USE_USB_OTG_FS
 #endif /* USE_USB_OTG_FS */
@@ -251,50 +228,7 @@
   #define __packed    __unaligned
 #endif /* __CC_ARM */
 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USB_CONF_Exported_Types
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USB_CONF_Exported_Macros
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-/** @defgroup USB_CONF_Exported_Variables
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-/** @defgroup USB_CONF_Exported_FunctionsPrototype
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-
 #endif //__USB_CONF__H__
 
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 

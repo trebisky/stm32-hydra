@@ -6,42 +6,26 @@
   * @date    22-July-2011
   * @brief   USB Device configuration file
   ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
   */
 
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_CONF__H__
 #define __USBD_CONF__H__
 
-/* Includes ------------------------------------------------------------------*/
 //#include   "stm32f4_discovery.h"
 #include "usb_conf.h"
 
-/** @defgroup USB_CONF_Exported_Defines
-  * @{
-  */
 #define USBD_CFG_MAX_NUM                1
 #define USBD_ITF_MAX_NUM                1
 #define USB_MAX_STR_DESC_SIZ            (64+4) // longest descriptor string length + 2
 
-/** @defgroup USB_VCP_Class_Layer_Parameter
-  * @{
-  */
 #define CDC_IN_EP                       0x81  /* EP1 for data IN */
 #define CDC_OUT_EP                      0x01  /* EP1 for data OUT */
 #define CDC_CMD_EP                      0x82  /* EP2 for CDC commands */
 
 /* CDC Endpoints parameters: you can fine tune these values depending on the needed baudrates and performance. */
+
 #ifdef USE_USB_OTG_HS
  #define CDC_DATA_MAX_PACKET_SIZE       512  /* Endpoint IN & OUT Packet size */
  #define CDC_CMD_PACKET_SZE             8    /* Control Endpoint Packet size */
@@ -60,39 +44,6 @@
 #define APP_TX_DATA_SIZE_MASK (APP_TX_DATA_SIZE-1)
 
 #define APP_FOPS                        VCP_fops
-/**
-  * @}
-  */
-
-/** @defgroup USB_CONF_Exported_Types
-  * @{
-  */
-/**
-  * @}
-  */
-
-
-/** @defgroup USB_CONF_Exported_Macros
-  * @{
-  */
-/**
-  * @}
-  */
-
-/** @defgroup USB_CONF_Exported_Variables
-  * @{
-  */
-/**
-  * @}
-  */
-
-/** @defgroup USB_CONF_Exported_FunctionsPrototype
-  * @{
-  */
-/**
-  * @}
-  */
-
 
 #endif //__USBD_CONF__H__
 

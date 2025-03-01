@@ -6,20 +6,9 @@
   * @date    22-July-2011
   * @brief   header file for the usbd_cdc_core.c file.
   ******************************************************************************
-  * @attention
-  *
-  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
-  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
-  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
-  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
-  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-  *
-  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  * COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
   */ 
-
-/* Includes ------------------------------------------------------------------*/
 
 #ifndef __USB_CDC_CORE_H_
 #define __USB_CDC_CORE_H_
@@ -27,19 +16,6 @@
 #include <library/usbd_ioreq.h>
 #include <driver/usb_core.h>
 
-/** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-  * @{
-  */
-  
-/** @defgroup usbd_cdc
-  * @brief This file is the Header file for USBD_cdc.c
-  * @{
-  */ 
-
-
-/** @defgroup usbd_cdc_Exported_Defines
-  * @{
-  */ 
 #define USB_CDC_CONFIG_DESC_SIZ                (67)
 #define USB_CDC_DESC_SIZ                       (67-9)
 
@@ -79,14 +55,6 @@
 #define SEND_BREAK                              0x23
 #define NO_CMD                                  0xFF
 
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USBD_CORE_Exported_TypesDefinitions
-  * @{
-  */
 typedef struct _CDC_IF_PROP
 {
   uint16_t (*pIf_Init)     (void *pdev);   
@@ -96,43 +64,9 @@ typedef struct _CDC_IF_PROP
   uint16_t (*pIf_DataRx)   (uint8_t* Buf, uint32_t Len);
 }
 CDC_IF_Prop_TypeDef;
-/**
-  * @}
-  */ 
-
-
-
-/** @defgroup USBD_CORE_Exported_Macros
-  * @{
-  */ 
-  
-/**
-  * @}
-  */ 
-
-/** @defgroup USBD_CORE_Exported_Variables
-  * @{
-  */ 
 
 extern USBD_Class_cb_TypeDef  USBD_CDC_cb;
-/**
-  * @}
-  */ 
-
-/** @defgroup USB_CORE_Exported_Functions
-  * @{
-  */
-/**
-  * @}
-  */ 
 
 #endif  // __USB_CDC_CORE_H_
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
   
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
