@@ -1,0 +1,40 @@
+#!/bin/sh
+
+SRC="/u1/Projects/STM32/Arduino_STM32/STM32F1/cores/maple/libmaple/usb"
+
+#cp $SRC/README .
+
+#cp $SRC/usb_lib/*.c lib
+#cp $SRC/stm32f1/*.c driver
+
+INC=/u1/Projects/STM32/Arduino_STM32/STM32F1/system/libmaple/usb
+#cp $INC/usb_lib/*.h lib
+
+#/u1/Projects/STM32/Arduino_STM32/STM32F1/system/libmaple/include/libmaple/libmaple.h
+INC2=/u1/Projects/STM32/Arduino_STM32/STM32F1/system/libmaple/include
+
+#cp $INC2/libmaple/libmaple.h driver
+#cp $INC2/libmaple/usb.h driver
+#cp $INC2/libmaple/rcc.h driver
+#cp $INC2/libmaple/nvic.h driver
+#cp $INC2/libmaple/delay.h driver
+#cp $INC2/libmaple/stm32.h driver
+#cp $INC2/libmaple/util.h driver
+#cp $INC2/libmaple/libmaple_types.h driver
+#cp $INC2/libmaple/bitband.h driver
+#cp $INC2/libmaple/usb_type.h driver
+#cp $INC2/libmaple/usb_cdcacm.h driver
+#cp $INC2/libmaple/gpio.h driver
+#cp $INC2/libmaple/exti.h driver
+
+INC3=/u1/Projects/STM32/Arduino_STM32/STM32F1/system/libmaple/usb/stm32f1
+#cp $INC3/usb_reg_map.h driver
+#cp $INC3/usb_lib_globals.h driver
+
+F1=/u1/Projects/STM32/Arduino_STM32/STM32F1/system/libmaple/stm32f1/include/series
+
+#cp $F1/rcc.h driver/f1_rcc.h
+#cp $F1/stm32.h driver/f1_stm32.h
+#cp $F1/gpio.h driver/f1_gpio.h
+#cp $F1/exti.h driver/f1_exti.h
+#cp $F1/nvic.h driver/f1_nvic.h
