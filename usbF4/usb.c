@@ -37,7 +37,7 @@ usb_init (void)
 #define IRQ_USB_WAKEUP  42
 #define IRQ_USB_FS      67
 
-	nvic_enable ( IRQ_USB_WAKEUP );
+		nvic_enable ( IRQ_USB_WAKEUP );
         nvic_enable ( IRQ_USB_FS );
 
         gpio_usb_init ();

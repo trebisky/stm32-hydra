@@ -85,8 +85,10 @@ void USBD_Init(USB_OTG_CORE_HANDLE *pdev,
   /* Upon Init call usr callback */
   pdev->dev.usr_cb->Init();
   
+#ifndef HYDRA
   /* Enable Interrupts */
   USB_OTG_BSP_EnableInterrupt(pdev);
+#endif
 }
 
 /**
