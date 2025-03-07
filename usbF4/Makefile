@@ -17,7 +17,7 @@ DUMP = $(TOOLS)-objdump -d
 GDB = $(TOOLS)-gdb
 
 BASE_OBJS = usb.o
-VCP_OBJS = misc.o  usb_bsp.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
+VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
 DRIVER_OBJS = usb_core.o  usb_dcd.o  usb_dcd_int.o
 LIBR_OBJS = usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o
 
@@ -42,7 +42,7 @@ OBJS = $(BASE_OBJS) $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
 # CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Wno-implicit-function-declaration -fno-builtin
 
 #CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -D$(CHIP) -O -I.
-CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -O -I.
+CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -O -I.. -I.
 
 all: ../usbf4.o
 
@@ -55,8 +55,8 @@ usbf4.o:	$(OBJS)
 # From VCP
 misc.o: vcp/misc.c
 	$(CC) -o $@ -c $<
-usb_bsp.o: vcp/usb_bsp.c
-	$(CC) -o $@ -c $<
+#usb_bsp.o: vcp/usb_bsp.c
+#	$(CC) -o $@ -c $<
 usbd_cdc_vcp.o: vcp/usbd_cdc_vcp.c
 	$(CC) -o $@ -c $<
 usbd_desc.o: vcp/usbd_desc.c

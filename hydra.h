@@ -9,7 +9,6 @@
 #define UART3	2
 /* F411 has only 2 uarts accessible, the F103 has 3 */
 
-
 /* names to index the bases array */
 #define GPIOA	0
 #define GPIOB	1

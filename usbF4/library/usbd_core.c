@@ -14,7 +14,6 @@
 #include <library/usbd_req.h>
 #include <library/usbd_ioreq.h>
 #include <driver/usb_dcd_int.h>
-#include <driver/usb_bsp.h>
 
 static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev);
 static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
@@ -105,8 +104,8 @@ USBD_Status USBD_DeInit(USB_OTG_CORE_HANDLE *pdev)
 USBD_Status USBD_DeInitFull(USB_OTG_CORE_HANDLE *pdev)
 {
   /* Software Init */
-  USB_OTG_BSP_DisableInterrupt(pdev);
 #ifndef HYDRA
+  USB_OTG_BSP_DisableInterrupt(pdev);
   USB_OTG_BSP_DeInit(pdev);
 #endif
   

@@ -16,10 +16,12 @@
 // #include <libmaple/gpio.h>
 
 typedef enum {DISABLE = 0, ENABLE = !DISABLE} FunctionalState;
+
 #define OTG_FS_IRQn 67
 //typedef unsigned char uint8_t;
 #include "misc.h"
 
+#ifndef HYDRA
 /**
 * @brief  USB_OTG_BSP_Init
 *         Initilizes BSP configurations
@@ -27,7 +29,6 @@ typedef enum {DISABLE = 0, ENABLE = !DISABLE} FunctionalState;
 * @retval None
 */
 
-#ifndef HYDRA
 void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 {
 	// ala42
@@ -78,7 +79,6 @@ void USB_OTG_BSP_DeInit(USB_OTG_CORE_HANDLE *pdev)
 //	rcc_clk_disable(RCC_SYSCFG);
 	rcc_clk_disable(RCC_USBFS);
 }
-#endif
 
 
 /**
@@ -152,6 +152,8 @@ void USB_OTG_BSP_DisableInterrupt(USB_OTG_CORE_HANDLE *pdev)
 #endif
 #endif
 }
+
+#endif	/* Hydra */
 
 /**
 * @brief  USB_OTG_BSP_uDelay

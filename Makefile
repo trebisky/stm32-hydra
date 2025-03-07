@@ -32,14 +32,16 @@ CHIP = CHIP_F411
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
 OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
-OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else
 CHIP = CHIP_F103
 ARM_CPU = cortex-m3
 LDS_FILE=f103.lds
 OBJS = locore_103.o $(BASE_OBJS) rcc_103.o gpio_103.o
-OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
 #OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/cs32f1x.cfg
+#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
+OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
 endif
 
 # Use the -g flag if you intend to use gdb

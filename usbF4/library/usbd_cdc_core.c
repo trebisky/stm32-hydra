@@ -706,11 +706,11 @@ static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length)
   * @retval pointer to descriptor buffer
   */
 #ifdef USE_USB_OTG_HS 
-static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
-{
-  *length = sizeof (usbd_cdc_OtherCfgDesc);
-  return usbd_cdc_OtherCfgDesc;
-}
+-- static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
+-- {
+--   *length = sizeof (usbd_cdc_OtherCfgDesc);
+--   return usbd_cdc_OtherCfgDesc;
+-- }
 #endif
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

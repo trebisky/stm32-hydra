@@ -10,7 +10,7 @@
   ******************************************************************************
   */
 
-#include <driver/usb_bsp.h>
+#include "hydra_usb.h"
 #include <driver/usb_core.h>
 
 /**
@@ -57,7 +57,7 @@ static USB_OTG_STS USB_OTG_CoreReset(USB_OTG_CORE_HANDLE *pdev)
   /* Wait for AHB master IDLE state. */
   do
   {
-    USB_OTG_BSP_uDelay(3);
+    board_uDelay(3);
     greset.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GRSTCTL);
     if (++count > 200000)
     {
@@ -77,9 +77,11 @@ static USB_OTG_STS USB_OTG_CoreReset(USB_OTG_CORE_HANDLE *pdev)
       break;
     }
   }
-  while (greset.b.csftrst == 1);
+  while (greset.b.csftrst == 1)
+	  ;
+
   /* Wait for 3 PHY Clocks*/
-  USB_OTG_BSP_uDelay(3);
+  board_uDelay(3);
   return status;
 }
 
@@ -159,7 +161,11 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
   /* initialize device cfg following its address */
   if (coreID == USB_OTG_FS_CORE_ID)
   {
+#ifdef HYDRA_F429
+    baseAddress                = USB_OTG_HS_BASE_ADDR;
+#else
     baseAddress                = USB_OTG_FS_BASE_ADDR;
+#endif
     pdev->cfg.coreID           = USB_OTG_FS_CORE_ID;
     pdev->cfg.host_channels    = 8 ;
     pdev->cfg.dev_endpoints    = 4 ;
@@ -324,7 +330,7 @@ USB_OTG_STS USB_OTG_CoreInit(USB_OTG_CORE_HANDLE *pdev)
     }
     
     USB_OTG_WRITE_REG32 (&pdev->regs.GREGS->GCCFG, gccfg.d32);
-    USB_OTG_BSP_mDelay(20);
+    board_mDelay(20);
   }
   /* case the HS core is working in FS mode */
   if(pdev->cfg.dma_enable == 1)
@@ -423,7 +429,7 @@ USB_OTG_STS USB_OTG_FlushTxFifo (USB_OTG_CORE_HANDLE *pdev , uint32_t num )
   } while (greset.b.txfflsh == 1);
 
   /* Wait for 3 PHY Clocks*/
-  USB_OTG_BSP_uDelay(3);
+  board_uDelay(3);
   return status;
 }
 
@@ -453,7 +459,7 @@ USB_OTG_STS USB_OTG_FlushRxFifo( USB_OTG_CORE_HANDLE *pdev )
   } while (greset.b.rxfflsh == 1);
 
   /* Wait for 3 PHY Clocks*/
-  USB_OTG_BSP_uDelay(3);
+  board_uDelay(3);
   return status;
 }
 
@@ -484,7 +490,7 @@ USB_OTG_STS USB_OTG_SetCurrentMode(USB_OTG_CORE_HANDLE *pdev , uint8_t mode)
   }
   
   USB_OTG_WRITE_REG32(&pdev->regs.GREGS->GUSBCFG, usbcfg.d32);
-  USB_OTG_BSP_mDelay(50);
+  board_mDelay(50);
   return status;
 }
 
@@ -689,7 +695,7 @@ uint32_t USB_OTG_ReadOtgItr (USB_OTG_CORE_HANDLE *pdev)
 --    USB_OTG_WRITE_REG32(pdev->regs.HPRT0, hprt0.d32);
 --  }
 --  
---  USB_OTG_BSP_mDelay(200);
+--  board_mDelay(200);
 --}
 --/**
 --* @brief  USB_OTG_EnableHostInt: Enables the Host mode interrupts
@@ -790,10 +796,10 @@ uint32_t USB_OTG_ReadOtgItr (USB_OTG_CORE_HANDLE *pdev)
 --  hprt0.d32 = USB_OTG_ReadHPRT0(pdev);
 --  hprt0.b.prtrst = 1;
 --  USB_OTG_WRITE_REG32(pdev->regs.HPRT0, hprt0.d32);
---  USB_OTG_BSP_mDelay (10);                                /* See Note #1 */
+--  board_mDelay (10);                                /* See Note #1 */
 --  hprt0.b.prtrst = 0;
 --  USB_OTG_WRITE_REG32(pdev->regs.HPRT0, hprt0.d32);
---  USB_OTG_BSP_mDelay (20);   
+--  board_mDelay (20);   
 --  return 1;
 --}
 --
@@ -1911,7 +1917,7 @@ void USB_OTG_ActiveRemoteWakeup(USB_OTG_CORE_HANDLE *pdev)
       dctl.d32 = 0;
       dctl.b.rmtwkupsig = 1;
       USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DCTL, 0, dctl.d32);
-      USB_OTG_BSP_mDelay(5);
+      board_mDelay(5);
       USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DCTL, dctl.d32, 0 );
     }
   }

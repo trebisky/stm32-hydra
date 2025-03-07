@@ -10,6 +10,8 @@
 #include <STM32_USB_OTG_Driver/inc/usb_dcd_int.h>
 #endif
 
+#include "hydra.h"
+
 #include <library/usbd_cdc_core.h>
 #include <library/usbd_usr.h>
 #include <vcp/usbd_desc.h>
@@ -17,6 +19,21 @@
 #include "usb.h"
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev;
+
+/* This is for the F411 */
+void
+gpio_usb_init ( void )
+{
+        gpio_pin_setup ( GPIOA, 11 );   /* A11 - D- (DM) */
+        gpio_pin_setup ( GPIOA, 12 );   /* A12 - D+ (DP) */
+
+		/* This is the HS controller on the F429 discovery board
+		 * We just go ahead and configure these pins regardless
+		 * (lazy for now anyway) even if we aren't going to use them.
+		 */
+        gpio_pin_setup ( GPIOB, 14 );   /* B14 - D- (DM) */
+        gpio_pin_setup ( GPIOB, 15 );   /* B15 - D+ (DP) */
+}
 
 void
 usb_init (void)
@@ -32,8 +49,6 @@ usb_init (void)
       gpio_set_pin(BOARD_USB_DP_PIN); // ala42 // presents us to the host
 #endif
 
-#ifdef HYDRA
-
 #define IRQ_USB_WAKEUP  42
 #define IRQ_USB_FS      67
 
@@ -41,7 +56,6 @@ usb_init (void)
         nvic_enable ( IRQ_USB_FS );
 
         gpio_usb_init ();
-#endif
 
 
       USBD_Init(&USB_OTG_dev,
@@ -50,6 +64,31 @@ usb_init (void)
             &USBD_CDC_cb,
             &USR_cb);
 }
+
+/* Delay in microseconds
+ */
+void 
+board_uDelay (const uint32_t usec)
+{
+  uint32_t count = 0;
+  const uint32_t utime = (120 * usec / 7);
+
+  do {
+    if ( ++count > utime )
+      return ;
+  } while (1);
+}
+
+
+/* Delay in milliseconds
+ */
+void
+board_mDelay (const uint32_t msec)
+{
+  board_uDelay ( msec * 1000 );
+}
+
+/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
 
 // This should work, but it doesn't
 //#define strlen(x)          __builtin_strlen ((x))
