@@ -10,11 +10,14 @@
   ******************************************************************************
   */
 
+#include "hydra_usb.h"
+
 #include <driver/usb_dcd_int.h>
 
 typedef int IRQn_Type;
 #define __NVIC_PRIO_BITS          4
 #define __Vendor_SysTickConfig    1
+
 #include <vcp/core_cm4.h>
 
 /* static functions */
@@ -146,7 +149,7 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
   uint32_t retval = 0;
 
   // Bad idea, we get non-stop SOF interrupts
-  // printf ( "OTG ISR called" );
+  // usb_debug ( DM_ORIG, "OTG ISR called" );
   
   if (USB_OTG_IsDeviceMode(pdev)) /* ensure that we are in device mode */
   {
@@ -156,19 +159,19 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
     
     if (gintr_status.b.outepintr) {
-      printf ( "USBint - OUT Endpoint\n" );
+      usb_debug ( DM_ORIG, "USBint - OUT Endpoint\n" );
       retval |= DCD_HandleOutEP_ISR(pdev);
     }    
     
     if (gintr_status.b.inepint) {
-      printf ( "USBint - IN Endpoint\n" );
+      usb_debug ( DM_ORIG, "USBint - IN Endpoint\n" );
       retval |= DCD_HandleInEP_ISR(pdev);
     }
     
     if (gintr_status.b.modemismatch) {
       USB_OTG_GINTSTS_TypeDef  gintsts;
       
-      printf ( "USBint - mode MM\n" );
+      usb_debug ( DM_ORIG, "USBint - mode MM\n" );
       /* Clear interrupt */
       gintsts.d32 = 0;
       gintsts.b.modemismatch = 1;
@@ -176,12 +179,12 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
     
     if (gintr_status.b.wkupintr) {
-      printf ( "USBint - wakeup\n" );
+      usb_debug ( DM_ORIG, "USBint - wakeup\n" );
       retval |= DCD_HandleResume_ISR(pdev);
     }
     
     if (gintr_status.b.usbsuspend) {
-      printf ( "USBint - suspend\n" );
+      usb_debug ( DM_ORIG, "USBint - suspend\n" );
       retval |= DCD_HandleUSBSuspend_ISR(pdev);
     }
 
@@ -190,19 +193,19 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
     
     if (gintr_status.b.rxstsqlvl) {
-      printf ( "USBint - Rx level\n" );
+      usb_debug ( DM_ORIG, "USBint - Rx level\n" );
       retval |= DCD_HandleRxStatusQueueLevel_ISR(pdev);
       
     }
     
     if (gintr_status.b.usbreset) {
-      printf ( "USBint - reset\n" );
+      usb_debug ( DM_ORIG, "USBint - reset\n" );
       retval |= DCD_HandleUsbReset_ISR(pdev);
       
     }
 
     if (gintr_status.b.enumdone) {
-      printf ( "USBint - enum done\n" );
+      usb_debug ( DM_ORIG, "USBint - enum done\n" );
       retval |= DCD_HandleEnumDone_ISR(pdev);
     }
     
@@ -363,12 +366,12 @@ static uint32_t DCD_HandleInEP_ISR(USB_OTG_CORE_HANDLE *pdev)
   while ( ep_intr )
   {
     if (ep_intr&0x1) {
-      // printf ( "USBint = IN Endpoint %d\n", epnum );
+      // usb_debug ( DM_ORIG, "USBint = IN Endpoint %d\n", epnum );
 
       diepint.d32 = DCD_ReadDevInEP(pdev , epnum); /* Get In ITR status */
 
       if ( diepint.b.xfercompl ) {
-	printf ( "USBint = IN Endpoint %d Xfer complete\n", epnum );
+	usb_debug ( DM_ORIG, "USBint = IN Endpoint %d Xfer complete\n", epnum );
         fifoemptymsk = 0x1 << epnum;
         USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, fifoemptymsk, 0);
         CLEAR_IN_EP_INTR(epnum, xfercompl);
@@ -398,7 +401,7 @@ static uint32_t DCD_HandleInEP_ISR(USB_OTG_CORE_HANDLE *pdev)
       }       
 
       if (diepint.b.emptyintr) {
-	printf ( "USBint = IN Endpoint %d empty Tx\n", epnum );
+	usb_debug ( DM_ORIG, "USBint = IN Endpoint %d empty Tx\n", epnum );
         DCD_WriteEmptyTxFifo(pdev , epnum);
         CLEAR_IN_EP_INTR(epnum, emptyintr);
       }
@@ -431,13 +434,13 @@ static uint32_t DCD_HandleOutEP_ISR(USB_OTG_CORE_HANDLE *pdev)
   while ( ep_intr ) {
     if (ep_intr&0x1) {
 
-      // printf ( "USBint = OUT Endpoint %d\n", epnum );
+      // usb_debug ( DM_ORIG, "USBint = OUT Endpoint %d\n", epnum );
       
       doepint.d32 = USB_OTG_ReadDevOutEP_itr(pdev, epnum);
       
       /* Transfer complete */
       if ( doepint.b.xfercompl ) {
-	  printf ( "USBint = OUT Endpoint %d xfer complete\n", epnum );
+	  usb_debug ( DM_ORIG, "USBint = OUT Endpoint %d xfer complete\n", epnum );
 
         /* Clear the bit in DOEPINTn for this interrupt */
         CLEAR_OUT_EP_INTR(epnum, xfercompl);
@@ -462,14 +465,14 @@ static uint32_t DCD_HandleOutEP_ISR(USB_OTG_CORE_HANDLE *pdev)
 
       /* Endpoint disable  */
       if ( doepint.b.epdisabled ) {
-	printf ( "USBint = OUT Endpoint %d disable\n", epnum );
+	usb_debug ( DM_ORIG, "USBint = OUT Endpoint %d disable\n", epnum );
         /* Clear the bit in DOEPINTn for this interrupt */
         CLEAR_OUT_EP_INTR(epnum, epdisabled);
       }
 
       /* Setup Phase Done (control EPs) */
       if ( doepint.b.setup ) {
-	printf ( "USBint = OUT Endpoint %d setup done\n", epnum );
+	usb_debug ( DM_ORIG, "USBint = OUT Endpoint %d setup done\n", epnum );
         
         /* inform the upper layer that a setup packet is available */
         /* SETUP COMPLETE */

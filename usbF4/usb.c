@@ -97,7 +97,7 @@ board_mDelay (const uint32_t msec)
 
 void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 
-int usb_debug_mask = 0;
+static int usb_debug_mask = 0;
 
 void
 usb_debug ( int select, char *fmt, ... )

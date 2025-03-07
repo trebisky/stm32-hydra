@@ -48,6 +48,8 @@
   ******************************************************************************
   */ 
 
+#include "hydra_usb.h"
+
 #include <vcp/usb_conf.h>
 #include <library/usbd_cdc_core.h>
 #include <vcp/usbd_desc.h>
@@ -562,7 +564,7 @@ static uint8_t  usbd_cdc_DataIn (void *pdev, uint8_t epnum)
     uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
     uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
 
-    printf ( "usbd_cdc_DataIn called with %d bytes waiting to send on endpoint %d\n", USB_Tx_length, epnum );
+    usb_debug ( DM_ORIG, "usbd_cdc_DataIn called with %d bytes waiting to send on endpoint %d\n", USB_Tx_length, epnum );
 
     if (USB_Tx_length == 0)
     {

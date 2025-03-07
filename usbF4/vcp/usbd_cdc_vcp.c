@@ -14,6 +14,8 @@
 #pragma     data_alignment = 4
 #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 
+#include "hydra_usb.h"
+
 #include "usbd_cdc_vcp.h"
 // #include <libmaple/bkp.h>
 
@@ -231,7 +233,7 @@ uint32_t VCP_DataTx (const uint8_t* Buf, uint32_t Len)
 	uint32_t cnt = 0;
 	uint16_t cdc_buf_cnt = 0;
 
-	printf ( "- VCP DataTx %d bytes: %c%c%c\n", Len, Buf[0], Buf[1], Buf[2] );
+	usb_debug ( DM_ORIG, "- VCP DataTx %d bytes: %c%c%c\n", Len, Buf[0], Buf[1], Buf[2] );
 
 	while ( cnt<Len ) {
 		while ( ((ptrIn+1)&APP_TX_DATA_SIZE_MASK)==APP_Tx_ptr_out ) {
@@ -340,7 +342,8 @@ static uint16_t VCP_DataRx(uint8_t* Buf, uint32_t Len)
 		}
 	}
 #endif
-	printf ( "VCP_DataRx %d\n", Len );
+
+	usb_debug ( DM_ORIG, "VCP_DataRx %d\n", Len );
 
 	if ( usb_read_hook ) {
 	    ( *usb_read_hook ) ( Buf, Len );

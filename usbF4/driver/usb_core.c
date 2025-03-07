@@ -11,6 +11,7 @@
   */
 
 #include "hydra_usb.h"
+
 #include <driver/usb_core.h>
 
 /**
@@ -101,7 +102,7 @@ USB_OTG_STS USB_OTG_WritePacket(USB_OTG_CORE_HANDLE *pdev,
 {
   USB_OTG_STS status = USB_OTG_OK;
 
-  printf ( "Endpoint %d, write packet %d bytes to FIFO: %c%c%c\n", ch_ep_num, len, src[0], src[1], src[2] );
+  usb_debug ( DM_ORIG, "Endpoint %d, write packet %d bytes to FIFO: %c%c%c\n", ch_ep_num, len, src[0], src[1], src[2] );
 
   if (pdev->cfg.dma_enable == 0) {
     __IO uint32_t *fifo = pdev->regs.DFIFO[ch_ep_num];
@@ -128,7 +129,7 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HANDLE *pdev,
 {
   uint32_t count32b = (len + 3) / 4;
 
-  printf ( "Endpoint ??, read packet %d bytes from FIFO\n", len );
+  usb_debug ( DM_ORIG, "Endpoint ??, read packet %d bytes from FIFO\n", len );
   
   __IO uint32_t *fifo = pdev->regs.DFIFO[0];
   
@@ -414,7 +415,7 @@ USB_OTG_STS USB_OTG_FlushTxFifo (USB_OTG_CORE_HANDLE *pdev , uint32_t num )
   
   uint32_t count = 0;
 
-  printf ( "USB - flush Tx Fifo %d\n", num ); 
+  usb_debug ( DM_ORIG, "USB - flush Tx Fifo %d\n", num ); 
 
   greset.d32 = 0;
   greset.b.txfflsh = 1;
@@ -445,7 +446,7 @@ USB_OTG_STS USB_OTG_FlushRxFifo( USB_OTG_CORE_HANDLE *pdev )
   __IO USB_OTG_GRSTCTL_TypeDef  greset;
   uint32_t count = 0;
 
-  printf ( "USB - flush Rx Fifo\n" ); 
+  usb_debug ( DM_ORIG, "USB - flush Rx Fifo\n" ); 
   
   greset.d32 = 0;
   greset.b.rxfflsh = 1;
@@ -1552,7 +1553,7 @@ USB_OTG_STS USB_OTG_EPStartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   depctl.d32 = 0;
   deptsiz.d32 = 0;
 
-  printf ( "- EP %d StartXfer %d bytes\n", ep->num, ep->xfer_len );
+  usb_debug ( DM_ORIG, "- EP %d StartXfer %d bytes\n", ep->num, ep->xfer_len );
 
   /* IN endpoint */
   if (ep->is_in == 1) {
@@ -1585,7 +1586,7 @@ USB_OTG_STS USB_OTG_EPStartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
         if (ep->xfer_len > 0) {
           fifoemptymsk = 1 << ep->num;
           USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, 0, fifoemptymsk);
-	  printf ( "- TxE interrupt enabled for endpoint %d\n", ep->num );
+	  usb_debug ( DM_ORIG, "- TxE interrupt enabled for endpoint %d\n", ep->num );
         }
       }
     }
@@ -1668,7 +1669,7 @@ USB_OTG_STS USB_OTG_EP0StartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   depctl.d32   = 0;
   deptsiz.d32  = 0;
 
-  printf ( "- EP 0 StartXfer %d bytes\n", ep->xfer_len );
+  usb_debug ( DM_ORIG, "- EP 0 StartXfer %d bytes\n", ep->xfer_len );
 
   /* IN endpoint */
   if (ep->is_in == 1) {
@@ -1709,7 +1710,7 @@ USB_OTG_STS USB_OTG_EP0StartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
         {
           fifoemptymsk |= 1 << ep->num;
           USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, 0, fifoemptymsk);
-	  printf ( "- TxE interrupt enabled for endpoint 0\n" );
+	  usb_debug ( DM_ORIG, "- TxE interrupt enabled for endpoint 0\n" );
         }
       }
     }
