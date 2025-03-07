@@ -335,12 +335,12 @@ puts ( char *msg )
 }
 
 #define PRINTF_BUF_SIZE 128
-static void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
+void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 
 void
 printf ( char *fmt, ... )
 {
-	char buf[PRINTF_BUF_SIZE];
+		char buf[PRINTF_BUF_SIZE];
         va_list args;
 
         va_start ( args, fmt );
@@ -354,7 +354,7 @@ printf ( char *fmt, ... )
 void
 usb_printf ( char *fmt, ... )
 {
-	char buf[PRINTF_BUF_SIZE];
+		char buf[PRINTF_BUF_SIZE];
         va_list args;
 
         va_start ( args, fmt );
@@ -478,7 +478,8 @@ shex8( char *buf, char *end, int val )
         return shex2(buf,end,val);
 }
 
-static void
+// static void
+void
 asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args)
 {
     char *buf, *end;

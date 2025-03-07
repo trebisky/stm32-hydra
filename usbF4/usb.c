@@ -11,6 +11,7 @@
 #endif
 
 #include "hydra.h"
+#include <stdarg.h>
 
 #include <library/usbd_cdc_core.h>
 #include <library/usbd_usr.h>
@@ -88,7 +89,31 @@ board_mDelay (const uint32_t msec)
   board_uDelay ( msec * 1000 );
 }
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* =========================================================================
+ * USB debug facility
+ */
+
+#define PRINTF_BUF_SIZE 128
+
+void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
+
+int usb_debug_mask = 0;
+
+void
+usb_debug ( int select, char *fmt, ... )
+{
+        char buf[PRINTF_BUF_SIZE];
+        va_list args;
+
+		if ( ! usb_debug_mask & select )
+			return;
+
+        va_start ( args, fmt );
+        asnprintf ( buf, PRINTF_BUF_SIZE, fmt, args );
+        va_end ( args );
+
+        serial_puts ( buf );
+}
 
 // This should work, but it doesn't
 //#define strlen(x)          __builtin_strlen ((x))
