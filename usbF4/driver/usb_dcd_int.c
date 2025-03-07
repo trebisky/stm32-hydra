@@ -179,12 +179,12 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
     
     if (gintr_status.b.wkupintr) {
-      usb_debug ( DM_ORIG, "USBint - wakeup\n" );
+      usb_debug ( DM_EVENT, "interrupt: resume\n" );
       retval |= DCD_HandleResume_ISR(pdev);
     }
     
     if (gintr_status.b.usbsuspend) {
-      usb_debug ( DM_ORIG, "USBint - suspend\n" );
+      usb_debug ( DM_EVENT, "interrupt: suspend\n" );
       retval |= DCD_HandleUSBSuspend_ISR(pdev);
     }
 
@@ -199,13 +199,13 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
     
     if (gintr_status.b.usbreset) {
-      usb_debug ( DM_ORIG, "USBint - reset\n" );
+      usb_debug ( DM_EVENT, "interrupt: reset\n" );
       retval |= DCD_HandleUsbReset_ISR(pdev);
       
     }
 
     if (gintr_status.b.enumdone) {
-      usb_debug ( DM_ORIG, "USBint - enum done\n" );
+      usb_debug ( DM_EVENT, "interrupt - enumeration done\n" );
       retval |= DCD_HandleEnumDone_ISR(pdev);
     }
     
@@ -242,6 +242,7 @@ static uint32_t DCD_SessionRequest_ISR(USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_GINTSTS_TypeDef  gintsts;  
   USBD_DCD_INT_fops->DevConnected (pdev);
+  usb_debug ( DM_ORIG, "Event - connected\n" );
 
   /* Clear interrupt */
   gintsts.d32 = 0;
@@ -267,6 +268,7 @@ static uint32_t DCD_OTG_ISR(USB_OTG_CORE_HANDLE *pdev)
   if (gotgint.b.sesenddet)
   {
     USBD_DCD_INT_fops->DevDisconnected (pdev);
+    usb_debug ( DM_ORIG, "Event - disconnected\n" );
   }
   /* Clear OTG interrupt */
   USB_OTG_WRITE_REG32(&pdev->regs.GREGS->GOTGINT, gotgint.d32); 
@@ -472,7 +474,7 @@ static uint32_t DCD_HandleOutEP_ISR(USB_OTG_CORE_HANDLE *pdev)
 
       /* Setup Phase Done (control EPs) */
       if ( doepint.b.setup ) {
-	usb_debug ( DM_ORIG, "USBint = OUT Endpoint %d setup done\n", epnum );
+		usb_debug ( DM_ORIG, "USBint = OUT Endpoint %d setup done\n", epnum );
         
         /* inform the upper layer that a setup packet is available */
         /* SETUP COMPLETE */
@@ -549,6 +551,7 @@ static uint32_t DCD_HandleRxStatusQueueLevel_ISR(USB_OTG_CORE_HANDLE *pdev)
   case STS_SETUP_UPDT:
     /* Copy the setup packet received in FIFO into the setup buffer in RAM */
     USB_OTG_ReadPacket(pdev , pdev->dev.setup_packet, 8);
+	usb_dump ( DM_ENUM, "Rx setup", pdev->dev.setup_packet, 8 );
     ep->xfer_count += status.b.bcnt;
     break;
   default:

@@ -11,13 +11,15 @@
 #endif
 
 #include "hydra.h"
+#include "hydra_usb.h"
+#include "usb.h"
+
 #include <stdarg.h>
 
 #include <library/usbd_cdc_core.h>
 #include <library/usbd_usr.h>
 #include <vcp/usbd_desc.h>
 
-#include "usb.h"
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev;
 
@@ -97,7 +99,7 @@ board_mDelay (const uint32_t msec)
 
 void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 
-static int usb_debug_mask = 0;
+static int usb_debug_mask = DM_EVENT | DM_ENUM;
 
 void
 usb_debug ( int select, char *fmt, ... )
@@ -105,14 +107,29 @@ usb_debug ( int select, char *fmt, ... )
         char buf[PRINTF_BUF_SIZE];
         va_list args;
 
-		if ( ! usb_debug_mask & select )
+		if ( ! (usb_debug_mask & select) )
 			return;
 
         va_start ( args, fmt );
         asnprintf ( buf, PRINTF_BUF_SIZE, fmt, args );
         va_end ( args );
 
-        serial_puts ( buf );
+        puts ( buf );
+}
+
+void
+usb_dump ( int select, char *msg, char *buf, int n )
+{
+		int i;
+
+		if ( ! (usb_debug_mask & select) )
+			return;
+
+		puts ( msg );
+		printf ( " (%d) ", n );
+		for ( i=0; i<n; i++ )
+			printf ( "%x", buf[i] );
+		puts ( "\n" );
 }
 
 // This should work, but it doesn't

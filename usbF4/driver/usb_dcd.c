@@ -10,6 +10,8 @@
   ******************************************************************************
   */
 
+#include "hydra_usb.h"
+
 #include <driver/usb_dcd.h>
 
 void DCD_Init(USB_OTG_CORE_HANDLE *pdev , 
@@ -19,6 +21,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   USB_OTG_EP *ep;
   
   USB_OTG_SelectCore (pdev , coreID);
+
+  usb_debug ( DM_EVENT, "Event - init" );
   
   pdev->dev.device_status = USB_OTG_DEFAULT;
   pdev->dev.device_address = 0;

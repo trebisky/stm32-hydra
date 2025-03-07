@@ -10,6 +10,8 @@
   ******************************************************************************
   */ 
 
+#include "hydra_usb.h"
+
 #include <library/usbd_ioreq.h>
 
 /**
@@ -29,6 +31,8 @@ USBD_Status  USBD_CtlSendData (USB_OTG_CORE_HANDLE  *pdev,
   pdev->dev.in_ep[0].total_data_len = len;
   pdev->dev.in_ep[0].rem_data_len   = len;
   pdev->dev.device_state = USB_OTG_EP0_DATA_IN;
+
+  usb_dump ( DM_ENUM, "Tx ctrl", pbuf, len );
 
   DCD_EP_Tx (pdev, 0, pbuf, len);
  

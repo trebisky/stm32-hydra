@@ -81,7 +81,7 @@ USBD_Status  USBD_StdDevReq (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ  *req)
   {
   case USB_REQ_GET_DESCRIPTOR: 
     
-    USBD_GetDescriptor (pdev, req) ;
+    USBD_GetDescriptor (pdev, req);
     break;
     
   case USB_REQ_SET_ADDRESS:                      

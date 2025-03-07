@@ -10,6 +10,8 @@
   ******************************************************************************
   */ 
 
+#include "hydra_usb.h"
+
 #include <library/usbd_core.h>
 #include <library/usbd_req.h>
 #include <library/usbd_ioreq.h>
@@ -127,18 +129,22 @@ static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev)
   switch (req.bmRequest & 0x1F) 
   {
   case USB_REQ_RECIPIENT_DEVICE:   
+	usb_debug ( DM_ENUM, "Setup device request\n" );
     USBD_StdDevReq (pdev, &req);
     break;
     
   case USB_REQ_RECIPIENT_INTERFACE:     
+	usb_debug ( DM_ENUM, "Setup interface request\n" );
     USBD_StdItfReq(pdev, &req);
     break;
     
   case USB_REQ_RECIPIENT_ENDPOINT:        
+	usb_debug ( DM_ENUM, "Setup Endpoint request\n" );
     USBD_StdEPReq(pdev, &req);   
     break;
     
   default:           
+	usb_debug ( DM_ENUM, "Setup stall\n" );
     DCD_EP_Stall(pdev , req.bmRequest & 0x80);
     break;
   }  

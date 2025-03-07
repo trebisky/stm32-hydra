@@ -383,7 +383,8 @@ sprintf ( char *buf, char *fmt, ... )
  * It only has 3 triggers:
  *  %s to inject a string
  *  %d to inject a decimal number
- *  %h to inject a 32 bit hex value as xxxxyyyy
+ *  %h or %X to inject a 32 bit hex value as xxxxyyyy
+ *  %x to inject a 8 bit hex value
  */
 
 #define PUTCHAR(x)      if ( buf <= end ) *buf++ = (x)
@@ -498,7 +499,9 @@ asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args)
             PUTCHAR(c);
             continue;
         }
+
 	c = *fmt++;
+
 	if ( c == 'd' ) {
 	    buf = sprintn ( buf, end, va_arg(args,int) );
 	    continue;
