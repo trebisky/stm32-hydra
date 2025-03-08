@@ -17,9 +17,14 @@ DUMP = $(TOOLS)-objdump -d
 GDB = $(TOOLS)-gdb
 
 BASE_OBJS = usb.o
-VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
+#VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
+VCP_OBJS = usbd_cdc_vcp.o  usbd_desc.o
 DRIVER_OBJS = usb_core.o  usb_dcd.o  usb_dcd_int.o
-LIBR_OBJS = usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o
+LIBR_OBJS = usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
+
+# Files we no longer need, but keep around for reference
+OLD_EXTRA = misc.c usb_bsp.c
+OLD_EXTRA_H = core_cm4.h  core_cmInstr.h misc.h  nvic.h  usb_bsp.h  usb_conf.h
 
 # We don't need to set CHIP here, this is usbF4 after all.
 ifeq ($(TARGET),black)
@@ -53,15 +58,13 @@ usbf4.o:	$(OBJS)
 	$(LD) -r $(OBJS) -o usbf4.o
 
 # From VCP
-misc.o: vcp/misc.c
-	$(CC) -o $@ -c $<
+#misc.o: vcp/misc.c
+#	$(CC) -o $@ -c $<
 #usb_bsp.o: vcp/usb_bsp.c
 #	$(CC) -o $@ -c $<
 usbd_cdc_vcp.o: vcp/usbd_cdc_vcp.c
 	$(CC) -o $@ -c $<
 usbd_desc.o: vcp/usbd_desc.c
-	$(CC) -o $@ -c $<
-usbd_usr.o: vcp/usbd_usr.c
 	$(CC) -o $@ -c $<
 
 # From driver
@@ -80,6 +83,8 @@ usbd_core.o: library/usbd_core.c
 usbd_ioreq.o: library/usbd_ioreq.c
 	$(CC) -o $@ -c $<
 usbd_req.o: library/usbd_req.c
+	$(CC) -o $@ -c $<
+usbd_usr.o: library/usbd_usr.c
 	$(CC) -o $@ -c $<
 
 bogus:

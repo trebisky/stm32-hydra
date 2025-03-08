@@ -18,7 +18,7 @@ typedef int IRQn_Type;
 #define __NVIC_PRIO_BITS          4
 #define __Vendor_SysTickConfig    1
 
-#include <vcp/core_cm4.h>
+// #include <vcp/core_cm4.h>
 
 /* static functions */
 static uint32_t DCD_ReadDevInEP (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum);
@@ -333,6 +333,7 @@ static uint32_t DCD_HandleUSBSuspend_ISR(USB_OTG_CORE_HANDLE *pdev)
   gintsts.b.usbsuspend = 1;
   USB_OTG_WRITE_REG32(&pdev->regs.GREGS->GINTSTS, gintsts.d32);
   
+#ifndef HYDRA
   if((pdev->cfg.low_power) && (dsts.b.suspsts == 1))
   {
 	/*  switch-off the clocks */
@@ -346,6 +347,8 @@ static uint32_t DCD_HandleUSBSuspend_ISR(USB_OTG_CORE_HANDLE *pdev)
     /* Request to enter Sleep mode after exit from current ISR */
     SCB->SCR |= (SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk);
   }
+#endif
+
   return 1;
 }
 

@@ -2,7 +2,12 @@
 #
 # Tom Trebisky  12-2-2020
 
-TARGET = black
+# "disco" is my STM32F429 discovery board
+# "black" is my STM32F411 "black pill" board
+# "blue" is my STM32F103 "blue pill" board (or olimex or maple)
+
+TARGET = disco
+#TARGET = black
 #TARGET = blue
 
 TOOLS = arm-none-eabi
@@ -27,15 +32,22 @@ BASE_OBJS = init.o main.o flash.o led.o serial.o nvic.o exti.o systick.o event.o
 USB_OBJS = usbf4.o
 #USB_OBJS = usb411.o usb_console.o
 
-ifeq ($(TARGET),black)
-CHIP = CHIP_F411
+ifeq ($(TARGET),disco)
+CHIPDEFS = -DCHIP_F411 -DCHIP_F429
+ARM_CPU = cortex-m4
+LDS_FILE=f411.lds
+OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
+#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+else ifeq ($(TARGET_CPU),black)
+CHIPDEFS = -DCHIP_F411
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
 OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
 #OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else
-CHIP = CHIP_F103
+CHIPDEFS = -DCHIP_F103
 ARM_CPU = cortex-m3
 LDS_FILE=f103.lds
 OBJS = locore_103.o $(BASE_OBJS) rcc_103.o gpio_103.o
@@ -53,7 +65,8 @@ endif
 #  these demos, I can't be busy to set up prototypes as I should.
 # CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Wno-implicit-function-declaration -fno-builtin
 
-CDEFS = -D$(CHIP) -DHYDRA -DHYDRA_USB
+# CDEFS = -D$(CHIP) -DHYDRA -DHYDRA_USB
+CDEFS = $(CHIPDEFS) -DHYDRA -DHYDRA_USB
 
 CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) -O
 

@@ -174,6 +174,7 @@ int
 serial_begin ( int uart, int baud )
 {
 	struct uart *up;
+	int baud_val;
 
 	gpio_uart_init ( uart );
 
@@ -189,9 +190,20 @@ serial_begin ( int uart, int baud )
 	up->gtp = 0;
 
 	if ( uart == UART2 )
-	    up->baud = get_pclk1() / baud;
+	    baud_val = get_pclk1() / baud;
 	else
-	    up->baud = get_pclk2() / baud;
+	    baud_val = get_pclk2() / baud;
+
+/* Without this, we get 38400, with it we get 115200
+ * So pclk2 on the F429 must be 32 Mhz
+ * (it is 96 Mhz on the F411)
+ */
+#ifdef CHIP_F429
+	baud_val /= 3;
+#endif
+
+	up->baud = baud_val;
+
 	return uart;
 }
 

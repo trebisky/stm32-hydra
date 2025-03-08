@@ -3,6 +3,11 @@
  * hydra.h
  */
 
+/* Instead of this, maybe there is a way for software to
+ * discover what hardware it is running on.
+ */
+#define HYDRA_F429
+
 /* names to call functions with */
 #define UART1	0
 #define UART2	1

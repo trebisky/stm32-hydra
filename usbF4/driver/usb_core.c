@@ -162,7 +162,7 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
   /* initialize device cfg following its address */
   if (coreID == USB_OTG_FS_CORE_ID)
   {
-#ifdef HYDRA_F429
+#ifdef CHIP_F429
     baseAddress                = USB_OTG_HS_BASE_ADDR;
 #else
     baseAddress                = USB_OTG_FS_BASE_ADDR;

@@ -21,6 +21,7 @@
 #define USBD_PID                        0x5740
 
 #define USBD_LANGID_STRING              0x409
+
 // #define USBD_MANUFACTURER_STRING        (uint8_t*)"STMicroelectronics"
 #define USBD_MANUFACTURER_STRING        (uint8_t*)"ACME bar and grill"
 

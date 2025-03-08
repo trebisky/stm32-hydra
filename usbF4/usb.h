@@ -1,7 +1,8 @@
 #ifndef _USBF4_H_
 #define _USBF4_H_
 
-#include <vcp/usb_conf.h>
+// #include "usb_conf.h"
+#include <stdint.h>
 
 typedef enum _RESULT
 {

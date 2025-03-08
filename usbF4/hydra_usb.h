@@ -3,10 +3,6 @@
  * hydra_usb.h
  */
 
-/*
-#define HYDRA_F429
-*/
-
 void usb_debug ( int, char *, ... );
 void usb_dump ( int, char *, char *, int );
 
