@@ -69,8 +69,11 @@ struct rcc {
 #define GPIOE_ENABLE	0x10
 #define GPIOH_ENABLE	0x80
 
+#define USB_HS_ENABLE	0x20000000
+
 /* On AHB2 */
 #define USB_ENABLE	0x80
+
 
 /* On APB1 */
 #define UART2_ENABLE	0x20000
@@ -321,8 +324,19 @@ rcc_bus_init ( void )
 
 	rp->apb1_e |= UART2_ENABLE;
 
+	/* This is the FS OTG USB, which is
+	 * the only one on the F411.
+	 */
 	rp->ahb2_e |= USB_ENABLE;
 	rp->ahb2_elp |= USB_ENABLE;
+
+	/* This is the additional HS OTG USB,
+	 * which is present in the F429 and is the
+	 * one being used on the Discovery board.
+	 * first the clock, then the clock in low power.
+	 */
+	rp->ahb1_e |= USB_HS_ENABLE;
+	rp->ahb1_elp |= USB_HS_ENABLE;
 
 	rp->apb2_e |= UART1_ENABLE;
 	rp->apb2_e |= UART3_ENABLE;

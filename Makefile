@@ -56,6 +56,9 @@ OBJS = locore_103.o $(BASE_OBJS) rcc_103.o gpio_103.o
 OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
 endif
 
+# This sends all of our variables to sub-makefiles
+export
+
 # Use the -g flag if you intend to use gdb
 #CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb
 #CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -g

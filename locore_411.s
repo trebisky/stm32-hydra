@@ -99,6 +99,18 @@
 .word	bogus		/* IRQ 66 */
 .word	usb_irq_handler		/* IRQ 67 */
 
+/* Beyond here for the F429 */
+.word	bogus		/* IRQ 68 */
+.word	bogus		/* IRQ 69 */
+.word	bogus		/* IRQ 70 */
+.word	bogus		/* IRQ 71 */
+.word	bogus		/* IRQ 72 */
+.word	bogus		/* IRQ 73 */
+.word	bogus		/* IRQ 74 */
+.word	bogus		/* IRQ 75 */
+.word	bogus		/* IRQ 76 */
+.word	usb_hs_irq_handler		/* IRQ 77 */
+
 
 .section .text
 

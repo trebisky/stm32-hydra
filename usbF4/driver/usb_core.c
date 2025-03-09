@@ -167,6 +167,7 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
 #else
     baseAddress                = USB_OTG_FS_BASE_ADDR;
 #endif
+printf ( "USB base address: %X\n", baseAddress );
     pdev->cfg.coreID           = USB_OTG_FS_CORE_ID;
     pdev->cfg.host_channels    = 8 ;
     pdev->cfg.dev_endpoints    = 4 ;
@@ -184,6 +185,7 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
   else if (coreID == USB_OTG_HS_CORE_ID)
   {
     baseAddress                = USB_OTG_HS_BASE_ADDR;
+printf ( "USB HS base address: %X\n", baseAddress );
     pdev->cfg.coreID           = USB_OTG_HS_CORE_ID;    
     pdev->cfg.host_channels    = 12 ;
     pdev->cfg.dev_endpoints    = 6 ;

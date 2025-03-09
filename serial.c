@@ -363,6 +363,7 @@ printf ( char *fmt, ... )
 }
 
 #ifdef HYDRA_USB
+/* print messages via the virtual console USB port */
 void
 usb_printf ( char *fmt, ... )
 {

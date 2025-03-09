@@ -54,9 +54,11 @@ usb_init (void)
 
 #define IRQ_USB_WAKEUP  42
 #define IRQ_USB_FS      67
+#define IRQ_USB_HS      77
 
 		nvic_enable ( IRQ_USB_WAKEUP );
         nvic_enable ( IRQ_USB_FS );
+        nvic_enable ( IRQ_USB_HS );
 
         gpio_usb_init ();
 
@@ -207,9 +209,20 @@ RESULT usbPowerOff(void)
 }
 #endif
 
+/* XXX we just send this to the same handler
+ */
+void
+usb_hs_irq_handler ( void )
+{
+	printf ( "HS interrupt\n" );
+	USBD_OTG_ISR_Handler (&USB_OTG_dev);
+}
+
+
 void
 usb_irq_handler ( void )
 {
+	printf ( "FS interrupt\n" );
 	USBD_OTG_ISR_Handler (&USB_OTG_dev);
 }
 

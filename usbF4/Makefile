@@ -46,8 +46,14 @@ OBJS = $(BASE_OBJS) $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
 #  these demos, I can't be busy to set up prototypes as I should.
 # CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Wno-implicit-function-declaration -fno-builtin
 
+# The upper level does this:
+#CDEFS = $(CHIPDEFS) -DHYDRA -DHYDRA_USB
+#CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) -O
+# With an "export" in the upper directory, the line below gets CDEFS (and much more!)
+
 #CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -D$(CHIP) -O -I.
-CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -O -I.. -I.
+#CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -O -I.. -I.
+CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin $(CDEFS) -O -I.. -I.
 
 all: ../usbf4.o
 
