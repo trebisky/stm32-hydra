@@ -63,11 +63,19 @@ usb_init (void)
         gpio_usb_init ();
 
 
+#ifdef CHIP_F429
+      USBD_Init(&USB_OTG_dev,
+            USB_OTG_HS_CORE_ID,
+            &USR_desc,
+            &USBD_CDC_cb,
+            &USR_cb);
+#else
       USBD_Init(&USB_OTG_dev,
             USB_OTG_FS_CORE_ID,
             &USR_desc,
             &USBD_CDC_cb,
             &USR_cb);
+#endif
 }
 
 /* Delay in microseconds

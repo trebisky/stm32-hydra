@@ -39,6 +39,9 @@ typedef unsigned char	u8;
  #define USB_OTG_FS_CORE
 #endif
 
+// tjt 3-8-2025
+#define USB_OTG_EMBEDDED_PHY_ENABLED
+
 /*******************************************************************************
 *                      FIFO Size Configuration in Device mode
 *
