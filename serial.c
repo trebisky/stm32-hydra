@@ -76,6 +76,8 @@ struct uart {
  *   different pairs of pins.
  *   I use pins A9, A10 by default, but you can
  *   switch to B6, B7 with a bit of AFIO monkey business
+ * This is necessary on the Olimex E407 board
+ *   see gpio_411.c where this is done
  */
 #define NUM_UARTS 3
 #endif
@@ -194,11 +196,13 @@ serial_begin ( int uart, int baud )
 	else
 	    baud_val = get_pclk2() / baud;
 
+#ifdef notdef
+/* We fix this now in rcc_411.c and give the right bus clock
+ */
 /* Without this, we get 38400, with it we get 115200
  * So pclk2 on the F429 must be 32 Mhz
  * (it is 96 Mhz on the F411)
  */
-#ifdef CHIP_F429
 	baud_val /= 3;
 #endif
 

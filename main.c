@@ -14,6 +14,18 @@ extern void led_off ( void );
 
 /* ================ */
 
+#ifdef notdef
+/* Just so I could examine the disassembly */
+static void fish ( void ) {
+	disable_irq;
+	ss = 2;
+	enable_irq;
+}
+#endif
+
+
+/* ================ */
+
 static int ss;
 
 static void
@@ -289,14 +301,30 @@ usb_test_3 ( void )
 
 /* ================================================= */
 
-#ifdef notdef
-/* Just so I could examine the disassembly */
-static void fish ( void ) {
-	disable_irq;
-	ss = 2;
-	enable_irq;
+/* 3-9-2025 - use this to see if we get interrupts
+ * It works on the F429, we get a message every time
+ * we type a character.
+ */
+
+void
+serial_fn ( int x )
+{
+	printf ( "SERIAL: %x\n", x );
 }
-#endif
+
+void
+serial_test ( void )
+{
+	printf ( "Start serial test\n" );
+
+	serial_read_hookup ( UART1, serial_fn );
+
+	for ( ;; )
+		;
+}
+
+/* ================================================= */
+/* ================================================= */
 
 void
 startup ( void )
@@ -320,7 +348,14 @@ startup ( void )
 	// printf ( "CPU running at %d Hz\n", get_cpu_hz() );
 	// printf ( "Console on UART%d\n", fd+1 );
 
+	// I uncommented this 3-9-2025 and I see:
+	//   Systick count: 1006
+	//   Systick count: 2006
+	//   Systick count: 3006
+	//		...
 	// systick_test ();
+
+	// serial_test ();
 
 	// tested OK
 	// delay_test ();

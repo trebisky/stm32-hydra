@@ -203,6 +203,13 @@ gpio_uart ( int gpio, int pin )
 	gpio_pupd ( gpio, pin, PUPD_NONE );
 }
 
+static void
+gpio_uart_pin_setup ( int gpio, int pin )
+{
+	gpio_af ( gpio, pin, 7 );
+	gpio_mode ( gpio, pin, MODE_AF );
+	gpio_uart ( gpio, pin );
+}
 
 /* Note that UART1 can be moved around a lot.
  * I make a choice here.
@@ -213,19 +220,31 @@ void
 gpio_uart_init ( int uart )
 {
 	if ( uart == UART1 ) {
-	    gpio_af ( GPIOA, 9, 7 );	/* Tx */
-	    gpio_mode ( GPIOA, 9, MODE_AF );
-	    gpio_uart ( GPIOA, 9 );
+#ifdef CHIP_F407
+	    gpio_uart_pin_setup ( GPIOB, 6 );	/* Tx */
+	    gpio_uart_pin_setup ( GPIOB, 7 );	/* Rx */
+#else
+	    gpio_uart_pin_setup ( GPIOA, 9 );	/* Tx */
+	    gpio_uart_pin_setup ( GPIOA, 10 );	/* Rx */
+#endif
+	    // gpio_af ( GPIOA, 9, 7 );
+	    // gpio_mode ( GPIOA, 9, MODE_AF );
+	    // gpio_uart ( GPIOA, 9 );
 
-	    gpio_af ( GPIOA, 10, 7 );	/* Rx */
-	    gpio_mode ( GPIOA, 10, MODE_AF );
-	    gpio_uart ( GPIOA, 10 );
+	    // gpio_af ( GPIOA, 10, 7 );
+	    // gpio_mode ( GPIOA, 10, MODE_AF );
+	    // gpio_uart ( GPIOA, 10 );
+#ifdef notdef
+	    gpio_uart_pin_setup ( GPIOA, 9 );	/* Tx */
+	    gpio_uart_pin_setup ( GPIOA, 10 );	/* Rx */
+#endif
 
 	    /* UART1 could be on any of these pins
 	     * if we wanted to move it there.
 	     */
 	    // gpio_af ( GPIOA, 15, 7 ); /* Tx */
 	    // gpio_af ( GPIOB, 3, 7 );	/* Rx */
+
 	    // gpio_af ( GPIOB, 6, 7 )	/* Tx */
 	    // gpio_af ( GPIOB, 7, 7 );	/* Rx */
 	} else if ( uart == UART2 ) {
@@ -246,43 +265,13 @@ gpio_uart_init ( int uart )
 }
 
 void
-gpio_pin_setup ( int gpio, int pin )
+gpio_usb_pin_setup ( int gpio, int pin )
 {
-	    gpio_af ( GPIOA, 11, 10 );	/* D- (DM) */
-	    gpio_af ( GPIOA, 12, 10 );	/* D+ (DP) */
-
-	    gpio_mode ( GPIOA, 11, MODE_AF );
-	    gpio_mode ( GPIOA, 12, MODE_AF );
-
-	    gpio_ospeed ( GPIOA, 11, SPEED_HIGH );
-	    gpio_ospeed ( GPIOA, 12, SPEED_HIGH );
-
-	    gpio_otype ( GPIOA, 11, TYPE_PP );
-	    gpio_otype ( GPIOA, 12, TYPE_PP );
-
-	    gpio_pupd ( GPIOA, 11, PUPD_NONE );
-	    gpio_pupd ( GPIOA, 12, PUPD_NONE );
+	    gpio_af ( gpio, pin, 10 );	/* D- (DM) */
+	    gpio_mode ( gpio, pin, MODE_AF );
+	    gpio_ospeed ( gpio, pin, SPEED_HIGH );
+	    gpio_otype ( gpio, pin, TYPE_PP );
+	    gpio_pupd ( gpio, pin, PUPD_NONE );
 }
-
-#ifdef notdef
-void
-gpio_usb_init ( void )
-{
-	    gpio_af ( GPIOA, 11, 10 );	/* D- (DM) */
-	    gpio_af ( GPIOA, 12, 10 );	/* D+ (DP) */
-
-	    gpio_mode ( GPIOA, 11, MODE_AF );
-	    gpio_mode ( GPIOA, 12, MODE_AF );
-
-	    gpio_ospeed ( GPIOA, 11, SPEED_HIGH );
-	    gpio_ospeed ( GPIOA, 12, SPEED_HIGH );
-
-	    gpio_otype ( GPIOA, 11, TYPE_PP );
-	    gpio_otype ( GPIOA, 12, TYPE_PP );
-
-	    gpio_pupd ( GPIOA, 11, PUPD_NONE );
-	    gpio_pupd ( GPIOA, 12, PUPD_NONE );
-}
-#endif
 
 /* THE END */

@@ -31,6 +31,7 @@ static void USB_OTG_EnableCommonInt(USB_OTG_CORE_HANDLE *pdev)
 #endif
   /* Clear any pending interrupts */
   USB_OTG_WRITE_REG32( &pdev->regs.GREGS->GINTSTS, 0xFFFFFFFF);
+
   /* Enable the interrupts in the INTMSK */
   int_mask.b.wkupintr = 1;
   int_mask.b.usbsuspend = 1; 
@@ -56,30 +57,27 @@ static USB_OTG_STS USB_OTG_CoreReset(USB_OTG_CORE_HANDLE *pdev)
   
   greset.d32 = 0;
   /* Wait for AHB master IDLE state. */
-  do
-  {
+  do {
     board_uDelay(3);
     greset.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GRSTCTL);
     if (++count > 200000)
     {
       return USB_OTG_OK;
     }
-  }
-  while (greset.b.ahbidle == 0);
+  } while (greset.b.ahbidle == 0);
+
   /* Core Soft Reset */
   count = 0;
   greset.b.csftrst = 1;
   USB_OTG_WRITE_REG32(&pdev->regs.GREGS->GRSTCTL, greset.d32 );
-  do
-  {
+
+  do {
     greset.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GRSTCTL);
     if (++count > 200000)
     {
       break;
     }
-  }
-  while (greset.b.csftrst == 1)
-	  ;
+  } while (greset.b.csftrst == 1);
 
   /* Wait for 3 PHY Clocks*/
   board_uDelay(3);
@@ -160,10 +158,9 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
   pdev->cfg.mps              = USB_OTG_FS_MAX_PACKET_SIZE ;    
   
   /* initialize device cfg following its address */
-  if (coreID == USB_OTG_FS_CORE_ID)
-  {
+  if (coreID == USB_OTG_FS_CORE_ID) {
     baseAddress                = USB_OTG_FS_BASE_ADDR;
-// printf ( "USB base address: %X\n", baseAddress );
+	printf ( "USB init FS core: %X\n", baseAddress );
     pdev->cfg.coreID           = USB_OTG_FS_CORE_ID;
     pdev->cfg.host_channels    = 8 ;
     pdev->cfg.dev_endpoints    = 4 ;
@@ -177,11 +174,9 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
 #ifdef USB_OTG_FS_LOW_PWR_MGMT_SUPPORT    
     pdev->cfg.low_power        = 1;    
 #endif     
-  }
-  else if (coreID == USB_OTG_HS_CORE_ID)
-  {
+  } else if (coreID == USB_OTG_HS_CORE_ID) {
     baseAddress                = USB_OTG_HS_BASE_ADDR;
-// printf ( "USB HS base address: %X\n", baseAddress );
+	printf ( "USB init HS core: %X\n", baseAddress );
     pdev->cfg.coreID           = USB_OTG_HS_CORE_ID;    
     pdev->cfg.host_channels    = 12 ;
     pdev->cfg.dev_endpoints    = 6 ;
@@ -388,6 +383,7 @@ USB_OTG_STS USB_OTG_EnableGlobalInt(USB_OTG_CORE_HANDLE *pdev)
 *         Enables the controller's Global Int in the AHB Config reg
 * @param  pdev : Selected device
 * @retval USB_OTG_STS : status
+* XXX tjt - this looks backwards
 */
 USB_OTG_STS USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev)
 {
@@ -1208,6 +1204,7 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
     USB_OTG_WRITE_REG32( &pdev->regs.GREGS->DIEPTXF[2], txfifosize.d32 );
   }
 #endif
+
 #ifdef USB_OTG_HS_CORE
   if(pdev->cfg.coreID == USB_OTG_HS_CORE_ID  )
   {

@@ -30,7 +30,7 @@ extern unsigned int __rodata_end;
 static void
 setup_default_serial ( void )
 {
-	int fd;
+		int fd;
 
         fd = serial_begin ( UART1, 115200 );
         // fd = serial_begin ( UART2, 115200 );
@@ -53,14 +53,15 @@ stm_init ( void )
 	// src = &__rodata_start;
 	src = &__text_end;
 
-        for ( p = &__data_start; p < &__data_end; p++ )
-            *p = *src++;
-
+	for ( p = &__data_start; p < &__data_end; p++ )
+		*p = *src++;
 
 	ram_init ();
 	rcc_init ();
 
 	setup_default_serial ();
+	printf ( "Rebooted -- initializing\n" );
+
 	systick_init ();
 	nvic_init ();
 
@@ -74,7 +75,7 @@ stm_init ( void )
 	 */
 	// enable_irq;
 
-	/* Call the user code */
+	/* Call user code */
 	startup ();
 }
 

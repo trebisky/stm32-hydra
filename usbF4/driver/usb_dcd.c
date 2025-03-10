@@ -26,6 +26,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   
   pdev->dev.device_status = USB_OTG_DEFAULT;
   pdev->dev.device_address = 0;
+
+  /* XXX - tjt -- why these two loops ??? */
   
   /* Init ep structure */
   for (i = 0; i < pdev->cfg.dev_endpoints ; i++)
@@ -46,7 +48,7 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   {
     ep = &pdev->dev.out_ep[i];
     /* Init ep structure */
-    ep->is_in = 0;
+    ep->is_in = 0;	/* <<< XXX */
     ep->num = i;
     ep->tx_fifo_num = i;
     /* Control until ep is activated */

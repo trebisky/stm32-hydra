@@ -130,4 +130,3 @@ enum USB_OTG_SPEED {
 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-

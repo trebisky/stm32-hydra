@@ -23,19 +23,19 @@
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev;
 
-/* This is for the F411 */
+/* This is for the F411 and/or F429, F407 */
 void
 gpio_usb_init ( void )
 {
-        gpio_pin_setup ( GPIOA, 11 );   /* A11 - D- (DM) */
-        gpio_pin_setup ( GPIOA, 12 );   /* A12 - D+ (DP) */
+        gpio_usb_pin_setup ( GPIOA, 11 );   /* A11 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOA, 12 );   /* A12 - D+ (DP) */
 
 		/* This is the HS controller on the F429 discovery board
 		 * We just go ahead and configure these pins regardless
 		 * (lazy for now anyway) even if we aren't going to use them.
 		 */
-        gpio_pin_setup ( GPIOB, 14 );   /* B14 - D- (DM) */
-        gpio_pin_setup ( GPIOB, 15 );   /* B15 - D+ (DP) */
+        gpio_usb_pin_setup ( GPIOB, 14 );   /* B14 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOB, 15 );   /* B15 - D+ (DP) */
 }
 
 void
@@ -237,6 +237,7 @@ usb_irq_handler ( void )
 void
 usb_wakeup_handler ( void )
 {
+	printf ( "USB wakeup interrupt\n" );
 }
 
 #ifndef HYDRA

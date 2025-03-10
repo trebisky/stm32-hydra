@@ -2,10 +2,12 @@
 #
 # Tom Trebisky  12-2-2020
 
+# "e407" is my Olimex E407 board
 # "disco" is my STM32F429 discovery board
 # "black" is my STM32F411 "black pill" board
 # "blue" is my STM32F103 "blue pill" board (or olimex or maple)
 
+#TARGET = e407
 TARGET = disco
 #TARGET = black
 #TARGET = blue
@@ -32,7 +34,13 @@ BASE_OBJS = init.o main.o flash.o led.o serial.o nvic.o exti.o systick.o event.o
 USB_OBJS = usbf4.o
 #USB_OBJS = usb411.o usb_console.o
 
-ifeq ($(TARGET),disco)
+ifeq ($(TARGET),e407)
+CHIPDEFS = -DCHIP_F411 -DCHIP_F407
+ARM_CPU = cortex-m4
+LDS_FILE=f411.lds
+OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
+OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+else ifeq ($(TARGET),disco)
 CHIPDEFS = -DCHIP_F411 -DCHIP_F429
 ARM_CPU = cortex-m4
 LDS_FILE=f411.lds
@@ -117,8 +125,38 @@ flash:  hydra.elf
 ocd:
 	openocd $(OCDCFG)
 
+# --------------------------------------------------------------
+# For some reason that I don't understand, when I leave my board overnight,
+# I will come back to it and when I try "make flash" it will fail.
+# Among the openocd messages is this one:
+# Warn : target stm32f4x.cpu examination failed
+# I have details on my web page. 
+# Someday I should dig into this more deeply
+# The fix (so far) has been to
+# connect an external ST-Link device, then download something
+# using the following:
+
+UB_OCDCFG = -f /usr/share/openocd/scripts/interface/sthack.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+
+unbrick: unbrick.elf
+	openocd $(UB_OCDCFG) -c "program unbrick.elf verify reset exit"
+
+# I use my very simple bare metal serial demo
+unbrick.elf:
+	cp /u1/Projects/STM32/Black_pill/STM32F411/serial1/serial.elf unbrick.elf
+
+# to connect the external ST-link, 3 wires are required.
+# remove CN4 jumpers and one jumper from JP2 on the back
+#  Green - ground
+#  Yellow - SWCLK - to pin 2 on CN4
+#  Blue - SWDIO - to pin 4 on CN4
+#  do NOT connect power from the external ST-Link
+# poower the board using the mini-USB as always.
+
+# --------------------------------------------------------------
 # I tried using gdb on Fedora 32, and apparently it is gone!
 # It was last supplied as a Fedora package in Fedora 29, no telling why.
+# I found it again and installed it on Fedora 41, years later.
 
 gdb:
 	$(GDB) --eval-command="target remote localhost:3333" hydra.elf

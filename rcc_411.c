@@ -124,8 +124,19 @@ struct rcc {
 // #define CLOCK_32	// hsi doubled by PLL
 // #define CLOCK_25
 // #define CLOCK_48
-#define CLOCK_96
+// #define CLOCK_96
 // #define CLOCK_HSI_96
+
+#ifdef CHIP_F407
+// Olimex E407 with F407
+#define CLOCK_48
+#elif CHIP_F429
+// my disco board
+#define CLOCK_32
+#else
+// for the F411
+#define CLOCK_96
+#endif
 
 #ifdef CLOCK_48
 #define PLL_VAL ( PLL_M_VAL | PLL_N_192 | PLL_P_VAL_48 | PLL_Q_VAL )
@@ -382,6 +393,7 @@ rcc_debug ( void )
 #define CPU_HZ          16000000
 #endif
 
+/* Correct for F429, uart1 */
 #ifdef CLOCK_32
 #define PCLK1           32000000
 #define PCLK2           32000000
@@ -400,12 +412,20 @@ rcc_debug ( void )
 #define CPU_HZ          25000000
 #endif
 
-#ifdef CLOCK_48
+#ifdef CLOCK_48_ORIG
 #define PCLK1           48000000
 #define PCLK2           48000000
 #define CPU_HZ          48000000
 #endif
 
+/* for F407, correct for UART1 anyway */
+#ifdef CLOCK_48
+#define PCLK1           48000000
+#define PCLK2           24000000	// used by UART1
+#define CPU_HZ          48000000
+#endif
+
+/* Correct for F411 */
 #ifdef CLOCK_96
 #define PCLK1           48000000
 #define PCLK2           96000000
