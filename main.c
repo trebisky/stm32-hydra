@@ -344,6 +344,7 @@ startup ( void )
 	puts ( "******************************\n" );
 	puts ( "Up and running mainline code\n" );
 	puts ( "March 8, 2025\n" );
+	rcc_show ();
 
 	// printf ( "CPU running at %d Hz\n", get_cpu_hz() );
 	// printf ( "Console on UART%d\n", fd+1 );
