@@ -35,33 +35,33 @@ USB_OBJS = usbf4.o
 #USB_OBJS = usb411.o usb_console.o
 
 ifeq ($(TARGET),e407)
-CHIPDEFS = -DCHIP_F411 -DCHIP_F407
-ARM_CPU = cortex-m4
-LDS_FILE=f411.lds
-OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
-OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+	CHIPDEFS = -DCHIP_F411 -DCHIP_F407
+	ARM_CPU = cortex-m4
+	LDS_FILE=f411.lds
+	OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
+	OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else ifeq ($(TARGET),disco)
-CHIPDEFS = -DCHIP_F411 -DCHIP_F429
-ARM_CPU = cortex-m4
-LDS_FILE=f411.lds
-OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
-#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
-OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
-else ifeq ($(TARGET_CPU),black)
-CHIPDEFS = -DCHIP_F411
-ARM_CPU = cortex-m4
-LDS_FILE=f411.lds
-OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
-#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
-OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+	CHIPDEFS = -DCHIP_F411 -DCHIP_F429
+	ARM_CPU = cortex-m4
+	LDS_FILE=f411.lds
+	OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
+	#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+	OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+else ifeq ($(TARGET),black)
+	CHIPDEFS = -DCHIP_F411
+	ARM_CPU = cortex-m4
+	LDS_FILE=f411.lds
+	OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
+	#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+	OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else
-CHIPDEFS = -DCHIP_F103
-ARM_CPU = cortex-m3
-LDS_FILE=f103.lds
-OBJS = locore_103.o $(BASE_OBJS) rcc_103.o gpio_103.o
-#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/cs32f1x.cfg
-#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
-OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
+	CHIPDEFS = -DCHIP_F103
+	ARM_CPU = cortex-m3
+	LDS_FILE=f103.lds
+	OBJS = locore_103.o $(BASE_OBJS) rcc_103.o gpio_103.o
+	#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/cs32f1x.cfg
+	#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
+	OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f1x.cfg
 endif
 
 # This sends all of our variables to sub-makefiles
@@ -88,8 +88,14 @@ usbf4.o:	bogus
 
 bogus:
 
+# Make is stupid about ifeq and @echo
+# if you want to use both, they must be inside a target
 show:
-ifeq ($(TARGET),black)
+ifeq ($(TARGET),e407)
+	@echo "Building for Olimex E407 (STM32F407)"
+else ifeq ($(TARGET),disco)
+	@echo "Building for STM32F429 discovery (STM32F429)"
+else ifeq ($(TARGET),black)
 	@echo "Building for black-pill (STM32F411)"
 else
 	@echo "Building for blue-pill (STM32F103)"

@@ -62,6 +62,29 @@ struct rcc {
 #define APB_DIV1	0
 #define APB_DIV2	4
 #define APB_DIV4	5
+#define APB_DIV8	6
+#define APB_DIV16	7
+
+/* Mux control for MCO1 and MCO2 */
+#define MCO2_SYSCLK		0
+#define MCO2_PLLI2S		0x40000000
+#define MCO2_HSE		0x80000000
+#define MCO2_PLL		0xC0000000
+
+#define MCO1_HSI		0
+#define MCO1_LSE		0x00020000
+#define MCO1_HSE		0x00040000
+#define MCO1_PLL		0x00060000
+
+/* Prescaler values for MCO */
+#define MCO_PRE_1		0
+#define MCO_PRE_2		4
+#define MCO_PRE_3		5
+#define MCO_PRE_4		6
+#define MCO_PRE_5		7
+
+#define MCO1_PRE_SHIFT	24
+#define MCO2_PRE_SHIFT	27
 
 /* Peripheral enables -------------------------------------------- */
 /* On AHB1 */
@@ -104,19 +127,10 @@ struct rcc {
 #define PLL_P_6		2
 #define PLL_P_8		3
 
-#define PLL_M_VAL	25			/* 25/25 feeds 1 Mhz to PLL */
-#define PLL_N_192	(192<<PLL_N_SHIFT)	/* PLL yiels 192 Mhz */
-#define PLL_N_128	(128<<PLL_N_SHIFT)	/* PLL yiels 128 Mhz */
-
-#define PLL_Q_VAL	(4<<PLL_Q_SHIFT)	/* 192/4 = 48 Mhz to USB */
-
 #define PLL_P_DIV_2	(PLL_P_2<<PLL_P_SHIFT)
 #define PLL_P_DIV_4	(PLL_P_4<<PLL_P_SHIFT)
 #define PLL_P_DIV_6	(PLL_P_6<<PLL_P_SHIFT)
 #define PLL_P_DIV_8	(PLL_P_8<<PLL_P_SHIFT)
-
-#define PLL_P_VAL_96	(PLL_P_2<<PLL_P_SHIFT)	/* 192/2 = 96 Mhz to cpu */
-#define PLL_P_VAL_48	(PLL_P_4<<PLL_P_SHIFT)	/* 192/4 = 48 Mhz to cpu */
 
 /* ===================================================================================== */
 /* ===================================================================================== */
@@ -161,22 +175,65 @@ struct rcc {
  * ============================================================
  * What changes do we make for the F429 based "disco" board.
  * Here we have an 8 Mhz external crystal
+ * See again, section 6.2 in the TRM (RM0090)
+ * The datasheet says the CPU can run up to 180 Mhz
+ * The game is to find a VCO less than 432 that can divide
+ * to give 48 for the USB and yield the highest CPU.
+ * Use VCO of 336, cpu of 168.
+ * Set m = 4 and n = 168 to get the 336 vco
+ * Set p = 2 to SYSCLK is 168
+ * Set q = 7 so USB is 336/7 = 48
+ * We let AHB remain at 168
+ * the fast apb2 must < 90 -- divide by 2 to get 84
+ * the slow apb1 must < 45 -- divide by 4 to get 42
  *
  * ============================================================
  * What changes do we make for the F407 based Olimex E407
  * Here we have an 12 Mhz external crystal
  */
 
-/* Here is code just for the F411 black pill */
+#ifdef CHIP_F429
+#define CPU_NAME		"F429"
+#define PCLK1           42000000
+#define PCLK2           84000000
+#define CPU_HZ          168000000
 
+#elif CHIP_F407
+/* XXX */
+#define CPU_NAME		"F407"
 #define PCLK1           48000000
 #define PCLK2           96000000
 #define CPU_HZ          96000000
 
-#define PLL_VAL ( PLL_M_VAL | PLL_N_192 | PLL_P_VAL_96 | PLL_Q_VAL )
+#else
+/* Must be last */
+#define CPU_NAME		"F411"
+#define PCLK1           48000000
+#define PCLK2           96000000
+#define CPU_HZ          96000000
+#endif
+
+/* ------------------------------------------------------------- */
+/* Here is code just for the F411 black pill */
+
+#define PLL_M_VAL	25			/* 25/25 feeds 1 Mhz to PLL */
+
+/* Yes, we really do just shift in the actual value we want
+ * range is 50 to 432
+ */
+#define PLL_N_192	(192<<PLL_N_SHIFT)	/* PLL yiels 192 Mhz */
+#define PLL_N_128	(128<<PLL_N_SHIFT)	/* PLL yiels 128 Mhz */
+
+#define PLL_Q_VAL	(4<<PLL_Q_SHIFT)	/* 192/4 = 48 Mhz to USB */
+
+#define PLL_P_VAL_96	(PLL_P_2<<PLL_P_SHIFT)	/* 192/2 = 96 Mhz to cpu */
+#define PLL_P_VAL_48	(PLL_P_4<<PLL_P_SHIFT)	/* 192/4 = 48 Mhz to cpu */
+
+/*                      25          192          2             4       */
+#define PLL_VAL_F411 ( PLL_M_VAL | PLL_N_192 | PLL_P_VAL_96 | PLL_Q_VAL )
 
 static void
-cpu_clock_init ( void )
+cpu_clock_init_f411 ( void )
 {
 	struct rcc *rp = RCC_BASE;
 	unsigned int xyz;
@@ -188,7 +245,7 @@ cpu_clock_init ( void )
 
 	/* Configure PLL */
 	xyz = rp->pll & PLL_RESERVED;
-	xyz |= PLL_VAL;
+	xyz |= PLL_VAL_F411;
 	xyz |= PLL_SRC_HSE;
 	rp->pll = xyz;
 
@@ -207,7 +264,64 @@ cpu_clock_init ( void )
 	rp->conf = xyz;
 }
 
+#define PLL_M_4		4			/* 8/4 feeds 2 Mhz to PLL */
+#define PLL_N_168	(168<<PLL_N_SHIFT)
+#define PLL_Q_7		(7<<PLL_Q_SHIFT)	/* 2*168/7 = 48 Mhz to USB */
+
+/*                      4          168          2             7       */
+#define PLL_VAL_F429 ( PLL_M_4 | PLL_N_168 | PLL_P_DIV_2 | PLL_Q_7 )
+static void
+cpu_clock_init_f429 ( void )
+{
+	struct rcc *rp = RCC_BASE;
+	unsigned int xyz;
+
+	/* Turn on HSE oscillator */
+	rp->cr |= CR_HSEON;
+	while ( ! (rp->cr & CR_HSERDY) )
+	    ;
+
+	/* Configure PLL */
+	xyz = rp->pll & PLL_RESERVED;
+	xyz |= PLL_VAL_F429;
+	xyz |= PLL_SRC_HSE;
+	rp->pll = xyz;
+
+	/* Turn on PLL */
+	rp->cr |= CR_PLLON;
+	while ( ! (rp->cr & CR_PLLRDY) )
+	    ;
+
+	/* switch from HSI to PLL */
+	xyz = rp->conf;
+	xyz &= ~CONF_CLOCK_BITS;
+	xyz |= CONF_PLL;
+
+	/* MCO2 gives us SYSCLK on PC9 */
+	/* MCO1 gives us PLL on PA8 */
+	xyz |= MCO1_PLL;
+
+	/* reduce slow APB1 clock to 42 Mhz */
+	xyz |= (APB_DIV4<<APB1_SHIFT);
+	/* reduce fast APB2 clock to 84 Mhz */
+	xyz |= (APB_DIV2<<APB2_SHIFT);
+	rp->conf = xyz;
+}
+
+static void
+cpu_clock_init ( void )
+{
+#ifdef CHIP_F411
+	cpu_clock_init_f411 ();
+#else
+	cpu_clock_init_f429 ();
+	/* XXX */
+#endif
+}
+
 /* ================================================================ */
+/* ================================================================ */
+
 /* Note that only GPIO A,B,C are wired to pins on the F411, so it is
  * pointless to power up D,E,H
  */
@@ -533,6 +647,13 @@ rcc_debug ( void )
 
 #endif	/* OLD_F411 */
 
+char *
+get_chip_name ( void )
+{
+	// return CPU_NAME;
+	return "SAM";
+}
+
 int
 get_cpu_hz ( void )
 {
@@ -565,7 +686,7 @@ rcc_show ( void )
 	// Shows all zeros
 	// printf ( "RCC conf to start: %X\n", conf_orig );
 	printf ( "RCC conf when done: %X\n", rp->conf );
-	printf ( "F411 cpu running at %d Mhz\n", get_cpu_hz() );
+	printf ( "%s cpu running at %d Mhz\n", get_chip_name(), get_cpu_hz() );
 	printf ( " Pclk1 (slow) = %d Mhz\n", get_pclk1() );
 	printf ( " Pclk2 (fast) = %d Mhz\n", get_pclk2() );
 }
