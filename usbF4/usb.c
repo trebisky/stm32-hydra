@@ -10,7 +10,7 @@
 #include <STM32_USB_OTG_Driver/inc/usb_dcd_int.h>
 #endif
 
-#include "hydra.h"
+#include "../hydra.h"
 #include "hydra_usb.h"
 #include "usb.h"
 

@@ -1,20 +1,7 @@
 # Makefile for stm32-hydra
 #
 # Tom Trebisky  12-2-2020
-
-TARGET = BLACK
-
-# --------------------------------------
-# Resist any urge to fool around below here.
-# --------------------------------------
-
-TOOLS = arm-none-eabi
-
-#LD = $(TOOLS)-gcc
-LD = $(TOOLS)-ld.bfd
-OBJCOPY = $(TOOLS)-objcopy
-DUMP = $(TOOLS)-objdump -d
-GDB = $(TOOLS)-gdb
+# overhauled 3-10-2025 to inherit from above
 
 BASE_OBJS = usb.o
 #VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
@@ -25,35 +12,7 @@ LIBR_OBJS = usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
 # Files we no longer need, but keep around for reference
 OLD_EXTRA = misc.c usb_bsp.c
 OLD_EXTRA_H = core_cm4.h  core_cmInstr.h misc.h  nvic.h  usb_bsp.h  usb_conf.h
-
-# We don't need to set CHIP here, this is usbF4 after all.
-ifeq ($(TARGET),black)
-#CHIP = CHIP_F411
-ARM_CPU = cortex-m4
-else
-#CHIP = CHIP_F103
-ARM_CPU = cortex-m3
-endif
-
 OBJS = $(BASE_OBJS) $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
-
-# Use the -g flag if you intend to use gdb
-#CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb
-#CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -g
-#CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Os
-
-# In truth the implicit fn warnings are good, but for the purpose of
-#  these demos, I can't be busy to set up prototypes as I should.
-# CC = $(TOOLS)-gcc -mcpu=cortex-m4 -mthumb -Wno-implicit-function-declaration -fno-builtin
-
-# The upper level does this:
-#CDEFS = $(CHIPDEFS) -DHYDRA -DHYDRA_USB
-#CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) -O
-# With an "export" in the upper directory, the line below gets CDEFS (and much more!)
-
-#CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -D$(CHIP) -O -I.
-#CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin -DHYDRA -O -I.. -I.
-CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin $(CDEFS) -O -I.. -I.
 
 all: ../usbf4.o
 
@@ -94,9 +53,6 @@ usbd_usr.o: library/usbd_usr.c
 	$(CC) -o $@ -c $<
 
 bogus:
-
-hydra.elf: 	$(OBJS) $(LDS_FILE)
-	$(LD) -T $(LDS_FILE) -o hydra.elf $(OBJS)
 
 # Doesn't work unless the compile command follows
 %.o: %.c

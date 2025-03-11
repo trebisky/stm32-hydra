@@ -79,7 +79,7 @@ export
 # CDEFS = -D$(CHIP) -DHYDRA -DHYDRA_USB
 CDEFS = $(CHIPDEFS) -DHYDRA -DHYDRA_USB
 
-CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) -O
+CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) -I. -O
 
 all: show hydra.elf hydra.dump hydra.bin
 
