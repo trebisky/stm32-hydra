@@ -25,20 +25,36 @@ struct gpio {
 	volatile unsigned int afh;	/* 0x24 */
 };
 
-/* We have 3 gpio (more in the chip, but not routed on our 48 pin package).
+/* On the F411, we have 3 gpio
+ *  (more in the chip, but not routed on our 48 pin package).
  * We really only have A and B available.
  * PC 13 is the onboard LED
  * PC 14 and 15 are routed to the board edge, but are connected to
  * the 32 kHz crystal, so I can't see how that would be useful.
  * But PA and PB give us plenty of pins.
+ * --
+ * On the F429, we have a package with more pins,
+ *  we have gpio A to G available.
  */
 
 #define GPIOA_BASE	(struct gpio *) 0x40020000
 #define GPIOB_BASE	(struct gpio *) 0x40020400
 #define GPIOC_BASE	(struct gpio *) 0x40020800
 
+#define GPIOD_BASE	(struct gpio *) 0x40020c00
+#define GPIOE_BASE	(struct gpio *) 0x40021000
+#define GPIOF_BASE	(struct gpio *) 0x40021400
+#define GPIOG_BASE	(struct gpio *) 0x40021800
+
+#define GPIOH_BASE	(struct gpio *) 0x40021c00
+#define GPIOI_BASE	(struct gpio *) 0x40022000
+#define GPIOJ_BASE	(struct gpio *) 0x40022400
+#define GPIOK_BASE	(struct gpio *) 0x40022800
+
 static struct gpio *gpio_bases[] = {
-    GPIOA_BASE, GPIOB_BASE, GPIOC_BASE
+    GPIOA_BASE, GPIOB_BASE, GPIOC_BASE,
+    GPIOD_BASE, GPIOE_BASE, GPIOF_BASE, GPIOG_BASE,
+    GPIOH_BASE, GPIOI_BASE, GPIOJ_BASE, GPIOK_BASE
 };
 
 /* ================================================ */
@@ -262,6 +278,33 @@ gpio_uart_init ( int uart )
 	    gpio_mode ( GPIOC, 7, MODE_AF );
 	    gpio_uart ( GPIOC, 7 );
 	}
+}
+
+void
+gpio_mco_pin_setup ( int gpio, int pin )
+{
+	    gpio_af ( gpio, pin, 0 );	/* 0 = System */
+	    gpio_mode ( gpio, pin, MODE_OUT );
+	    gpio_ospeed ( gpio, pin, SPEED_HIGH );
+	    gpio_otype ( gpio, pin, TYPE_PP );
+	    gpio_pupd ( gpio, pin, PUPD_NONE );
+}
+
+void
+gpio_mco_setup ( void )
+{
+		gpio_mco_pin_setup ( GPIOA, 8 );
+		gpio_mco_pin_setup ( GPIOC, 9 );
+}
+
+void
+gpio_led_pin_setup ( int gpio, int pin )
+{
+	    gpio_af ( gpio, pin, 0 );	/* 0 = System */
+	    gpio_mode ( gpio, pin, MODE_OUT );
+	    gpio_ospeed ( gpio, pin, SPEED_HIGH );
+	    gpio_otype ( gpio, pin, TYPE_OD );
+	    gpio_pupd ( gpio, pin, PUPD_NONE );
 }
 
 void

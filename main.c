@@ -327,6 +327,23 @@ serial_test ( void )
 /* ================================================= */
 
 void
+blinker ( void )
+{
+	for ( ;; ) {
+		printf ( "ON\n" );
+		red_on ();
+		green_on ();
+		delay_ms ( 500 );
+		printf ( "OFF\n" );
+		red_off ();
+		green_off ();
+		delay_ms ( 500 );
+	}
+}
+
+void rcc_show ( void ) {};
+
+void
 startup ( void )
 {
 	int fd;
@@ -344,7 +361,9 @@ startup ( void )
 	puts ( "******************************\n" );
 	puts ( "Up and running mainline code\n" );
 	puts ( "March 8, 2025\n" );
+
 	rcc_show ();
+	blinker ();
 
 	// printf ( "CPU running at %d Hz\n", get_cpu_hz() );
 	// printf ( "Console on UART%d\n", fd+1 );
@@ -385,9 +404,11 @@ startup ( void )
 	usb_test_3 ();
 	printf ( "USB test done\n" );
 
-	printf ( "Enter idle loop\n" );
+	// printf ( "Enter idle loop\n" );
+	// idle ();
 
-	idle ();
+	blinker ();
+
 }
 
 /* THE END */

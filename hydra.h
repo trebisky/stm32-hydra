@@ -15,9 +15,14 @@
 /* F411 has only 2 uarts accessible, the F103 has 3 */
 
 /* names to index the bases array */
+#ifdef notdef
 #define GPIOA	0
 #define GPIOB	1
 #define GPIOC	2
+#endif
+enum { GPIOA, GPIOB, GPIOC,
+		GPIOD, GPIOE, GPIOF, GPIOG,
+		GPIOH, GPIOI, GPIOJ, GPIOK };
 
 /* pointer to void function */
 typedef void (*vfptr) ( void );

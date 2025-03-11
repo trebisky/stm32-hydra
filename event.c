@@ -449,7 +449,7 @@ delay ( int counts )
 	    sleep ();
 	    // dilly_dally ();
 	    if ( ! delay_counts )
-		break;
+			break;
 	}
 }
 
@@ -561,6 +561,13 @@ delay_us ( int us )
                  :
                  : [us] "r" (us)
                  : "r0");
+}
+
+void
+delay_ms ( int ms )
+{
+	while ( ms-- )
+		delay_us ( 1000 );
 }
 
 /* This generates the delay for i2c at 400K, which would
