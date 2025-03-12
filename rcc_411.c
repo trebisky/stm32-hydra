@@ -210,12 +210,117 @@ cpu_clock_init_pll_f411 ( void )
 	rp->conf = xyz;
 }
 
+#ifdef notdef
+-----
 /* The only difference here is substituting 8 for 25
  * for the M value.  This divides our 8 Mhz crystal to
  * 1 Mhz for the PLL, just like 25 divided the 25 Mhz
  * crystal down to 1 Mhz for the F411
+ * Tested and works fine, gets the CPU running at 96 Mhz.
  */
-#define PLL_F429 ( 8 | PLL_N_192 | PLL_P_VAL_96 | PLL_Q_VAL )
+-#define PLL_F429 ( 8 | PLL_N_192 | PLL_P_VAL_96 | PLL_Q_VAL )
+-
+-static void
+-cpu_clock_init_pll_f429 ( void )
+-{
+-	struct rcc *rp = RCC_BASE;
+-	unsigned int xyz;
+-
+-	/* Turn on HSE oscillator */
+-	rp->cr |= CR_HSEON;
+-	while ( ! (rp->cr & CR_HSERDY) )
+-	    ;
+-
+-	/* Configure PLL */
+-	xyz = rp->pll & PLL_RESERVED;
+-	xyz |= PLL_F429;
+-	xyz |= PLL_SRC_HSE;
+-	rp->pll = xyz;
+-
+-	/* Turn on PLL */
+-	rp->cr |= CR_PLLON;
+-	while ( ! (rp->cr & CR_PLLRDY) )
+-	    ;
+-
+-	/* switch from HSI to PLL */
+-	/* (also setup APB dividers) */
+-	xyz = rp->conf;
+-	xyz &= ~CONF_CLOCK_BITS;
+-	xyz |= CONF_PLL;
+-#ifdef CLOCK_96
+-	xyz |= (APB_DIV2<<APB1_SHIFT);
+-#endif
+-	rp->conf = xyz;
+-}
+-----
+#endif
+
+#ifdef notdef
+-----
+/* M and N determine the VCO frequency.
+ * M divides our crystal and feeds that to the VCO
+ *   it should be 1-2 Mhz, and 2 is better (they say).
+ * N multiplies that to give the VCO ouput.
+ * So, with our 8 Mhz crystal, set M to 8 and fee
+ * the VCO with 1 Mhz, then multiply by 192
+ * Now if we set M to 4, we send 2 Mhz to the VCO
+ * so we only need multiply it by 96
+ * Works -- tested.
+ */
+
+-#define PLL_N_96	(96<<PLL_N_SHIFT)		/* PLL yields 192 Mhz */
+-#define PLL_P_F429	(PLL_P_2<<PLL_P_SHIFT)	/* 192/2 = 96 Mhz to cpu */
+-#define PLL_Q_F429	(4<<PLL_Q_SHIFT)		/* 192/4 = 48 Mhz to USB */
+-#define PLL_F429 ( 4 | PLL_N_96 | PLL_P_F429 | PLL_Q_F429 )
+-
+-static void
+-cpu_clock_init_pll_f429_XXX ( void )
+-{
+-	struct rcc *rp = RCC_BASE;
+-	unsigned int xyz;
+-
+-	/* Turn on HSE oscillator */
+-	rp->cr |= CR_HSEON;
+-	while ( ! (rp->cr & CR_HSERDY) )
+-	    ;
+-
+-	/* Configure PLL */
+-	xyz = rp->pll & PLL_RESERVED;
+-	xyz |= PLL_F429;
+-	xyz |= PLL_SRC_HSE;
+-	rp->pll = xyz;
+-
+-	/* Turn on PLL */
+-	rp->cr |= CR_PLLON;
+-	while ( ! (rp->cr & CR_PLLRDY) )
+-	    ;
+-
+-	/* switch from HSI to PLL */
+-	/* (also setup APB dividers) */
+-	xyz = rp->conf;
+-	xyz &= ~CONF_CLOCK_BITS;
+-	xyz |= CONF_PLL;
+-#ifdef CLOCK_96
+-	xyz |= (APB_DIV2<<APB1_SHIFT);
+-#endif
+-	rp->conf = xyz;
+-}
+-----
+#endif
+
+/* Go for broke here.
+ * Aim for a 168 mhz CPU clock
+ * The VCO gets 2 Mhz and we bump it up to 336 (2*168)
+ * Then we divide by 2 and 7 for the cpu and usb
+ * The trick then is the two APB clocks.
+ */
+
+#define PLL_N_F429	(168<<PLL_N_SHIFT)		/* PLL yields 336 Mhz */
+#define PLL_P_F429	(PLL_P_2<<PLL_P_SHIFT)	/* 336/2 = 168 Mhz to cpu */
+#define PLL_Q_F429	(7<<PLL_Q_SHIFT)		/* 336/7 = 48 Mhz to USB */
+#define PLL_F429 ( 4 | PLL_N_F429 | PLL_P_F429 | PLL_Q_F429 )
+
+#define CLOCK_F429
 
 static void
 cpu_clock_init_pll_f429 ( void )
@@ -244,12 +349,14 @@ cpu_clock_init_pll_f429 ( void )
 	xyz = rp->conf;
 	xyz &= ~CONF_CLOCK_BITS;
 	xyz |= CONF_PLL;
-#ifdef CLOCK_96
-	xyz |= (APB_DIV2<<APB1_SHIFT);
-#endif
-	rp->conf = xyz;
 
-	mco_setup ();
+	/* reduce slow APB1 clock to 42 Mhz */
+    xyz |= (APB_DIV4<<APB1_SHIFT);
+
+    /* reduce fast APB2 clock to 84 Mhz */
+    xyz |= (APB_DIV2<<APB2_SHIFT);
+
+	rp->conf = xyz;
 }
 
 /* The MCO fields come set to all zeros
@@ -530,6 +637,10 @@ rcc_debug ( void )
 #define CPU_HZ          48000000
 #endif
 
+#ifdef CLOCK_F429
+#undef CLOCK_96
+#endif
+
 #ifdef CLOCK_96
 #define PCLK1           48000000
 #define PCLK2           96000000
@@ -540,6 +651,12 @@ rcc_debug ( void )
 // #define PCLK_F429       32000000
 // #define PCLK_F429       30720000
 #define CPU_HZ          96000000
+#endif
+
+#ifdef CLOCK_F429
+#define PCLK1           42000000
+#define PCLK2           84000000
+#define CPU_HZ          168000000
 #endif
 
 int
