@@ -541,6 +541,12 @@ delay_calibrate ( void )
 #define DELAY_US_400K	32	// 403 kHz
 #endif
 
+/* XXX - when we get the F429 running at 168 Mhz or something
+ * other than 96, we will need to add another entry here,
+ * or perhaps ask the RCC module what the actual CPU clock
+ * is and adjust the delay accordingly.
+ */
+
 /* From libmaple.
  * Having the core loop in assembly makes this stay the
  * same regardless of compiler optimization levels or
@@ -563,6 +569,9 @@ delay_us ( int us )
                  : "r0");
 }
 
+/* I checked this for the F429 (while running at 96 Mhz)
+ * using a stopwatch and it was just right.
+ */
 void
 delay_ms ( int ms )
 {

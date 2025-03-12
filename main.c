@@ -329,19 +329,22 @@ serial_test ( void )
 void
 blinker ( void )
 {
+	int ii = 0;
+
+	printf ( "Blinking!\n" );
+
 	for ( ;; ) {
-		printf ( "ON\n" );
+		printf ( "-- help -- %d\n", ii++ );
+		// printf ( "ON\n" );
 		red_on ();
 		green_on ();
 		delay_ms ( 500 );
-		printf ( "OFF\n" );
+		// printf ( "OFF\n" );
 		red_off ();
 		green_off ();
 		delay_ms ( 500 );
 	}
 }
-
-void rcc_show ( void ) {};
 
 void
 startup ( void )

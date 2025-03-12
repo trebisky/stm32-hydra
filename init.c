@@ -67,6 +67,9 @@ stm_init ( void )
 
 	usb_init ();
 
+	/* So we can use scope on clocks */
+    gpio_mco_setup ();
+
 	led_init ();
 	led_off ();
 

@@ -6,6 +6,8 @@
 
 #include "hydra.h"
 
+#define FANCY
+
 struct rcc {
 	volatile unsigned int cr;	/* 0 - control reg */
 	volatile unsigned int pll;	/* 4 - pll config */
@@ -60,6 +62,27 @@ struct rcc {
 #define APB_DIV1	0
 #define APB_DIV2	4
 #define APB_DIV4	5
+
+/* Mux control for MCO1 and MCO2 */
+#define MCO2_SYSCLK     0
+#define MCO2_PLLI2S     0x40000000
+#define MCO2_HSE        0x80000000
+#define MCO2_PLL        0xC0000000
+
+#define MCO1_HSI        0
+#define MCO1_LSE        0x00020000
+#define MCO1_HSE        0x00040000
+#define MCO1_PLL        0x00060000
+
+/* Prescaler values for MCO */
+#define MCO_PRE_1       0
+#define MCO_PRE_2       4
+#define MCO_PRE_3       5
+#define MCO_PRE_4       6
+#define MCO_PRE_5       7
+
+#define MCO1_PRE_SHIFT  24
+#define MCO2_PRE_SHIFT  27
 
 /* On AHB1 */
 #define GPIOA_ENABLE	0x01
@@ -144,6 +167,8 @@ struct rcc {
 #define PLL_32 ( 16 | PLL_N_128 | PLL_P_DIV_4 | PLL_Q_VAL )
 #define PLL_96 ( 16 | PLL_N_192 | PLL_P_DIV_2 | PLL_Q_VAL )
 
+static void mco_setup ( void );
+
 /* The PLL is an alternate 3rd clock source.
  * We would like to run the CPU at 100 Mhz and
  * the USB clock at 48 Mhz, but this cannot be done.
@@ -153,7 +178,7 @@ struct rcc {
  * intend to use the USB, why not.
  */
 static void
-cpu_clock_init_pll ( void )
+cpu_clock_init_pll_f411 ( void )
 {
 	struct rcc *rp = RCC_BASE;
 	unsigned int xyz;
@@ -175,6 +200,7 @@ cpu_clock_init_pll ( void )
 	    ;
 
 	/* switch from HSI to PLL */
+	/* (also setup APB dividers) */
 	xyz = rp->conf;
 	xyz &= ~CONF_CLOCK_BITS;
 	xyz |= CONF_PLL;
@@ -184,6 +210,75 @@ cpu_clock_init_pll ( void )
 	rp->conf = xyz;
 }
 
+/* The only difference here is substituting 8 for 25
+ * for the M value.  This divides our 8 Mhz crystal to
+ * 1 Mhz for the PLL, just like 25 divided the 25 Mhz
+ * crystal down to 1 Mhz for the F411
+ */
+#define PLL_F429 ( 8 | PLL_N_192 | PLL_P_VAL_96 | PLL_Q_VAL )
+
+static void
+cpu_clock_init_pll_f429 ( void )
+{
+	struct rcc *rp = RCC_BASE;
+	unsigned int xyz;
+
+	/* Turn on HSE oscillator */
+	rp->cr |= CR_HSEON;
+	while ( ! (rp->cr & CR_HSERDY) )
+	    ;
+
+	/* Configure PLL */
+	xyz = rp->pll & PLL_RESERVED;
+	xyz |= PLL_F429;
+	xyz |= PLL_SRC_HSE;
+	rp->pll = xyz;
+
+	/* Turn on PLL */
+	rp->cr |= CR_PLLON;
+	while ( ! (rp->cr & CR_PLLRDY) )
+	    ;
+
+	/* switch from HSI to PLL */
+	/* (also setup APB dividers) */
+	xyz = rp->conf;
+	xyz &= ~CONF_CLOCK_BITS;
+	xyz |= CONF_PLL;
+#ifdef CLOCK_96
+	xyz |= (APB_DIV2<<APB1_SHIFT);
+#endif
+	rp->conf = xyz;
+
+	mco_setup ();
+}
+
+/* The MCO fields come set to all zeros
+ * So, no prescaler and
+ * PC9 = MCO2 is SYSCLK
+ * PA8 = MCO1 is
+ */
+
+static void
+mco_setup ( void )
+{
+	struct rcc *rp = RCC_BASE;
+	unsigned int xyz;
+
+	xyz = rp->conf;
+
+    /* MCO1 gives us PLL on PA8 */
+	/* MCO2 gives us SYSCLK on PC9 */
+    // xyz |= MCO1_PLL;
+    xyz |= MCO1_HSI;
+    xyz |= MCO2_HSE;
+
+	xyz |= (MCO_PRE_5<<MCO1_PRE_SHIFT);
+	xyz |= (MCO_PRE_5<<MCO2_PRE_SHIFT);
+
+	rp->conf = xyz;
+}
+
+#ifndef FANCY
 /* Here we just switch to the PLL using the
  * "on reset" values, which should give
  * 96 Mhz
@@ -276,7 +371,9 @@ cpu_clock_init_25 ( void )
 	xyz |= CONF_HSE;
 	rp->conf = xyz;
 }
+#endif /* FANCY */
 
+#ifndef FANCY
 /* The RM has a table in section 3 for various voltages and
  * processor speeds that indicates how many flash wait states
  * are required.  I always run at 3.3 volts, so the rules
@@ -309,6 +406,21 @@ cpu_clock_init ( void )
 	flash_init ( 1 );
 	cpu_clock_init_32 ();
 #endif
+}
+#endif /* FANCY */
+
+static void
+cpu_clock_init ( void )
+{
+#ifdef CHIP_F429
+	flash_init ( 3 );
+	cpu_clock_init_pll_f429 ();
+#else
+	flash_init ( 3 );
+	cpu_clock_init_pll_f411 ();
+#endif
+
+	mco_setup ();
 }
 
 /* Note that only GPIO A,B,C are wired to pins, so it is
@@ -359,7 +471,6 @@ rcc_bus_init ( void )
 void
 rcc_init ( void )
 {
-
 	cpu_clock_init ();
 	rcc_bus_init ();
 }
@@ -422,8 +533,12 @@ rcc_debug ( void )
 #ifdef CLOCK_96
 #define PCLK1           48000000
 #define PCLK2           96000000
+/* We used these back when the F429 was using the F411 setup
+ * here.  Both values worked to give the right baud rate,
+ * but the second is correct (96 * 8 / 25)
+ */
 // #define PCLK_F429       32000000
-#define PCLK_F429       30720000
+// #define PCLK_F429       30720000
 #define CPU_HZ          96000000
 #endif
 
@@ -442,22 +557,28 @@ get_pclk1 ( void )
         return PCLK1;
 }
 
-/* Crazy hack for the F429 disco until we get clocks right
- * The disco has an 8 Mhz crystal.
- * The clocks avbove (96) are set for a 25 Mhz crystal
- */
-#ifdef CHIP_F429
-int
-get_pclk2 ( void )
-{
-        return PCLK_F429;
-}
-#else
 int
 get_pclk2 ( void )
 {
         return PCLK2;
 }
-#endif
+
+char *get_chip_name ( void ) { return "??"; }
+
+/* We cannot use printf inside of rcc_init() as the serial port
+ * is not yet set up.
+ */
+void
+rcc_show ( void )
+{
+    struct rcc *rp = RCC_BASE;
+
+    // Shows all zeros
+    // printf ( "RCC conf to start: %X\n", conf_orig );
+    printf ( "RCC conf when done: %X\n", rp->conf );
+    printf ( "%s cpu running at %d Mhz\n", get_chip_name(), get_cpu_hz() );
+    printf ( " Pclk1 (slow) = %d Mhz\n", get_pclk1() );
+    printf ( " Pclk2 (fast) = %d Mhz\n", get_pclk2() );
+}
 
 /* THE END */
