@@ -532,13 +532,21 @@ delay_calibrate ( void )
 #define DELAY_US_400K	11
 #endif
 
-/* For 96 Mhz cpu - verified 12-2020 */
-#ifdef CHIP_F411
+/* For 96 Mhz F411 cpu - verified 12-2020 */
+#if defined(CHIP_F411) && !defined(CHIP_F429)
 // #define DELAY_US_MULT	300	// 101 kHz
 #define DELAY_US_MULT	302	// 100 kHz
 
 // #define DELAY_US_400K	38	// 1.4 us
 #define DELAY_US_400K	32	// 403 kHz
+#endif
+
+/* For 168 Mhz F429 -- 3-12-2025
+ * Simply scaled from the F411
+ */
+#ifdef CHIP_F429
+#define DELAY_US_MULT	528
+#define DELAY_US_400K	56
 #endif
 
 /* XXX - when we get the F429 running at 168 Mhz or something
