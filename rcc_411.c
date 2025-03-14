@@ -317,22 +317,44 @@ mco_setup ( void )
 	rp->conf = xyz;
 }
 
-/* The RM has a table in section 3 for various voltages and
- * processor speeds that indicates how many flash wait states
- * are required.  I always run at 3.3 volts, so the rules
- * are as follows:
+/* The RM for the F411 has a table in section 3 for various voltages and
+ * processor speeds that indicates how many flash wait states are required.
+ * I always run at 3.3 volts, so the rules are as follows:
  *
  *  0-30 Mhz 0 waits
  * 30-64 Mhz 1 wait
  * 64-90 Mhz 2 waits
  * 90-100 Mhz 3 waits
+ *
+ * Similarly the RM for the F429 and F407 have such a table.
+ * Section 3 covers flash memory.  The table is table 10 on page 80.
+ * Here is is for the F407 and its brothers.
+ *
+ *  0-30 Mhz 0 waits
+ * 30-60 Mhz 1 wait
+ * 60-90 Mhz 2 waits
+ * 90-120 Mhz 3 waits
+ * 120-150 Mhz 4 waits
+ * 150-168 Mhz 5 waits
+ *
+ * The next page has Table 11, for F42x and F43x
+ *
+ *  0-30 Mhz 0 waits
+ * 30-60 Mhz 1 wait
+ * 60-90 Mhz 2 waits
+ * 90-120 Mhz 3 waits
+ * 120-150 Mhz 4 waits
+ * 150-180 Mhz 5 waits
  */
 static void
 cpu_clock_init ( void )
 {
 #ifdef CHIP_F429
-	flash_init ( 3 );	/* XXX */
+	flash_init ( 5 );
 	cpu_clock_init_pll_f429 ();
+#elif CHIP_F407
+	flash_init ( 5 );
+	cpu_clock_init_pll_f429 ();		/* XXX */
 #else
 	flash_init ( 3 );
 	cpu_clock_init_pll_f411 ();
