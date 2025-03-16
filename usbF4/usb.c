@@ -226,7 +226,6 @@ usb_hs_irq_handler ( void )
 	USBD_OTG_ISR_Handler (&USB_OTG_dev);
 }
 
-
 void
 usb_irq_handler ( void )
 {

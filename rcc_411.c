@@ -252,8 +252,6 @@ cpu_clock_init_pll_f411 ( void )
 #define PLL_Q_F429	(7<<PLL_Q_SHIFT)		/* 336/7 = 48 Mhz to USB */
 #define PLL_F429 ( 4 | PLL_N_F429 | PLL_P_F429 | PLL_Q_F429 )
 
-#define CLOCK_F429
-
 static void
 cpu_clock_init_pll_f429 ( void )
 {
@@ -441,7 +439,7 @@ rcc_init ( void )
 #define CPU_HZ          48000000
 #endif
 
-#ifdef CLOCK_F429
+#ifdef CHIP_F429
 #define CPU_NAME        "F429"
 #define PCLK1           42000000
 #define PCLK2           84000000

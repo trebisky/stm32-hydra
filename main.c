@@ -325,6 +325,9 @@ serial_test ( void )
 
 /* ================================================= */
 /* ================================================= */
+      
+extern int tusb_int_count;
+extern int tusb_sof_count;
 
 void
 blinker ( void )
@@ -334,7 +337,8 @@ blinker ( void )
 	printf ( "Blinking!\n" );
 
 	for ( ;; ) {
-		printf ( "-- help -- %d\n", ii++ );
+		printf ( "-- testing -- %d\n", ii++ );
+		printf ( " usb, sof count = %d %d\n", tusb_int_count, tusb_sof_count );
 		// printf ( "ON\n" );
 		red_on ();
 		green_on ();

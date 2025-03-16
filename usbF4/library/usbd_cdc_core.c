@@ -557,9 +557,11 @@ static uint8_t  usbd_cdc_EP0_RxReady (void  *pdev)
 //https://my.st.com/public/STe2ecommunities/mcu/Lists/cortex_mx_stm32/Flat.aspx?RootFolder=%2fpublic%2f
 //STe2ecommunities%2fmcu%2fLists%2fcortex_mx_stm32%2fUSB%20CDC%20Device%20hung%20fix&
 //FolderCTID=0x01200200770978C69A1141439FE559EB459D7580009C4E14902C3CDE46A77F0FFD06506F5B&currentviews=75
-static uint8_t  usbd_cdc_DataIn (void *pdev, uint8_t epnum)
+
+static uint8_t
+usbd_cdc_DataIn (void *pdev, uint8_t epnum)
 {
-  if (USB_Tx_State == 0) return USBD_OK;
+	if (USB_Tx_State == 0) return USBD_OK;
 
     uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
     uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
@@ -657,7 +659,8 @@ static uint8_t  usbd_cdc_SOF(void *pdev)
   * @param  pdev: instance
   * @retval None
   */
-static void Handle_USBAsynchXfer(void *pdev)
+static void
+Handle_USBAsynchXfer(void *pdev)
 {
   if ( USB_Tx_State ) return;
 

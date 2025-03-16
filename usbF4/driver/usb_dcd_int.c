@@ -142,6 +142,9 @@ static uint32_t DCD_OTG_ISR(USB_OTG_CORE_HANDLE *pdev);
 --}
 #endif
 
+int tusb_int_count = 0;
+int tusb_sof_count = 0;
+
 /**
 * @brief  STM32_USBF_OTG_ISR_Handler
 *         handles all USB Interrupts
@@ -155,6 +158,7 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
 
   // Bad idea, we get non-stop SOF interrupts
   // usb_debug ( DM_ORIG, "OTG ISR called" );
+  ++tusb_int_count;
   
   if (USB_OTG_IsDeviceMode(pdev)) /* ensure that we are in device mode */
   {
@@ -195,18 +199,17 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
 
     if (gintr_status.b.sofintr) {
       retval |= DCD_HandleSof_ISR(pdev);
+	  ++tusb_sof_count;
     }
     
     if (gintr_status.b.rxstsqlvl) {
       usb_debug ( DM_ORIG, "USBint - Rx level\n" );
       retval |= DCD_HandleRxStatusQueueLevel_ISR(pdev);
-      
     }
     
     if (gintr_status.b.usbreset) {
       usb_debug ( DM_EVENT, "interrupt: reset\n" );
       retval |= DCD_HandleUsbReset_ISR(pdev);
-      
     }
 
     if (gintr_status.b.enumdone) {
