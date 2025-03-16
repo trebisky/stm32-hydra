@@ -13,8 +13,6 @@
 #ifndef __USB_DEF_H__
 #define __USB_DEF_H__
 
-#include  <vcp/usbd_conf.h>
-
 #define USB_OTG_SPEED_PARAM_HIGH 0
 #define USB_OTG_SPEED_PARAM_HIGH_IN_FULL 1
 #define USB_OTG_SPEED_PARAM_FULL 3

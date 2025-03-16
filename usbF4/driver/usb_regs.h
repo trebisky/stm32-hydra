@@ -13,8 +13,8 @@
 #ifndef __USB_OTG_REGS_H__
 #define __USB_OTG_REGS_H__
 
-#include <vcp/usbd_conf.h>
-#include <libmaple_types.h>
+// #include <vcp/usbd_conf.h>
+// #include <libmaple_types.h>
 
 #define USB_OTG_HS_BASE_ADDR                 0x40040000
 #define USB_OTG_FS_BASE_ADDR                 0x50000000

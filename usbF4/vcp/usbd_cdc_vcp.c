@@ -17,7 +17,6 @@
 #include "hydra_usb.h"
 
 #include "usbd_cdc_vcp.h"
-// #include <libmaple/bkp.h>
 
 LINE_CODING linecoding =
   {

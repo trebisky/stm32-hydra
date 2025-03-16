@@ -12,9 +12,14 @@
 
 #include "hydra_usb.h"
 
-#include <driver/usb_dcd_int.h>
+#include <libmaple_types.h>
+#include "usb_regs.h"
+#include "usb_defines.h"
+#include "usb_dcd.h"
+#include "usb_dcd_int.h"
 
 typedef int IRQn_Type;
+
 #define __NVIC_PRIO_BITS          4
 #define __Vendor_SysTickConfig    1
 
@@ -791,4 +796,4 @@ static uint32_t DCD_ReadDevInEP (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum)
   return v;
 }
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

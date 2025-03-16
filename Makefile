@@ -88,6 +88,11 @@ usbf4.o:	bogus
 
 bogus:
 
+tags:	bogus
+	ctags -R .
+	rm -f cscope.*
+	cscope -Rqb
+
 # Make is stupid about ifeq and @echo
 # if you want to use both, they must be inside a target
 show:

@@ -12,7 +12,12 @@
 
 #include "hydra_usb.h"
 
-#include <driver/usb_core.h>
+#include <vcp/usbd_conf.h>
+
+#include <libmaple_types.h>
+#include "usb_regs.h"
+#include "usb_defines.h"
+#include "usb_core.h"
 
 /**
 * @brief  USB_OTG_EnableCommonInt
@@ -383,7 +388,7 @@ USB_OTG_STS USB_OTG_EnableGlobalInt(USB_OTG_CORE_HANDLE *pdev)
 *         Enables the controller's Global Int in the AHB Config reg
 * @param  pdev : Selected device
 * @retval USB_OTG_STS : status
-* XXX tjt - this looks backwards
+* XXX tjt - this looks wrong, i.e. it enables not disables.
 */
 USB_OTG_STS USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev)
 {
@@ -2108,4 +2113,4 @@ void USB_OTG_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep , uint32_t 
 
 #endif
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

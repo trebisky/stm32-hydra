@@ -14,7 +14,6 @@
 #include "usbd_desc.h"
 #include <library/usbd_req.h>
 #include "usbd_conf.h"
-#include <driver/usb_regs.h>
 
 #define USBD_VID                        0x0483
 

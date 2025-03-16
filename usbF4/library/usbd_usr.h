@@ -19,6 +19,7 @@ extern  USBD_Usr_cb_TypeDef USR_cb;
 extern  USBD_Usr_cb_TypeDef USR_FS_cb;
 extern  USBD_Usr_cb_TypeDef USR_HS_cb;
 
+#ifdef notdef
 void     USBD_USR_Init(void);
 void     USBD_USR_DeviceReset (uint8_t speed);
 void     USBD_USR_DeviceConfigured (void);
@@ -27,6 +28,7 @@ void     USBD_USR_DeviceResumed(void);
 
 void     USBD_USR_DeviceConnected(void);
 void     USBD_USR_DeviceDisconnected(void); 
+#endif
 
 void     USBD_USR_FS_Init(void);
 void     USBD_USR_FS_DeviceReset (uint8_t speed);
@@ -48,9 +50,4 @@ void     USBD_USR_HS_DeviceDisconnected(void);
 
 #endif /*__USBD_USR_H__*/
 
-
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
-
-
-
+/* THE END */

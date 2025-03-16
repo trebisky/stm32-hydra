@@ -13,6 +13,14 @@
 #include <library/usbd_usr.h>
 #include <library/usbd_ioreq.h>
 
+static void     USBD_USR_Init(void);
+static void     USBD_USR_DeviceReset (uint8_t speed);
+static void     USBD_USR_DeviceConfigured (void);
+static void     USBD_USR_DeviceSuspended(void);
+static void     USBD_USR_DeviceResumed(void);
+
+static void     USBD_USR_DeviceConnected(void);
+static void     USBD_USR_DeviceDisconnected(void);
 
 USBD_Usr_cb_TypeDef USR_cb =
 {
@@ -58,7 +66,8 @@ uint8_t usb_getStatus(void) { return usbd_status; }
 * @param  None
 * @retval None
 */
-void USBD_USR_Init(void)
+static void
+USBD_USR_Init(void)
 {   
   /* Setup SysTick Timer for 40 msec interrupts 
   This interrupt is used to probe the joystick */
@@ -79,7 +88,8 @@ void USBD_USR_Init(void)
 * @param  speed : device speed
 * @retval None
 */
-void USBD_USR_DeviceReset(uint8_t speed )
+static void
+USBD_USR_DeviceReset(uint8_t speed )
 {
  switch (speed)
  {
@@ -95,14 +105,14 @@ void USBD_USR_DeviceReset(uint8_t speed )
 	usbd_status = 0;
 }
 
-
 /**
 * @brief  USBD_USR_DeviceConfigured
 *         Displays the message on LCD on device configuration Event
 * @param  None
 * @retval Staus
 */
-void USBD_USR_DeviceConfigured (void)
+static void
+USBD_USR_DeviceConfigured (void)
 {
 	usbd_status |= USB_CONFIGURED;
 }
@@ -114,7 +124,8 @@ void USBD_USR_DeviceConfigured (void)
 * @param  None
 * @retval Staus
 */
-void USBD_USR_DeviceConnected (void)
+static void
+USBD_USR_DeviceConnected (void)
 {
 	usbd_status |= USB_CONNECTED;
 }
@@ -126,7 +137,8 @@ void USBD_USR_DeviceConnected (void)
 * @param  None
 * @retval Staus
 */
-void USBD_USR_DeviceDisconnected (void)
+static void
+USBD_USR_DeviceDisconnected (void)
 {
 	usbd_status &= ~USB_CONNECTED;
 }
@@ -137,7 +149,8 @@ void USBD_USR_DeviceDisconnected (void)
 * @param  None
 * @retval None
 */
-void USBD_USR_DeviceSuspended(void)
+static void
+USBD_USR_DeviceSuspended(void)
 {
   /* Users can do their application actions here for the USB-Reset */
 	usbd_status &= ~USB_RESUMED;
@@ -150,10 +163,11 @@ void USBD_USR_DeviceSuspended(void)
 * @param  None
 * @retval None
 */
-void USBD_USR_DeviceResumed(void)
+static void
+USBD_USR_DeviceResumed(void)
 {
   /* Users can do their application actions here for the USB-Reset */
 	usbd_status |= USB_RESUMED;
 }
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

@@ -346,6 +346,9 @@ blinker ( void )
 	}
 }
 
+/* This is the first "user" C code.
+ * it is called from stm_init() in init.c
+ */
 void
 startup ( void )
 {
