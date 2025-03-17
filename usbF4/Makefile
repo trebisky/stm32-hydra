@@ -3,6 +3,10 @@
 # Tom Trebisky  12-2-2020
 # overhauled 3-10-2025 to inherit from above
 
+ifndef TARGET
+$(error Don't run make here)
+endif
+
 BASE_OBJS = usb.o
 #VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
 VCP_OBJS = usbd_cdc_vcp.o  usbd_desc.o

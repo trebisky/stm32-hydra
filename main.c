@@ -328,6 +328,7 @@ serial_test ( void )
       
 extern int tusb_int_count;
 extern int tusb_sof_count;
+extern int tusb_xof_count;
 
 void
 blinker ( void )
@@ -338,8 +339,18 @@ blinker ( void )
 
 	for ( ;; ) {
 		printf ( "-- testing -- %d\n", ii++ );
-		printf ( " usb, sof count = %d %d\n", tusb_int_count, tusb_sof_count );
+		if ( ii == 5 ) {
+			tusb_int_count = 0;
+			tusb_sof_count = 0;
+			tusb_xof_count = 0;
+		}
+		// These counts increment 1000 per second
+		printf ( " usb, sof, xof count = %d %d %d\n", tusb_int_count, tusb_sof_count, tusb_xof_count );
 		// printf ( "ON\n" );
+		if ( (ii % 10 ) == 0 ) {
+			usb_test_send ();
+			printf ( " -- send\n" );
+		}
 		red_on ();
 		green_on ();
 		delay_ms ( 500 );

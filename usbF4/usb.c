@@ -188,6 +188,23 @@ usb_write ( char *buf, int len )
 	(void) VCP_DataTx ( buf, len );
 }
 
+/* 5-16-2025 - data sending experiment */
+void
+usb_test_send ( void )
+{
+	char xbuf[1024];
+	int i;
+	int n = 800;
+
+	for ( i=0; i<1024; i++ )
+		xbuf[i] = 'A';
+
+	for ( i=n-5; i<n; i++ )
+		xbuf[i] = '-';
+
+	(void) VCP_DataTx ( xbuf, n );
+}
+
 /* This never blocks and returns 0 at a ferrocious rate. */
 int
 usb_read ( char *buf, int len )
@@ -229,7 +246,7 @@ usb_hs_irq_handler ( void )
 void
 usb_irq_handler ( void )
 {
-	printf ( "FS interrupt\n" );
+	// printf ( "FS interrupt\n" );
 	USBD_OTG_ISR_Handler (&USB_OTG_dev);
 }
 

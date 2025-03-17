@@ -144,6 +144,7 @@ static uint32_t DCD_OTG_ISR(USB_OTG_CORE_HANDLE *pdev);
 
 int tusb_int_count = 0;
 int tusb_sof_count = 0;
+int tusb_xof_count = 0;
 
 /**
 * @brief  STM32_USBF_OTG_ISR_Handler
@@ -166,6 +167,9 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     if ( !gintr_status.d32 ) { /* avoid spurious interrupt */
       return 0;
     }
+
+    if ( ! gintr_status.b.sofintr )
+		++tusb_xof_count;
     
     if (gintr_status.b.outepintr) {
       usb_debug ( DM_ORIG, "USBint - OUT Endpoint\n" );
@@ -198,6 +202,8 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
 
     if (gintr_status.b.sofintr) {
+	  // No!  These are continuous at 1000 Hz
+      // usb_debug ( DM_EVENT, "interrupt: SOF\n" );
       retval |= DCD_HandleSof_ISR(pdev);
 	  ++tusb_sof_count;
     }

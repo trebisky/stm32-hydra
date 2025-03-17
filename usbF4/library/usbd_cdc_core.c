@@ -583,6 +583,8 @@ usbd_cdc_DataIn (void *pdev, uint8_t epnum)
         */
     }
 
+	printf ( "USB Tx datain start: %d\n", USB_Tx_length );
+
     if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE)
     {
        USB_Tx_length = CDC_DATA_IN_PACKET_SIZE;
@@ -593,6 +595,8 @@ usbd_cdc_DataIn (void *pdev, uint8_t epnum)
     }
 
     APP_Tx_ptr_out = (USB_Tx_ptr + USB_Tx_length) & APP_TX_DATA_SIZE_MASK;
+
+	printf ( "USB Tx datain send: %d\n", USB_Tx_length );
 
     /* Prepare the available data buffer to be sent on IN endpoint */
     DCD_EP_Tx (pdev,
@@ -671,6 +675,8 @@ Handle_USBAsynchXfer(void *pdev)
     return; // nothing to send
   }
 
+	printf ( "USB Tx asynch start: %d\n", USB_Tx_length );
+
     USB_Tx_State = 1;
 
     if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE)
@@ -683,6 +689,8 @@ Handle_USBAsynchXfer(void *pdev)
     }
 
     APP_Tx_ptr_out = (USB_Tx_ptr+USB_Tx_length)&APP_TX_DATA_SIZE_MASK;
+
+	printf ( "USB Tx asynch send: %d\n", USB_Tx_length );
 
     DCD_EP_Tx (pdev,
                CDC_IN_EP,
