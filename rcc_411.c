@@ -289,6 +289,53 @@ cpu_clock_init_pll_f429 ( void )
 	rp->conf = xyz;
 }
 
+/* Here we have a 12 Mhz crystal -- we want to divide down to 2
+ */
+#ifdef notdef
+#define PLL_N_F429	(168<<PLL_N_SHIFT)		/* PLL yields 336 Mhz */
+#define PLL_P_F429	(PLL_P_2<<PLL_P_SHIFT)	/* 336/2 = 168 Mhz to cpu */
+#define PLL_Q_F429	(7<<PLL_Q_SHIFT)		/* 336/7 = 48 Mhz to USB */
+#endif
+
+#define PLL_F407 ( 6 | PLL_N_F429 | PLL_P_F429 | PLL_Q_F429 )
+
+static void
+cpu_clock_init_pll_f407 ( void )
+{
+	struct rcc *rp = RCC_BASE;
+	unsigned int xyz;
+
+	/* Turn on HSE oscillator */
+	rp->cr |= CR_HSEON;
+	while ( ! (rp->cr & CR_HSERDY) )
+	    ;
+
+	/* Configure PLL */
+	xyz = rp->pll & PLL_RESERVED;
+	xyz |= PLL_F407;
+	xyz |= PLL_SRC_HSE;
+	rp->pll = xyz;
+
+	/* Turn on PLL */
+	rp->cr |= CR_PLLON;
+	while ( ! (rp->cr & CR_PLLRDY) )
+	    ;
+
+	/* switch from HSI to PLL */
+	/* (also setup APB dividers) */
+	xyz = rp->conf;
+	xyz &= ~CONF_CLOCK_BITS;
+	xyz |= CONF_PLL;
+
+	/* reduce slow APB1 clock to 42 Mhz */
+    xyz |= (APB_DIV4<<APB1_SHIFT);
+
+    /* reduce fast APB2 clock to 84 Mhz */
+    xyz |= (APB_DIV2<<APB2_SHIFT);
+
+	rp->conf = xyz;
+}
+
 /* The MCO fields come set to all zeros
  * So, no prescaler and
  * PC9 = MCO2 is SYSCLK
@@ -352,7 +399,7 @@ cpu_clock_init ( void )
 	cpu_clock_init_pll_f429 ();
 #elif CHIP_F407
 	flash_init ( 5 );
-	cpu_clock_init_pll_f429 ();		/* XXX */
+	cpu_clock_init_pll_f407 ();
 #else
 	flash_init ( 3 );
 	cpu_clock_init_pll_f411 ();
@@ -434,9 +481,9 @@ rcc_init ( void )
 #ifdef CHIP_F407
 /* XXX */
 #define CPU_NAME        "F407"
-#define PCLK1           48000000
-#define PCLK2           24000000    // used by UART1
-#define CPU_HZ          48000000
+#define PCLK1           42000000
+#define PCLK2           84000000    // used by UART1
+#define CPU_HZ          168000000
 #endif
 
 #ifdef CHIP_F429
