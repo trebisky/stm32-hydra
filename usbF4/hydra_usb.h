@@ -13,5 +13,7 @@ void usb_dump ( int, char *, char *, int );
 #define DM_ORIG		1
 #define DM_EVENT	2
 #define DM_ENUM		4
+#define DM_WRITE1	8		/* writes to endpoint */
+#define DM_READ1	0x10	/* reads from endpoint */
 
 /* THE END */

@@ -339,18 +339,74 @@ blinker ( void )
 
 	for ( ;; ) {
 		printf ( "-- testing -- %d\n", ii++ );
+		red_on ();
+		green_on ();
+		delay_ms ( 500 );
+		// printf ( "OFF\n" );
+		red_off ();
+		green_off ();
+		delay_ms ( 500 );
+	}
+}
+
+/* Some experiments with reading and writing
+ * 3-15-2025
+ */
+void
+rw_test ( void )
+{
+	int ii = 0;
+
+	printf ( "Blinking and testing!\n" );
+
+	for ( ;; ) {
+		printf ( "-- testing -- %d\n", ii++ );
 		if ( ii == 5 ) {
 			tusb_int_count = 0;
 			tusb_sof_count = 0;
 			tusb_xof_count = 0;
 		}
-		// These counts increment 1000 per second
-		printf ( " usb, sof, xof count = %d %d %d\n", tusb_int_count, tusb_sof_count, tusb_xof_count );
+		// The int and sof counts increment 1000 per second
+		// printf ( " usb, sof, xof count = %d %d %d\n", tusb_int_count, tusb_sof_count, tusb_xof_count );
 		// printf ( "ON\n" );
+#ifdef notdef
 		if ( (ii % 10 ) == 0 ) {
 			usb_test_send ();
 			printf ( " -- send\n" );
 		}
+#endif
+		red_on ();
+		green_on ();
+		delay_ms ( 500 );
+		// printf ( "OFF\n" );
+		red_off ();
+		green_off ();
+		delay_ms ( 500 );
+	}
+}
+
+static int xfer_count = 0;
+
+static void
+gobbler ( char *buf, int len )
+{
+	// printf ( "Hydra USB got: %d\n", len );
+	xfer_count += len;
+}
+
+/*
+ * 3-17-2025
+ */
+void
+xfer_test ( void )
+{
+	int ii = 0;
+
+	printf ( "xfer test!\n" );
+	usb_hookup ( gobbler );
+
+	for ( ;; ) {
+		printf ( "Tick %d -- %d\n", ii++, xfer_count );
 		red_on ();
 		green_on ();
 		delay_ms ( 500 );
@@ -384,7 +440,8 @@ startup ( void )
 	puts ( "March 8, 2025\n" );
 
 	rcc_show ();
-	blinker ();
+	// blinker ();
+	xfer_test ();
 
 	// printf ( "CPU running at %d Hz\n", get_cpu_hz() );
 	// printf ( "Console on UART%d\n", fd+1 );

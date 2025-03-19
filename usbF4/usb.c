@@ -109,7 +109,11 @@ board_mDelay (const uint32_t msec)
 
 void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 
-static int usb_debug_mask = DM_EVENT | DM_ENUM;
+// static int usb_debug_mask = DM_EVENT | DM_ENUM;
+// static int usb_debug_mask = DM_READ1 | DM_ENUM | DM_EVENT;
+// static int usb_debug_mask = DM_ENUM | DM_EVENT;
+// static int usb_debug_mask = DM_READ1;
+static int usb_debug_mask = 0;
 
 void
 usb_debug ( int select, char *fmt, ... )

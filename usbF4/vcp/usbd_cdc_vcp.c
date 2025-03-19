@@ -343,6 +343,7 @@ static uint16_t VCP_DataRx(uint8_t* Buf, uint32_t Len)
 #endif
 
 	usb_debug ( DM_ORIG, "VCP_DataRx %d\n", Len );
+	usb_debug ( DM_READ1, "VCP_DataRx %X %d\n", Buf, Len );
 
 	if ( usb_read_hook ) {
 	    ( *usb_read_hook ) ( Buf, Len );
@@ -355,13 +356,14 @@ static uint16_t VCP_DataRx(uint8_t* Buf, uint32_t Len)
 		rxWr &= UsbRecBufferSizeMask;
 	}
 	UsbRecWrite = rxWr; // store volatile
+
 	// check for enough space in Rx buffer for the next Rx packet
 	uint32_t free_rx_space = (UsbRecRead-rxWr-1) & UsbRecBufferSizeMask;
-	if ( free_rx_space<CDC_DATA_MAX_PACKET_SIZE )
-	{
+	if ( free_rx_space<CDC_DATA_MAX_PACKET_SIZE ) {
 		rxDisabled = 1; // disable OUT endpoint
 		return USBD_BUSY;
 	}
+
 	return USBD_OK;
 }
 
