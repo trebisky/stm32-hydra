@@ -35,6 +35,8 @@ usbd_cdc_vcp.o: vcp/usbd_cdc_vcp.c
 	$(CC) -o $@ -c $<
 usbd_desc.o: vcp/usbd_desc.c
 	$(CC) -o $@ -c $<
+usbd_cdc_core.o: vcp/usbd_cdc_core.c
+	$(CC) -o $@ -c $<
 
 # From driver
 usb_core.o: driver/usb_core.c
@@ -45,8 +47,8 @@ usb_dcd_int.o: driver/usb_dcd_int.c
 	$(CC) -o $@ -c $<
 
 # From library
-usbd_cdc_core.o: library/usbd_cdc_core.c
-	$(CC) -o $@ -c $<
+#usbd_cdc_core.o: library/usbd_cdc_core.c
+#	$(CC) -o $@ -c $<
 usbd_core.o: library/usbd_core.c
 	$(CC) -o $@ -c $<
 usbd_ioreq.o: library/usbd_ioreq.c

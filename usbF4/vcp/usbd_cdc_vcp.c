@@ -150,6 +150,7 @@ void VCP_SetUSBTxBlocking(uint8_t Mode)
 }
 
 /**
+  * Done (perhaps) during enumeration via setup packets.
   * @brief  VCP_Ctrl
   *         Manage the CDC class requests
   * @param  Cmd: Command code
@@ -471,5 +472,4 @@ static uint16_t VCP_COMConfig(uint8_t Conf)
   return USBD_OK;
 }
 
-
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

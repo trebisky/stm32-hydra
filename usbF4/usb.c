@@ -16,8 +16,8 @@
 
 #include <stdarg.h>
 
-#include <library/usbd_cdc_core.h>
 #include <library/usbd_usr.h>
+#include <vcp/usbd_cdc_core.h>
 #include <vcp/usbd_desc.h>
 
 

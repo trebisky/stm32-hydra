@@ -13,7 +13,7 @@
 #ifndef __USBD_CDC_VCP_H
 #define __USBD_CDC_VCP_H
 
-#include <library/usbd_cdc_core.h>
+#include "usbd_cdc_core.h"
 #include "usbd_conf.h"
 
 
@@ -34,4 +34,4 @@ typedef struct
 
 #endif /* __USBD_CDC_VCP_H */
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */
