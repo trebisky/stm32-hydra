@@ -308,9 +308,9 @@ gpio_led_pin_setup ( int gpio, int pin )
 }
 
 void
-gpio_usb_pin_setup ( int gpio, int pin )
+gpio_usb_pin_setup ( int gpio, int pin, int alt )
 {
-	    gpio_af ( gpio, pin, 10 );	/* D- (DM) */
+	    gpio_af ( gpio, pin, alt );	/* 10 or 12 */
 	    gpio_mode ( gpio, pin, MODE_AF );
 	    gpio_ospeed ( gpio, pin, SPEED_HIGH );
 	    gpio_otype ( gpio, pin, TYPE_PP );

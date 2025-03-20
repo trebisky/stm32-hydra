@@ -406,7 +406,8 @@ xfer_test ( void )
 	usb_hookup ( gobbler );
 
 	for ( ;; ) {
-		printf ( "Tick %d -- %d\n", ii++, xfer_count );
+		// printf ( "Tick %d -- bytes: %d\n", ii++, xfer_count );
+		printf ( "Tick %d -- bytes: %d -- int, sof, xof = %d %d %d\n", ii++, xfer_count, tusb_int_count, tusb_sof_count, tusb_xof_count );
 		red_on ();
 		green_on ();
 		delay_ms ( 500 );

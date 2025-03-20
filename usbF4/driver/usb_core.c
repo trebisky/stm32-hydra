@@ -126,13 +126,15 @@ USB_OTG_STS USB_OTG_WritePacket(USB_OTG_CORE_HANDLE *pdev,
 * @param  bytes : No. of bytes
 * @retval None
 */
-void *USB_OTG_ReadPacket(USB_OTG_CORE_HANDLE *pdev, 
+void *
+USB_OTG_ReadPacket(USB_OTG_CORE_HANDLE *pdev, 
                          uint8_t *dest, 
                          uint16_t len)
 {
   uint32_t count32b = (len + 3) / 4;
 
-  usb_debug ( DM_ORIG, "Endpoint ??, read packet %d bytes from FIFO\n", len );
+  // debug moved to calling routine where we know the endpoit.
+  // usb_debug ( DM_ORIG, "Endpoint ??, read packet %d bytes from FIFO\n", len );
   
   __IO uint32_t *fifo = pdev->regs.DFIFO[0];
   
@@ -216,8 +218,7 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
   pdev->regs.DREGS =  (USB_OTG_DREGS  *)  (baseAddress + \
     USB_OTG_DEV_GLOBAL_REG_OFFSET);
   
-  for (i = 0; i < pdev->cfg.dev_endpoints; i++)
-  {
+  for (i = 0; i < pdev->cfg.dev_endpoints; i++) {
     pdev->regs.INEP_REGS[i]  = (USB_OTG_INEPREGS *)  \
       (baseAddress + USB_OTG_DEV_IN_EP_REG_OFFSET + \
         (i * USB_OTG_EP_REG_OFFSET));
@@ -225,21 +226,22 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
       (baseAddress + USB_OTG_DEV_OUT_EP_REG_OFFSET + \
         (i * USB_OTG_EP_REG_OFFSET));
   }
+
   pdev->regs.HREGS = (USB_OTG_HREGS *)(baseAddress + \
     USB_OTG_HOST_GLOBAL_REG_OFFSET);
   pdev->regs.HPRT0 = (uint32_t *)(baseAddress + USB_OTG_HOST_PORT_REGS_OFFSET);
   
-  for (i = 0; i < pdev->cfg.host_channels; i++)
-  {
+  for (i = 0; i < pdev->cfg.host_channels; i++) {
     pdev->regs.HC_REGS[i] = (USB_OTG_HC_REGS *)(baseAddress + \
       USB_OTG_HOST_CHAN_REGS_OFFSET + \
         (i * USB_OTG_CHAN_REGS_OFFSET));
   }
-  for (i = 0; i < pdev->cfg.host_channels; i++)
-  {
+
+  for (i = 0; i < pdev->cfg.host_channels; i++) {
     pdev->regs.DFIFO[i] = (uint32_t *)(baseAddress + USB_OTG_DATA_FIFO_OFFSET +\
       (i * USB_OTG_DATA_FIFO_SIZE));
   }
+
   pdev->regs.PCGCCTL = (uint32_t *)(baseAddress + USB_OTG_PCGCCTL_OFFSET);
   
   return status;
@@ -1486,13 +1488,12 @@ USB_OTG_STS USB_OTG_EPActivate(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
 
   /* Enable the Interrupt for this EP */
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED
---  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID))
---  {
---    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, 0, daintmsk.d32);
---  }
---  else
+  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID)) {
+    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, 0, daintmsk.d32);
+  } else
 #endif   
     USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DAINTMSK, 0, daintmsk.d32);
+
   return status;
 }
 
@@ -1512,28 +1513,25 @@ USB_OTG_STS USB_OTG_EPDeactivate(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   depctl.d32 = 0;
   daintmsk.d32 = 0;  
   /* Read DEPCTLn register */
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     addr = &pdev->regs.INEP_REGS[ep->num]->DIEPCTL;
     daintmsk.ep.in = 1 << ep->num;
-  }
-  else
-  {
+  } else {
     addr = &pdev->regs.OUTEP_REGS[ep->num]->DOEPCTL;
     daintmsk.ep.out = 1 << ep->num;
   }
+
   depctl.b.usbactep = 0;
   USB_OTG_WRITE_REG32(addr, depctl.d32);
   /* Disable the Interrupt for this EP */
   
 #ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED
---  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID))
---  {
---    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, daintmsk.d32, 0);
---  }
---  else
+  if((ep->num == 1)&&(pdev->cfg.coreID == USB_OTG_HS_CORE_ID)) {
+    USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DEACHMSK, daintmsk.d32, 0);
+  } else
 #endif    
     USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DAINTMSK, daintmsk.d32, 0);
+
   return status;
 }
 

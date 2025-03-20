@@ -23,20 +23,27 @@
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev;
 
+/* A footnote on figure 26, page 272 of the TRM says
+ * that the value 12 is used for the usb HS when used in
+ * FS mode.
+ */
+#define GPIO_ALT_USB	10
+#define GPIO_ALT_USB_FS	12
+
 /* This is for the F411 and/or F429, F407 */
 void
 gpio_usb_init ( void )
 {
-        gpio_usb_pin_setup ( GPIOA, 11 );   /* A11 - D- (DM) */
-        gpio_usb_pin_setup ( GPIOA, 12 );   /* A12 - D+ (DP) */
+        gpio_usb_pin_setup ( GPIOA, 11, GPIO_ALT_USB );   /* A11 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOA, 12, GPIO_ALT_USB );   /* A12 - D+ (DP) */
 
 		/* This is the HS controller on the F429 discovery board
 		 *  as well as on the F407 Olimex E407 board
 		 * We just go ahead and configure these pins regardless
 		 * (lazy for now anyway) even if we aren't going to use them.
 		 */
-        gpio_usb_pin_setup ( GPIOB, 14 );   /* B14 - D- (DM) */
-        gpio_usb_pin_setup ( GPIOB, 15 );   /* B15 - D+ (DP) */
+        gpio_usb_pin_setup ( GPIOB, 14, GPIO_ALT_USB_FS );   /* B14 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOB, 15, GPIO_ALT_USB_FS );   /* B15 - D+ (DP) */
 }
 
 void
@@ -63,10 +70,8 @@ usb_init (void)
 
         gpio_usb_init ();
 
-// #if defined(CHIP_F429) | defined(CHIP_F407)
-// #define USB_HS
-
-#ifdef USB_HS
+/* Change this in usb_conf.h */
+#ifdef USE_USB_OTG_HS
 	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
       USBD_Init(&USB_OTG_dev,
             USB_OTG_HS_CORE_ID,
@@ -245,12 +250,17 @@ RESULT usbPowerOff(void)
 }
 #endif
 
-/* XXX we just send this to the same handler
+/* The same handler for FS and HS -- for now.
+ * Someday if we have both USB devices active
+ * at the same time, they will both come here and
+ * we will have to sort out which one interrupted.
+ * Also the HS controller uses some other vectors
+ * for its special EP-1 interrupts.
  */
 void
 usb_hs_irq_handler ( void )
 {
-	printf ( "HS interrupt\n" );
+	// printf ( "HS interrupt\n" );
 	USBD_OTG_ISR_Handler (&USB_OTG_dev);
 }
 

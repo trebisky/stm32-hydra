@@ -14,9 +14,10 @@
 #define __USB_CONF__H__
 
 #include <stdint.h>
+//#include "stm32f4xx.h"
 
-#define USE_USB_OTG_FS
 #define     __IO    volatile
+
 //typedef unsigned int	uint32_t;
 typedef unsigned int	u32;
 //typedef unsigned short	uint16_t;
@@ -24,23 +25,61 @@ typedef unsigned short	u16;
 //typedef unsigned char	uint8_t;
 typedef unsigned char	u8;
 
-//#include "stm32f4xx.h"
+/* ---------------------------------------------------------------------------- */
 
 /* USB Core and PHY interface configuration.
    Tip: To avoid modifying these defines each time you need to change the USB
         configuration, you can declare the needed define in your toolchain
         compiler preprocessor.
    */
-#ifndef USE_USB_OTG_FS
- //#define USE_USB_OTG_FS
-#endif /* USE_USB_OTG_FS */
+
+// tjt 3-8-2025
+#define USE_EMBEDDED_PHY
+#define USB_OTG_EMBEDDED_PHY_ENABLED
+
+// #define USE_USB_OTG_FS
+#define USE_USB_OTG_HS
+
+//#define USE_HOST_MODE
+#define USE_DEVICE_MODE
+//#define USE_OTG_MODE
 
 #ifdef USE_USB_OTG_FS
  #define USB_OTG_FS_CORE
+#else
+ #define USB_OTG_HS_CORE
 #endif
 
-// tjt 3-8-2025
-#define USB_OTG_EMBEDDED_PHY_ENABLED
+/* ---------------------------------------------------------------------------- */
+
+#ifndef USB_OTG_FS_CORE
+ #ifndef USB_OTG_HS_CORE
+    #error  "USB_OTG_HS_CORE or USB_OTG_FS_CORE should be defined"
+ #endif
+#endif
+
+
+#ifndef USE_DEVICE_MODE
+ #ifndef USE_HOST_MODE
+    #error  "USE_DEVICE_MODE or USE_HOST_MODE should be defined"
+ #endif
+#endif
+
+#ifndef USE_USB_OTG_HS
+ #ifndef USE_USB_OTG_FS
+    #error  "USE_USB_OTG_HS or USE_USB_OTG_FS should be defined"
+ #endif
+#endif
+
+#ifdef USE_USB_OTG_HS
+ #ifndef USE_ULPI_PHY
+  #ifndef USE_EMBEDDED_PHY
+   #ifndef USE_I2C_PHY
+     #error  "USE_ULPI_PHY or USE_EMBEDDED_PHY or USE_I2C_PHY should be defined"
+   #endif
+  #endif
+ #endif
+#endif
 
 /*******************************************************************************
 *                      FIFO Size Configuration in Device mode
@@ -90,39 +129,38 @@ typedef unsigned char	u8;
  //#define USB_OTG_FS_SOF_OUTPUT_ENABLED
 #endif
 
+/****************** USB OTG HS CONFIGURATION **********************************/
+#ifdef USB_OTG_HS_CORE
+ #define RX_FIFO_HS_SIZE                          512
+ #define TX0_FIFO_HS_SIZE                         512
+ #define TX1_FIFO_HS_SIZE                         512
+ #define TX2_FIFO_HS_SIZE                          0
+ #define TX3_FIFO_HS_SIZE                          0
+ #define TX4_FIFO_HS_SIZE                          0
+ #define TX5_FIFO_HS_SIZE                          0
+ #define TXH_NP_HS_FIFOSIZ                         96
+ #define TXH_P_HS_FIFOSIZ                          96
+
+ //#define USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
+ //#define USB_OTG_HS_SOF_OUTPUT_ENABLED
+
+ //#define USB_OTG_INTERNAL_VBUS_ENABLED
+ #define USB_OTG_EXTERNAL_VBUS_ENABLED
+
+ #ifdef USE_ULPI_PHY
+  #define USB_OTG_ULPI_PHY_ENABLED
+ #endif
+ #ifdef USE_EMBEDDED_PHY
+   #define USB_OTG_EMBEDDED_PHY_ENABLED
+ #endif
+ // #define USB_OTG_HS_INTERNAL_DMA_ENABLED
+ #define USB_OTG_HS_DEDICATED_EP1_ENABLED
+#endif
+
+
 /****************** USB OTG MODE CONFIGURATION ********************************/
 
-//#define USE_HOST_MODE
-#define USE_DEVICE_MODE
-//#define USE_OTG_MODE
 
-
-#ifndef USB_OTG_FS_CORE
- #ifndef USB_OTG_HS_CORE
-    #error  "USB_OTG_HS_CORE or USB_OTG_FS_CORE should be defined"
- #endif
-#endif
-
-
-#ifndef USE_DEVICE_MODE
- #ifndef USE_HOST_MODE
-    #error  "USE_DEVICE_MODE or USE_HOST_MODE should be defined"
- #endif
-#endif
-
-#ifndef USE_USB_OTG_HS
- #ifndef USE_USB_OTG_FS
-    #error  "USE_USB_OTG_HS or USE_USB_OTG_FS should be defined"
- #endif
-#else //USE_USB_OTG_HS
- #ifndef USE_ULPI_PHY
-  #ifndef USE_EMBEDDED_PHY
-   #ifndef USE_I2C_PHY
-     #error  "USE_ULPI_PHY or USE_EMBEDDED_PHY or USE_I2C_PHY should be defined"
-   #endif
-  #endif
- #endif
-#endif
 
 /****************** C Compilers dependant keywords ****************************/
 /* In HS mode and when the DMA is used, all variables and data structures dealing

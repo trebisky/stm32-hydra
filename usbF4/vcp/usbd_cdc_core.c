@@ -70,6 +70,7 @@ static uint8_t  usbd_cdc_SOF         (void *pdev);
  *********************************************/
 static void Handle_USBAsynchXfer  (void *pdev);
 static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length);
+
 #ifdef USE_USB_OTG_HS  
 static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
 #endif
@@ -77,50 +78,26 @@ static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
 extern CDC_IF_Prop_TypeDef  APP_FOPS;
 extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-    #pragma data_alignment=4   
-  #endif
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 __ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-    #pragma data_alignment=4   
-  #endif
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 __ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-    #pragma data_alignment=4   
-  #endif
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 __ALIGN_BEGIN static __IO uint32_t  usbd_cdc_AltSet  __ALIGN_END = 0;
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-    #pragma data_alignment=4   
-  #endif
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 __ALIGN_BEGIN uint8_t __CCMRAM__ USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN_END ;
 
+/* tjt - XXX - it is odd that only the Tx buffer is not specified as
+ * being in CCMRAM - and also note that depending on the linker file,
+ * it could end up in CCMRAM anyway, this is just a hint to say
+ * "put it ih CCMRAM if possible" -- however CCMRAM is supposed to
+ * not work with DMA, so there could be trouble waiting here.
+ */
 #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-    #pragma data_alignment=4   
-  #endif
 __ALIGN_BEGIN uint8_t APP_Tx_Buffer   [APP_TX_DATA_SIZE] __ALIGN_END ;
 #else 
 __ALIGN_BEGIN uint8_t __CCMRAM__ APP_Tx_Buffer[APP_TX_DATA_SIZE] __ALIGN_END ;
 #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
  
-
-
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-    #pragma data_alignment=4   
-  #endif
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 __ALIGN_BEGIN uint8_t CmdBuff[CDC_CMD_PACKET_SZE] __ALIGN_END ;
 
 volatile uint16_t APP_Tx_ptr_in  = 0;
@@ -490,7 +467,9 @@ static uint8_t  usbd_cdc_Setup (void  *pdev,
       if( (req->wValue >> 8) == CDC_DESCRIPTOR_TYPE)
       {
         uint8_t  *pbuf;
+
 #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+		/* XXX - trouble here, where is this? */
         pbuf = usbd_cdc_Desc;   
 #else
         pbuf = usbd_cdc_CfgDesc + 9 + (9 * USBD_ITF_MAX_NUM);
@@ -718,11 +697,11 @@ static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length)
   * @retval pointer to descriptor buffer
   */
 #ifdef USE_USB_OTG_HS 
--- static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
--- {
---   *length = sizeof (usbd_cdc_OtherCfgDesc);
---   return usbd_cdc_OtherCfgDesc;
--- }
+static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
+{
+  *length = sizeof (usbd_cdc_OtherCfgDesc);
+  return usbd_cdc_OtherCfgDesc;
+}
 #endif
 
 /* THE END */

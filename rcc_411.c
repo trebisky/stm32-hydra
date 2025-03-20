@@ -440,13 +440,20 @@ rcc_bus_init ( void )
 	rp->ahb2_e |= USB_ENABLE;
 	rp->ahb2_elp |= USB_ENABLE;
 
+	/* They say this bit must be cleared when the
+	 * HS usb is used in FS mode.
+	 */
+#define USB_HS_ULPI_ENABLE 0x40000000
+
 	/* This is the additional HS OTG USB,
 	 * which is present in the F429 and is the
 	 * one being used on the Discovery board.
 	 * first the clock, then the clock in low power.
 	 */
 	rp->ahb1_e |= USB_HS_ENABLE;
+	rp->ahb1_e &= ~USB_HS_ULPI_ENABLE;
 	rp->ahb1_elp |= USB_HS_ENABLE;
+	rp->ahb1_elp &= ~USB_HS_ULPI_ENABLE;
 
 	rp->apb2_e |= UART1_ENABLE;
 	rp->apb2_e |= UART3_ENABLE;
@@ -549,6 +556,10 @@ rcc_show ( void )
     printf ( "%s cpu running at %d Hz\n", get_chip_name(), get_cpu_hz() );
     printf ( " Pclk1 (slow) = %d Hz\n", get_pclk1() );
     printf ( " Pclk2 (fast) = %d Hz\n", get_pclk2() );
+
+	// both are zero
+	// printf ( " RCC ahb1 reset = %X\n", rp->ahb1_r );
+	// printf ( " RCC ahb2 reset = %X\n", rp->ahb2_r );
 }
 
 /* THE END */
