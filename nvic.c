@@ -34,9 +34,17 @@ struct nvic {
 
 #define NVIC_BASE	((struct nvic *) 0xe000e100)
 
+// For an F407 I define both 411 and 407
+// Maybe we should just set the limit to 91 for
+// all chips and be done with it?
+
 #ifdef CHIP_F103
  #define NUM_IRQ	60
-#else
+#endif
+
+#if defined(CHIP_F407) || defined(CHIP_F429)
+ #define NUM_IRQ	91
+#else	/* just F411 */
  #define NUM_IRQ	68
 #endif
 
@@ -51,6 +59,7 @@ nvic_init ( void )
 	// Be sure the serial IO system is initialized
 	//  before printing from here.
 	// show_reg ( "nvic stir", &np->stir );
+	printf ( "Nvic initialized with %d IRQ\n", NUM_IRQ );
 }
 
 void
@@ -58,8 +67,10 @@ nvic_enable ( int irq )
 {
 	struct nvic *np = NVIC_BASE;
 
-	if ( irq >= NUM_IRQ )
+	if ( irq >= NUM_IRQ ) {
+		printf ( "Nvic, IRQ %d out of range\n", irq );
 	    return;
+	}
 
 	np->iser[irq/32] = 1 << (irq%32);
 }

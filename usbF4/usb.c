@@ -31,6 +31,7 @@ gpio_usb_init ( void )
         gpio_usb_pin_setup ( GPIOA, 12 );   /* A12 - D+ (DP) */
 
 		/* This is the HS controller on the F429 discovery board
+		 *  as well as on the F407 Olimex E407 board
 		 * We just go ahead and configure these pins regardless
 		 * (lazy for now anyway) even if we aren't going to use them.
 		 */
@@ -62,14 +63,18 @@ usb_init (void)
 
         gpio_usb_init ();
 
+// #if defined(CHIP_F429) | defined(CHIP_F407)
+// #define USB_HS
 
-#ifdef CHIP_F429
+#ifdef USB_HS
+	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
       USBD_Init(&USB_OTG_dev,
             USB_OTG_HS_CORE_ID,
             &USR_desc,
             &USBD_CDC_cb,
             &USR_cb);
 #else
+	  printf ( "Initialize FS usb core with IRQ %d\n", IRQ_USB_FS );
       USBD_Init(&USB_OTG_dev,
             USB_OTG_FS_CORE_ID,
             &USR_desc,
@@ -113,7 +118,9 @@ void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 // static int usb_debug_mask = DM_READ1 | DM_ENUM | DM_EVENT;
 // static int usb_debug_mask = DM_ENUM | DM_EVENT;
 // static int usb_debug_mask = DM_READ1;
-static int usb_debug_mask = 0;
+// static int usb_debug_mask = DM_ORIG;
+static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
+// static int usb_debug_mask = 0;
 
 void
 usb_debug ( int select, char *fmt, ... )
@@ -247,6 +254,9 @@ usb_hs_irq_handler ( void )
 	USBD_OTG_ISR_Handler (&USB_OTG_dev);
 }
 
+/* This and the above are called straight from
+ * locore_411.s
+ */
 void
 usb_irq_handler ( void )
 {

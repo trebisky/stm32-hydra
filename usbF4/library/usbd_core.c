@@ -75,7 +75,7 @@ void USBD_Init(USB_OTG_CORE_HANDLE *pdev,
   USBD_DeInit(pdev);
 #endif
   
-  /*Register class and user callbacks */
+  /* Register class and user callbacks */
   pdev->dev.class_cb = class_cb;
   pdev->dev.usr_cb = usr_cb;  
   pdev->dev.usr_device = pDevice;    

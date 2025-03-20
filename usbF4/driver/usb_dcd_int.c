@@ -157,19 +157,43 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
   USB_OTG_GINTSTS_TypeDef  gintr_status;
   uint32_t retval = 0;
 
+#ifdef notdef
+  /* tjt 3-20-2025
+   * The idea here is to clean up debug and eliminate messages when
+   * it is only SOF interrupts, but rather than set this up so nicely
+   * like this on every call, I just cheat.
+   */
+  USB_OTG_GINTSTS_TypeDef  sof_status;
+  sof_status.d32 = 0;
+  sof_status.b.sofintr = 1;
+#endif
+
+#define	SOF_ONLY	0x8
+
   // Bad idea, we get non-stop SOF interrupts
-  // usb_debug ( DM_ORIG, "OTG ISR called" );
+  // usb_debug ( DM_ORIG, "OTG ISR called\n" );
+  // printf ( "OTG ISR called\n" );
+
+  /* Count all interrupts */
   ++tusb_int_count;
   
   if (USB_OTG_IsDeviceMode(pdev)) /* ensure that we are in device mode */
   {
     gintr_status.d32 = USB_OTG_ReadCoreItr(pdev);
-    if ( !gintr_status.d32 ) { /* avoid spurious interrupt */
-      return 0;
+
+	/* Clean up debug.
+	 * This also would get swamped by endless SOF interrupts at 1000 Hz
+	 * Many times we get SOF along with other bits set, and we don't
+	 * want to ignore those.
+	 */
+	if ( gintr_status.d32 != SOF_ONLY ) {
+		usb_debug ( DM_ORIG, "OTG ISR status: %X\n", gintr_status.d32 );
+		//printf ( "OTG ISR status: %X\n", gintr_status.d32 );
+		++tusb_xof_count;
     }
 
-    if ( ! gintr_status.b.sofintr )
-		++tusb_xof_count;
+    if ( ! gintr_status.d32 ) /* avoid spurious interrupt */
+      return 0;
     
     if (gintr_status.b.outepintr) {
       usb_debug ( DM_ORIG, "USBint - OUT Endpoint\n" );

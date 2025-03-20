@@ -55,6 +55,7 @@
 #define SEND_BREAK                              0x23
 #define NO_CMD                                  0xFF
 
+/* tjt - this structure is used only in usbd_cdc_core.c */
 typedef struct _CDC_IF_PROP
 {
   uint16_t (*pIf_Init)     (void *pdev);   

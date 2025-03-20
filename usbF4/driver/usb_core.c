@@ -208,6 +208,8 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
 #endif 
     
   }
+
+	printf ( "USB base address: %X\n", baseAddress );
   
   pdev->regs.GREGS = (USB_OTG_GREGS *)(baseAddress + \
     USB_OTG_CORE_GLOBAL_REGS_OFFSET);
