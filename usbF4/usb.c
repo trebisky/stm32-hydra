@@ -62,10 +62,26 @@ usb_init (void)
 
 #define IRQ_USB_WAKEUP  42
 #define IRQ_USB_FS      67
-#define IRQ_USB_HS      77
+
+#define IRQ_USB_HS_EP1_OUT      74
+#define IRQ_USB_HS_EP1_IN       75
+#define IRQ_USB_HS_WAKEUP       76
+#define IRQ_USB_HS      		77
+
+#ifdef notdef
+usb_hs_ep1_out      /* IRQ 74 */
+usb_hs_ep1_in       /* IRQ 75 */
+usb_hs_wakeup       /* IRQ 76 */
+usb_hs_irq_handler  /* IRQ 77 */
+#endif
+
 
 		nvic_enable ( IRQ_USB_WAKEUP );
         nvic_enable ( IRQ_USB_FS );
+
+		nvic_enable ( IRQ_USB_HS_EP1_OUT );
+		nvic_enable ( IRQ_USB_HS_EP1_IN );
+		nvic_enable ( IRQ_USB_HS_WAKEUP );
         nvic_enable ( IRQ_USB_HS );
 
         gpio_usb_init ();
@@ -250,6 +266,12 @@ RESULT usbPowerOff(void)
 }
 #endif
 
+/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+/* Interrupt handlers below here.
+ * all called from locore_411.s
+ */
+
 /* The same handler for FS and HS -- for now.
  * Someday if we have both USB devices active
  * at the same time, they will both come here and
@@ -257,6 +279,26 @@ RESULT usbPowerOff(void)
  * Also the HS controller uses some other vectors
  * for its special EP-1 interrupts.
  */
+
+void
+usb_irq_handler ( void )
+{
+	// printf ( "FS interrupt\n" );
+	USBD_OTG_ISR_Handler ( &USB_OTG_dev );
+}
+
+void
+usb_wakeup_handler ( void )
+{
+	printf ( "USB FS wakeup interrupt\n" );
+}
+
+#ifdef notdef
+usb_hs_ep1_out      /* IRQ 74 */
+usb_hs_ep1_in       /* IRQ 75 */
+usb_hs_wakeup       /* IRQ 76 */
+#endif
+
 void
 usb_hs_irq_handler ( void )
 {
@@ -264,31 +306,23 @@ usb_hs_irq_handler ( void )
 	USBD_OTG_ISR_Handler (&USB_OTG_dev);
 }
 
-/* This and the above are called straight from
- * locore_411.s
- */
 void
-usb_irq_handler ( void )
+usb_hs_ep1_out ( void )
 {
-	// printf ( "FS interrupt\n" );
-	USBD_OTG_ISR_Handler (&USB_OTG_dev);
+	// printf ( "USB HS ep1 out interrupt\n" );
+	(void) USBD_OTG_EP1OUT_ISR_Handler ( &USB_OTG_dev );
+}
+void
+usb_hs_ep1_in ( void )
+{
+	// printf ( "USB HS ep1 in interrupt\n" );
+	(void) USBD_OTG_EP1IN_ISR_Handler ( &USB_OTG_dev );
 }
 
 void
-usb_wakeup_handler ( void )
+usb_hs_wakeup ( void )
 {
-	printf ( "USB wakeup interrupt\n" );
+	printf ( "USB HS wakeup interrupt\n" );
 }
-
-#ifndef HYDRA
-void __irq_usb_fs(void)
-{
-	USBD_OTG_ISR_Handler (&USB_OTG_dev);
-}
-
-void x__irq_usbwakeup(void)
-{
-}
-#endif
 
 /* THE END */

@@ -106,10 +106,10 @@
 .word	bogus		/* IRQ 71 */
 .word	bogus		/* IRQ 72 */
 .word	bogus		/* IRQ 73 */
-.word	bogus		/* IRQ 74 */
-.word	bogus		/* IRQ 75 */
-.word	bogus		/* IRQ 76 */
-.word	usb_hs_irq_handler		/* IRQ 77 */
+.word	usb_hs_ep1_out		/* IRQ 74 */
+.word	usb_hs_ep1_in		/* IRQ 75 */
+.word	usb_hs_wakeup		/* IRQ 76 */
+.word	usb_hs_irq_handler	/* IRQ 77 */
 
 
 .section .text
