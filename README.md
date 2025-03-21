@@ -1,4 +1,4 @@
-# Hydra for stm32 boards
+# Hydra for STM32 boards
 
 This began back in 12-2-2020
 by taking the files from my stm32f411/delay "bare metal" demo and going from there.
