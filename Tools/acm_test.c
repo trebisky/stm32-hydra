@@ -10,7 +10,8 @@
 #include <unistd.h>
 #include <time.h>
 
-#define TEST_DEVICE	"/dev/ttyACM0"
+// #define TEST_DEVICE	"/dev/ttyACM0"
+#define TEST_DEVICE	"/dev/ttyACM1"
 
 static void
 error ( char *msg )

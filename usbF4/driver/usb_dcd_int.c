@@ -64,6 +64,8 @@ uint32_t USBD_OTG_EP1OUT_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
   
   doepint.d32 = USB_OTG_READ_REG32(&pdev->regs.OUTEP_REGS[1]->DOEPINT);
   doepint.d32&= USB_OTG_READ_REG32(&pdev->regs.DREGS->DOUTEP1MSK);
+
+  usb_debug ( DM_ORIG, "OTG EP1 OUT ISR status: %X\n", doepint.d32 );
   
   /* Transfer complete */
   if ( doepint.b.xfercompl )
@@ -107,7 +109,10 @@ uint32_t USBD_OTG_EP1IN_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
   msk = USB_OTG_READ_REG32(&pdev->regs.DREGS->DINEP1MSK);
   emp = USB_OTG_READ_REG32(&pdev->regs.DREGS->DIEPEMPMSK);
   msk |= ((emp >> 1 ) & 0x1) << 7;
+
   diepint.d32  = USB_OTG_READ_REG32(&pdev->regs.INEP_REGS[1]->DIEPINT) & msk;  
+
+  usb_debug ( DM_ORIG, "OTG EP1 IN ISR status: %X\n", diepint.d32 );
   
   if ( diepint.b.xfercompl )
   {
@@ -594,7 +599,7 @@ static uint32_t DCD_HandleRxStatusQueueLevel_ISR(USB_OTG_CORE_HANDLE *pdev)
     /* Copy the setup packet received in FIFO into the setup buffer in RAM */
 	usb_debug ( DM_ORIG, "Endpoint %d read SETUP packet %d bytes from FIFO\n", status.b.epnum, status.b.bcnt );
     USB_OTG_ReadPacket(pdev , pdev->dev.setup_packet, 8);
-	// usb_dump ( DM_ENUM, "Rx setup", pdev->dev.setup_packet, 8 );
+	usb_dump ( DM_ENUM, "Rx setup", pdev->dev.setup_packet, 8 );
     ep->xfer_count += status.b.bcnt;
     break;
   default:
