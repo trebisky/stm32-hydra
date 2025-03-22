@@ -44,10 +44,11 @@ struct uart {
         volatile unsigned int gtp;     /* 18 - guard time and prescaler */
 };
 
-/* These are different for the F411
- * Well, USART1 has the same base, USART2 is different
+/* These are different for the F411 than for the F103
+ * Well, USART2 has the same base, USART1 is different
  * and then the RM doesn't give a USART3!
  * We are given USART6, which I call USART3.
+ * XXX the above needs to be checked.
  */
 
 #ifdef CHIP_F411
@@ -196,16 +197,6 @@ serial_begin ( int uart, int baud )
 	else
 	    baud_val = get_pclk2() / baud;
 
-#ifdef notdef
-/* We fix this now in rcc_411.c and give the right bus clock
- */
-/* Without this, we get 38400, with it we get 115200
- * So pclk2 on the F429 must be 32 Mhz
- * (it is 96 Mhz on the F411)
- */
-	baud_val /= 3;
-#endif
-
 	up->baud = baud_val;
 
 	return uart;
@@ -314,6 +305,18 @@ serial_puts ( int uart, char *str )
  * from anywhere without passing fd all over the world.
  */
 
+#ifdef notdef
+/* The Olimex P405 uses uart2 for the console */
+#ifdef CHIP_F405
+static int std_serial = UART2;
+#else
+static int std_serial = UART1;
+#endif
+#endif
+
+/* The real action is in init.c
+ * the console serial is chosen there.
+ */
 static int std_serial = UART1;
 
 void
@@ -322,15 +325,17 @@ set_std_serial ( int arg )
 	std_serial = arg;
 }
 
+#ifdef notdef
 /* Common shortcut */
 void
 console_init ( void )
 {
 	int console;
 
-	console = serial_begin ( UART1, 115200 );
-	set_std_serial ( console );
+	console = serial_begin ( std_serial, 115200 );
+	// set_std_serial ( console );
 }
+#endif
 
 int
 getc ( void )

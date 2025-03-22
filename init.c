@@ -32,8 +32,11 @@ setup_default_serial ( void )
 {
 		int fd;
 
+#ifdef CHIP_F405
+        fd = serial_begin ( UART2, 115200 );
+#else
         fd = serial_begin ( UART1, 115200 );
-        // fd = serial_begin ( UART2, 115200 );
+#endif
         set_std_serial ( fd );
 }
 

@@ -335,9 +335,9 @@ USB_OTG_STS USB_OTG_CoreInit(USB_OTG_CORE_HANDLE *pdev)
     USB_OTG_WRITE_REG32 (&pdev->regs.GREGS->GCCFG, gccfg.d32);
     board_mDelay(20);
   }
+
   /* case the HS core is working in FS mode */
-  if(pdev->cfg.dma_enable == 1)
-  {
+  if(pdev->cfg.dma_enable == 1) {
     
     ahbcfg.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GAHBCFG);
     ahbcfg.b.hburstlen = 5; /* 64 x 32-bits*/
@@ -345,6 +345,7 @@ USB_OTG_STS USB_OTG_CoreInit(USB_OTG_CORE_HANDLE *pdev)
     USB_OTG_WRITE_REG32(&pdev->regs.GREGS->GAHBCFG, ahbcfg.d32);
     
   }
+
   /* initialize OTG features */
 #ifdef  USE_OTG_MODE
   usbcfg.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GUSBCFG);
@@ -354,15 +355,19 @@ USB_OTG_STS USB_OTG_CoreInit(USB_OTG_CORE_HANDLE *pdev)
   USB_OTG_EnableCommonInt(pdev);
 #endif
   
+/* XXX - who knows what this is all about */
 #if defined (STM32F446xx) || defined (STM32F469_479xx)
   usbcfg.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GUSBCFG);
   usbcfg.b.srpcap = 1;
+
+  /* XXX - this is the special part */
   /*clear sdis bit in dctl */
   dctl.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DCTL);
   /* Connect device */
   dctl.b.sftdiscon  = 0;
   USB_OTG_WRITE_REG32(&pdev->regs.DREGS->DCTL, dctl.d32);
   dctl.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DCTL);
+
   USB_OTG_WRITE_REG32(&pdev->regs.GREGS->GUSBCFG, usbcfg.d32);
   USB_OTG_EnableCommonInt(pdev);
 #endif
@@ -1182,7 +1187,6 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
 #ifdef USB_OTG_FS_CORE
   if(pdev->cfg.coreID == USB_OTG_FS_CORE_ID  )
   {  
-    
     /* Set Full speed phy */
     USB_OTG_InitDevSpeed (pdev , USB_OTG_SPEED_PARAM_FULL);
     
@@ -1267,9 +1271,11 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
     USB_OTG_WRITE_REG32( &pdev->regs.GREGS->DIEPTXF[4], txfifosize.d32 );
   }
 #endif  
+
   /* Flush the FIFOs */
   USB_OTG_FlushTxFifo(pdev , 0x10); /* all Tx FIFOs */
   USB_OTG_FlushRxFifo(pdev);
+
   /* Clear all pending Device Interrupts */
   USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DIEPMSK, 0 );
   USB_OTG_WRITE_REG32( &pdev->regs.DREGS->DOEPMSK, 0 );

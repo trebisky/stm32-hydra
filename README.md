@@ -22,6 +22,7 @@ project.  Right now Hydra runs on:
 1. Blue Pill STM32F103 boards (and Maple)
 1. Black Pill STM32F411 boards
 1. Olimex STM32-E407 board
+1. Olimex STM32-P405 board
 1. STM32F429 discovery kit board
 
 Why "Hydra" -- well, why not.  It seemed like a good name, and there are a lot

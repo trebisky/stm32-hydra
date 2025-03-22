@@ -264,6 +264,7 @@ gpio_uart_init ( int uart )
 	    // gpio_af ( GPIOB, 6, 7 )	/* Tx */
 	    // gpio_af ( GPIOB, 7, 7 );	/* Rx */
 	} else if ( uart == UART2 ) {
+		/* Olimex P405 uses this as the console */
 	    gpio_af ( GPIOA, 2, 7 );	/* Tx */
 	    gpio_mode ( GPIOA, 2, MODE_AF );
 	    gpio_uart ( GPIOA, 2 );

@@ -397,6 +397,10 @@ cpu_clock_init ( void )
 #ifdef CHIP_F429
 	flash_init ( 5 );
 	cpu_clock_init_pll_f429 ();
+#elif CHIP_F405
+	// Same as the F429 here
+	flash_init ( 5 );
+	cpu_clock_init_pll_f429 ();
 #elif CHIP_F407
 	flash_init ( 5 );
 	cpu_clock_init_pll_f407 ();
@@ -480,16 +484,24 @@ rcc_init ( void )
  * The chip fires up using it.
  */
 
-/* for F407, correct for UART1 anyway */
-/* XXX this will need work, this is a way to get the baud
- * rate we want when using the F411 setup.
+/* for F407, my Olimex E407 board
  * The E407 Olimex board I have has a 12 Mhz crystal.
  */
 #ifdef CHIP_F407
-/* XXX */
 #define CPU_NAME        "F407"
 #define PCLK1           42000000
 #define PCLK2           84000000    // used by UART1
+#define CPU_HZ          168000000
+#endif
+
+/* This is my Olimex P405 board
+ * It has an 8 Mhz crystal, so the setup is the same
+ * as for the F429.  But the serial is on UART2.
+ */
+#ifdef CHIP_F405
+#define CPU_NAME        "F405"
+#define PCLK1           42000000
+#define PCLK2           84000000
 #define CPU_HZ          168000000
 #endif
 
@@ -501,7 +513,7 @@ rcc_init ( void )
 #endif
 
 /* Correct for F411 at 96 Mhz */
-#if defined(CHIP_F411) && !defined(CHIP_F429) && !defined(CHIP_F407)
+#if defined(CHIP_F411) && !defined(CHIP_F429) && !defined(CHIP_F407) && !defined(CHIP_F405)
 #define CPU_NAME        "F411"
 #define PCLK1           48000000
 #define PCLK2           96000000

@@ -418,19 +418,22 @@ xfer_test ( void )
 	}
 }
 
+void
+flood ( void )
+{
+		for ( ;; )
+			putc ( 'V' );
+}
+
 /* This is the first "user" C code.
  * it is called from stm_init() in init.c
  */
 void
 startup ( void )
 {
-	int fd;
+	int fd = 999;
 
-#ifdef notdef
-	fd = serial_begin ( UART1, 115200 );
-	// fd = serial_begin ( UART2, 115200 );
-	set_std_serial ( fd );
-#endif
+	// flood ();
 
 	puts ( "\n" );
 	puts ( "******************************\n" );

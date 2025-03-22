@@ -8,7 +8,8 @@
 # "blue" is my STM32F103 "blue pill" board (or olimex or maple)
 
 #TARGET = e407
-TARGET = disco
+#TARGET = disco
+TARGET = p405
 #TARGET = black
 #TARGET = blue
 
@@ -39,6 +40,13 @@ ifeq ($(TARGET),e407)
 	ARM_CPU = cortex-m4
 	LDS_FILE=f411.lds
 	OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
+	OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
+else ifeq ($(TARGET),p405)
+	CHIPDEFS = -DCHIP_F411 -DCHIP_F405
+	ARM_CPU = cortex-m4
+	LDS_FILE=f411.lds
+	OBJS = locore_411.o $(BASE_OBJS) rcc_411.o gpio_411.o $(USB_OBJS)
+	#OCDCFG = -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 	OCDCFG = -f /usr/share/openocd/scripts/interface/stlink.cfg -f /usr/share/openocd/scripts/target/stm32f4x.cfg
 else ifeq ($(TARGET),disco)
 	CHIPDEFS = -DCHIP_F411 -DCHIP_F429

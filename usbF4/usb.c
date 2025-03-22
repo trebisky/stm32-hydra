@@ -140,8 +140,8 @@ void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 // static int usb_debug_mask = DM_ENUM | DM_EVENT;
 // static int usb_debug_mask = DM_READ1;
 // static int usb_debug_mask = DM_ORIG;
-static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
-// static int usb_debug_mask = 0;
+// static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
+static int usb_debug_mask = 0;
 
 void
 usb_debug ( int select, char *fmt, ... )
@@ -308,15 +308,19 @@ usb_hs_irq_handler ( void )
 
 void
 usb_hs_ep1_out ( void )
-{
+{ 
+#ifdef USE_USB_OTG_HS
 	// printf ( "USB HS ep1 out interrupt\n" );
 	(void) USBD_OTG_EP1OUT_ISR_Handler ( &USB_OTG_dev );
+#endif
 }
 void
 usb_hs_ep1_in ( void )
 {
+#ifdef USE_USB_OTG_HS
 	// printf ( "USB HS ep1 in interrupt\n" );
 	(void) USBD_OTG_EP1IN_ISR_Handler ( &USB_OTG_dev );
+#endif
 }
 
 void
