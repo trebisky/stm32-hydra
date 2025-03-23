@@ -14,8 +14,9 @@
 #define __USBD_CORE_H
 
 #include <driver/usb_dcd.h>
+
 #include "usbd_def.h"
-#include <vcp/usbd_conf.h>
+// #include <vcp/usbd_conf.h>
 
 typedef enum {
   USBD_OK   = 0,

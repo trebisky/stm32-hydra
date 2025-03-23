@@ -14,6 +14,7 @@
 #define __USB_DESC_H
 
 #include <library/usbd_def.h>
+#include <vcp/usbd_conf.h>
 
 #define USB_DEVICE_DESCRIPTOR_TYPE              0x01
 #define USB_CONFIGURATION_DESCRIPTOR_TYPE       0x02

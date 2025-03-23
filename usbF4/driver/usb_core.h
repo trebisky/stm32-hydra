@@ -14,7 +14,8 @@
 #define __USB_CORE_H__
 
 #include <libmaple_types.h>
-#include <vcp/usbd_conf.h>
+// #include <vcp/usbd_conf.h>
+#include <usb_conf.h>
 #include "usb_regs.h"
 #include "usb_defines.h"
 

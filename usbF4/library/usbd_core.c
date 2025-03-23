@@ -15,7 +15,9 @@
 #include <library/usbd_core.h>
 #include <library/usbd_req.h>
 #include <library/usbd_ioreq.h>
+
 #include <driver/usb_dcd_int.h>
+#include <driver/usb_dcd.h>
 
 static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev);
 static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);

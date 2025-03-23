@@ -1,24 +1,13 @@
-#ifdef notdef
-#include <STM32_USB_Device_Library/Class/cdc/inc/usbd_cdc_core.h>
-#include <STM32_USB_Device_Library/Core/inc/usbd_usr.h>
-#include <VCP/usbd_desc.h>
-#include "usb.h"
-#include <libmaple/gpio.h>
-#include <libmaple/rccF4.h>
-#include <VCP/usbd_cdc_vcp.h>
-#include <boards.h>
-#include <STM32_USB_OTG_Driver/inc/usb_dcd_int.h>
-#endif
-
 #include "../hydra.h"
 #include "hydra_usb.h"
 #include "usb.h"
 
 #include <stdarg.h>
 
-#include <library/usbd_usr.h>
-#include <vcp/usbd_cdc_core.h>
-#include <vcp/usbd_desc.h>
+#include "library/usbd_usr.h"
+
+#include "vcp/usbd_cdc_core.h"
+#include "vcp/usbd_desc.h"
 
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev;

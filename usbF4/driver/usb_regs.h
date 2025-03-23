@@ -13,9 +13,6 @@
 #ifndef __USB_OTG_REGS_H__
 #define __USB_OTG_REGS_H__
 
-// #include <vcp/usbd_conf.h>
-// #include <libmaple_types.h>
-
 #define USB_OTG_HS_BASE_ADDR                 0x40040000
 #define USB_OTG_FS_BASE_ADDR                 0x50000000
 
@@ -1098,5 +1095,4 @@ uint32_t Reserved5_31 :
 
 #endif //__USB_OTG_REGS_H__
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+/* THE END */

@@ -14,7 +14,6 @@
 #define __USB_CONF__H__
 
 #include <stdint.h>
-//#include "stm32f4xx.h"
 
 #define     __IO    volatile
 

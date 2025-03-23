@@ -13,7 +13,7 @@
 #ifndef USB_DCD_INT_H__
 #define USB_DCD_INT_H__
 
-#include "usb_dcd.h"
+// #include "usb_dcd.h"
 
 typedef struct _USBD_DCD_INT
 {

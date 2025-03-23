@@ -13,7 +13,7 @@
 #ifndef __USBD_DEF_H
 #define __USBD_DEF_H
 
-#include <vcp/usbd_conf.h>
+// #include <vcp/usbd_conf.h>
 
 #ifndef NULL
 #define NULL    0

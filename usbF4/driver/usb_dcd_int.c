@@ -11,10 +11,11 @@
   */
 
 #include "hydra_usb.h"
+#include "libmaple_types.h"
 
-#include <libmaple_types.h>
 #include "usb_regs.h"
 #include "usb_defines.h"
+
 #include "usb_dcd.h"
 #include "usb_dcd_int.h"
 

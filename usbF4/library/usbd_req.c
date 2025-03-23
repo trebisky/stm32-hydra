@@ -10,9 +10,15 @@
   ******************************************************************************
   */ 
 
-#include <library/usbd_req.h>
-#include <library/usbd_ioreq.h>
-#include <vcp/usbd_desc.h>
+#include "usbd_def.h"
+#include "usbd_core.h"
+#include "usbd_req.h"
+#include "usbd_ioreq.h"
+
+/* XXX */
+#include "vcp/usbd_desc.h"
+#include  "vcp/usbd_conf.h"
+
 
 
 #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
@@ -787,4 +793,4 @@ static uint8_t USBD_GetLen(uint8_t *buf)
     return len;
 }
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

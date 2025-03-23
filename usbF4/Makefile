@@ -16,7 +16,9 @@ LIBR_OBJS = usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
 # Files we no longer need, but keep around for reference
 OLD_EXTRA = misc.c usb_bsp.c
 OLD_EXTRA_H = core_cm4.h  core_cmInstr.h misc.h  nvic.h  usb_bsp.h  usb_conf.h
+
 OBJS = $(BASE_OBJS) $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
+#OBJS = $(BASE_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
 
 all: ../usbf4.o
 
