@@ -11,107 +11,10 @@
 #include "vcp/usbd_desc.h"
 #include "library/usbd_req.h"
 
-int
-class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *req,
-		uint8_t **apbuf, uint16_t *alen )
-{
-  uint16_t len;
-  uint8_t *pbuf;
-
-  usb_debug ( DM_DESC, "Get Descriptor: %d (wLength = %d)\n", type, req->wLength );
-
-  switch ( type ) {
-	  case USB_DESC_TYPE_DEVICE:
-		  pbuf = pdev->dev.usr_device->GetDeviceDescriptor(pdev->cfg.speed, &len);
-		  if ((req->wLength == 64) ||( pdev->dev.device_status == USB_OTG_DEFAULT))
-			  len = 8;
-		  break;
-    
-	  case USB_DESC_TYPE_CONFIGURATION:
-		  usb_debug ( DM_DESC, " ** getting CDC config descriptor **\n" );
-		  pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
-#ifdef USB_OTG_HS_CORE
-		  if((pdev->cfg.speed == USB_OTG_SPEED_FULL )&& (pdev->cfg.phy_itface  == USB_OTG_ULPI_PHY)) {
-			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
-		  }
-#endif  
-		  pbuf[1] = USB_DESC_TYPE_CONFIGURATION;
-
-		  pdev->dev.pConfig_descriptor = pbuf;    
-		  break;
-    
-	  case USB_DESC_TYPE_STRING:
-		  switch ((uint8_t)(req->wValue)) {
-			  case USBD_IDX_LANGID_STR:
-				  pbuf = pdev->dev.usr_device->GetLangIDStrDescriptor(pdev->cfg.speed, &len);        
-				  break;
-			  case USBD_IDX_MFC_STR:
-				  pbuf = pdev->dev.usr_device->GetManufacturerStrDescriptor(pdev->cfg.speed, &len);
-				  break;
-			  case USBD_IDX_PRODUCT_STR:
-				  pbuf = pdev->dev.usr_device->GetProductStrDescriptor(pdev->cfg.speed, &len);
-				  break;
-			  case USBD_IDX_SERIAL_STR:
-				  pbuf = pdev->dev.usr_device->GetSerialStrDescriptor(pdev->cfg.speed, &len);
-				  break;
-			  case USBD_IDX_CONFIG_STR:
-				  pbuf = pdev->dev.usr_device->GetConfigurationStrDescriptor(pdev->cfg.speed, &len);
-				  break;
-			  case USBD_IDX_INTERFACE_STR:
-				  pbuf = pdev->dev.usr_device->GetInterfaceStrDescriptor(pdev->cfg.speed, &len);
-				  break;
-			  default:
-#ifdef USB_SUPPORT_USER_STRING_DESC
-				  pbuf = pdev->dev.class_cb->GetUsrStrDescriptor(pdev->cfg.speed, (req->wValue) , &len);
-				  break;
-#else      
-				  return 0;
-#endif
-		  }
-		  break;
-
-	  case USB_DESC_TYPE_DEVICE_QUALIFIER:                   
-#ifdef USB_OTG_HS_CORE
-		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
-			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
-            
-			  USBD_DeviceQualifierDesc[4]= pbuf[14];
-			  USBD_DeviceQualifierDesc[5]= pbuf[15];
-			  USBD_DeviceQualifierDesc[6]= pbuf[16];
-      
-			  pbuf = USBD_DeviceQualifierDesc;
-			  len  = USB_LEN_DEV_QUALIFIER_DESC;
-			  break;
-		  } else {
-		  	  return 0;
-		  }
-#else
-	  return 0;
-#endif    
-
-	  case USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION:
-#ifdef USB_OTG_HS_CORE   
-		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
-			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
-			  pbuf[1] = USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION;
-			  break; 
-		  } else {
-			  return 0;
-		  }
-#else
-		  return 0;
-#endif     
-
-	  default: 
-	  	  return 0;
-  }		/* end of big switch */
-
-  *apbuf = pbuf;
-  *alen = len;
-  return 1;
-}
-
-/* ---------------------- */
+/* =========================================================================== */
+/* =========================================================================== */
+/* =========================================================================== */
+/* The descriptor definitions come first */
 
 /* USB CDC device Configuration Descriptor */
 __ALIGN_BEGIN static uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
@@ -307,6 +210,118 @@ __ALIGN_BEGIN static uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __A
 };
 #endif /* USE_USB_OTG_HS  */
 
+/* =========================================================================== */
+/* =========================================================================== */
+
+int
+class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *req,
+		uint8_t **apbuf, uint16_t *alen )
+{
+  uint16_t len;
+  uint8_t *pbuf;
+
+  usb_debug ( DM_DESC, "Get Descriptor: %d (wLength = %d)\n", type, req->wLength );
+
+  switch ( type ) {
+	  case USB_DESC_TYPE_DEVICE:
+		  pbuf = pdev->dev.usr_device->GetDeviceDescriptor(pdev->cfg.speed, &len);
+		  if ((req->wLength == 64) ||( pdev->dev.device_status == USB_OTG_DEFAULT))
+			  len = 8;
+		  break;
+    
+	  case USB_DESC_TYPE_CONFIGURATION:
+		  usb_debug ( DM_DESC, " ** getting CDC config descriptor **\n" );
+		  // pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
+		  pbuf = usbd_cdc_CfgDesc;
+		  len = sizeof (usbd_cdc_CfgDesc);
+/* This only would be used if we are actually in full speed mode
+ * with an external full speed Phy.
+ */
+#ifdef USB_OTG_HS_CORE
+		  if ( (pdev->cfg.speed == USB_OTG_SPEED_FULL) && (pdev->cfg.phy_itface  == USB_OTG_ULPI_PHY) ) {
+			  // pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
+			  len = sizeof (usbd_cdc_OtherCfgDesc);
+			  pbuf = usbd_cdc_OtherCfgDesc;
+		  }
+#endif  
+		  pbuf[1] = USB_DESC_TYPE_CONFIGURATION;
+
+		  pdev->dev.pConfig_descriptor = pbuf;    
+		  break;
+    
+	  case USB_DESC_TYPE_STRING:
+		  switch ((uint8_t)(req->wValue)) {
+			  case USBD_IDX_LANGID_STR:
+				  pbuf = pdev->dev.usr_device->GetLangIDStrDescriptor(pdev->cfg.speed, &len);        
+				  break;
+			  case USBD_IDX_MFC_STR:
+				  pbuf = pdev->dev.usr_device->GetManufacturerStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_PRODUCT_STR:
+				  pbuf = pdev->dev.usr_device->GetProductStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_SERIAL_STR:
+				  pbuf = pdev->dev.usr_device->GetSerialStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_CONFIG_STR:
+				  pbuf = pdev->dev.usr_device->GetConfigurationStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_INTERFACE_STR:
+				  pbuf = pdev->dev.usr_device->GetInterfaceStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  default:
+#ifdef USB_SUPPORT_USER_STRING_DESC
+				  pbuf = pdev->dev.class_cb->GetUsrStrDescriptor(pdev->cfg.speed, (req->wValue) , &len);
+				  break;
+#else      
+				  return 0;
+#endif
+		  }
+		  break;
+
+	  case USB_DESC_TYPE_DEVICE_QUALIFIER:                   
+#ifdef USB_OTG_HS_CORE
+		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
+			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
+            
+			  USBD_DeviceQualifierDesc[4]= pbuf[14];
+			  USBD_DeviceQualifierDesc[5]= pbuf[15];
+			  USBD_DeviceQualifierDesc[6]= pbuf[16];
+      
+			  pbuf = USBD_DeviceQualifierDesc;
+			  len  = USB_LEN_DEV_QUALIFIER_DESC;
+			  break;
+		  } else {
+		  	  return 0;
+		  }
+#else
+	  return 0;
+#endif    
+
+	  case USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION:
+#ifdef USB_OTG_HS_CORE   
+		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
+			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
+			  pbuf[1] = USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION;
+			  break; 
+		  } else {
+			  return 0;
+		  }
+#else
+		  return 0;
+#endif     
+
+	  default: 
+	  	  return 0;
+  }		/* end of big switch */
+
+  *apbuf = pbuf;
+  *alen = len;
+  return 1;
+}
+
+/* =========================================================================== */
+/* =========================================================================== */
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXX */
 /* XXXXXXXXXXXXXXXXXXXXXXXXX */

@@ -69,18 +69,21 @@ static uint8_t  usbd_cdc_SOF         (void *pdev);
    CDC specific management functions
  *********************************************/
 static void Handle_USBAsynchXfer  (void *pdev);
+
+#ifdef OLDWAY
 static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length);
 
 #ifdef USE_USB_OTG_HS  
 static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
 #endif
 
+__ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
+__ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
+#endif /* OLDWAY */
+
 extern CDC_IF_Prop_TypeDef  APP_FOPS;
 extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
 
-__ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
-
-__ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
 
 __ALIGN_BEGIN static __IO uint32_t  usbd_cdc_AltSet  __ALIGN_END = 0;
 
@@ -108,6 +111,32 @@ uint8_t  USB_Tx_State = 0;
 static uint32_t cdcCmd = 0xFF;
 static uint32_t cdcLen = 0;
 
+static uint8_t  *
+bogusDesc (uint8_t speed, uint16_t *length)
+{
+	panic ( "bogusDesc" );
+}
+
+/* CDC interface class callbacks structure */
+USBD_Class_cb_TypeDef  USBD_CDC_cb = 
+{
+  usbd_cdc_Init,
+  usbd_cdc_DeInit,
+  usbd_cdc_Setup,
+  NULL,                 /* EP0_TxSent, */
+  usbd_cdc_EP0_RxReady,
+  usbd_cdc_DataIn,
+  usbd_cdc_DataOut,
+  usbd_cdc_SOF,
+  NULL,
+  NULL,     
+  bogusDesc,
+#ifdef USE_USB_OTG_HS   
+  bogusDesc
+#endif /* USE_USB_OTG_HS  */
+};
+
+#ifdef OLDWAY
 /* CDC interface class callbacks structure */
 USBD_Class_cb_TypeDef  USBD_CDC_cb = 
 {
@@ -325,6 +354,7 @@ __ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_EN
   0x00                              /* bInterval */
 };
 #endif /* USE_USB_OTG_HS  */
+#endif /* OLDWAY */
 
 /**
   * @brief  usbd_cdc_Init
@@ -459,15 +489,16 @@ static uint8_t  usbd_cdc_Setup (void  *pdev,
     switch (req->bRequest)
     {
     case USB_REQ_GET_DESCRIPTOR: 
-      if( (req->wValue >> 8) == CDC_DESCRIPTOR_TYPE)
-      {
+      if( (req->wValue >> 8) == CDC_DESCRIPTOR_TYPE) {
         uint8_t  *pbuf;
 
 #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
 		/* XXX - trouble here, where is this? */
         pbuf = usbd_cdc_Desc;   
 #else
-        pbuf = usbd_cdc_CfgDesc + 9 + (9 * USBD_ITF_MAX_NUM);
+		/* XXX */
+		panic ( "vcp/usbd_cdc_core unhappy get descriptor" );
+        // pbuf = usbd_cdc_CfgDesc + 9 + (9 * USBD_ITF_MAX_NUM);
 #endif 
         uint16_t len = MIN(USB_CDC_DESC_SIZ , req->wLength);
       
@@ -671,6 +702,7 @@ Handle_USBAsynchXfer(void *pdev)
                USB_Tx_length);
 }
 
+#ifdef OLDWAY
 /**
   * @brief  USBD_cdc_GetCfgDesc 
   *         Return configuration descriptor
@@ -698,5 +730,6 @@ static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
   return usbd_cdc_OtherCfgDesc;
 }
 #endif
+#endif /* OLDWAY */
 
 /* THE END */

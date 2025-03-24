@@ -23,8 +23,14 @@ static void fish ( void ) {
 }
 #endif
 
-
 /* ================ */
+
+void
+panic ( char *msg )
+{
+		printf ( "%s\n", msg ); 
+		spin ();
+}
 
 static int ss;
 
