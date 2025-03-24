@@ -9,7 +9,7 @@ endif
 
 #BASE_OBJS = usb.o
 #VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
-VCP_OBJS = usbd_cdc_vcp.o  usbd_desc.o
+VCP_OBJS = class.o usbd_cdc_vcp.o  usbd_desc.o
 DRIVER_OBJS = usb_core.o  usb_dcd.o  usb_dcd_int.o
 LIBR_OBJS = public.o usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
 
@@ -37,6 +37,8 @@ usbf4.o:	$(OBJS)
 #	$(CC) -o $@ -c $<
 #usb_bsp.o: vcp/usb_bsp.c
 #	$(CC) -o $@ -c $<
+class.o: vcp/class.c
+	$(CC) -o $@ -c $<
 usbd_cdc_vcp.o: vcp/usbd_cdc_vcp.c
 	$(CC) -o $@ -c $<
 usbd_desc.o: vcp/usbd_desc.c

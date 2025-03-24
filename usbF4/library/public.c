@@ -1,3 +1,7 @@
+/* --------------------
+ * public.c
+ * Tom Trebisky  3-23-2025
+ */
 #include "../hydra.h"
 #include "hydra_usb.h"
 #include "usb.h"
@@ -6,12 +10,20 @@
 
 #include "usbd_usr.h"
 
+/* XXX - for now we need these include files,
+ * but ultimately we will have the class register these
+ * things in response to a init call
+ */
+// library/public.c:124:14: error: 'USR_desc' undeclared (first use in this function)
+// library/public.c:125:14: error: 'USBD_CDC_cb' undeclared (first use in this function)
 #include "vcp/usbd_cdc_core.h"
 #include "vcp/usbd_desc.h"
 
+typedef void (*bfptr) ( char *, int );
+
 static void gpio_usb_init ( void );
 
-void fust_init ( void );
+int fusb_init ( void );
 void fusb_puts ( int, char * );
 void fusb_write ( int, char *, int );
 int fusb_read ( int, char *, int );
@@ -51,6 +63,13 @@ usb_read ( char *buf, int len )
 {
 		return fusb_read ( usb_fd, buf, len );
 }
+
+void
+usb_hookup ( bfptr fn )
+{
+		class_usb_hookup ( fn );
+}
+
 
 /* ============================================================================== */
 /* ============================================================================== */
@@ -125,12 +144,6 @@ usbPowerOff ( void )
 }
 #endif
 
-#ifdef notyet
-extern uint16_t VCP_DataTx (const uint8_t* Buf, uint32_t Len);
-extern uint8_t  VCPGetByte(void);
-extern uint32_t VCPGetBytes(uint8_t * rxBuf, uint32_t len);
-#endif
-
 void
 fusb_puts ( int fd, char *buf )
 {
@@ -152,21 +165,24 @@ fusb_puts ( int fd, char *buf )
 
 	// (void) VCP_DataTx ( buf, strlen(buf) );
 	// (void) VCP_DataTx ( buf, __builtin_strlen(buf) );
-	(void) VCP_DataTx ( ubuf, len );
+	// (void) VCP_DataTx ( ubuf, len );
+	fusb_write ( fd, ubuf, len );
 }
 
 /* This works fine, as expected */
 void
 fusb_write ( int fd, char *buf, int len )
 {
-	(void) VCP_DataTx ( buf, len );
+	// (void) VCP_DataTx ( buf, len );
+	class_usb_write ( buf, len );
 }
 
 /* This never blocks and returns 0 at a ferrocious rate. */
 int
 fusb_read ( int fd, char *buf, int len )
 {
-	return VCPGetBytes ( buf, len );
+	// return VCPGetBytes ( buf, len );
+	return class_usb_read ( buf, len );
 }
 
 /* ============================================================================== */

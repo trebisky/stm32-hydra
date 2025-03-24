@@ -302,8 +302,9 @@ typedef void (*bfptr) ( char *, int );
 
 static bfptr usb_read_hook = (bfptr) 0;
 
+/* see class.c */
 void
-usb_hookup ( bfptr f )
+VCP_hookup ( bfptr f )
 {
 	usb_read_hook = f;
 }
