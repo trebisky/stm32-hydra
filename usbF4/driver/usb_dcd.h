@@ -13,7 +13,7 @@
 #ifndef __DCD_H__
 #define __DCD_H__
 
-#include "usb_core.h"
+#include "library/usb_core.h"
 
 #define USB_OTG_EP_CONTROL                       0
 #define USB_OTG_EP_ISOC                          1

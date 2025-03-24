@@ -18,7 +18,7 @@
 
 #include "usb_regs.h"
 #include "usb_defines.h"
-#include "usb_core.h"
+#include "library/usb_core.h"
 
 /**
 * @brief  USB_OTG_EnableCommonInt

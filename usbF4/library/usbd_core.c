@@ -12,12 +12,12 @@
 
 #include "hydra_usb.h"
 
-#include <library/usbd_core.h>
-#include <library/usbd_req.h>
-#include <library/usbd_ioreq.h>
+#include "usbd_core.h"
+#include "usbd_req.h"
+#include "usbd_ioreq.h"
 
-#include <driver/usb_dcd_int.h>
-#include <driver/usb_dcd.h>
+#include "driver/usb_dcd_int.h"
+#include "driver/usb_dcd.h"
 
 static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev);
 static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
@@ -418,5 +418,4 @@ static uint8_t USBD_DevDisconnected(USB_OTG_CORE_HANDLE  *pdev)
 }
 #endif
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+/* THE END */

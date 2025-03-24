@@ -13,8 +13,8 @@
 #ifndef __USB_CDC_CORE_H_
 #define __USB_CDC_CORE_H_
 
-#include <library/usbd_ioreq.h>
-#include <driver/usb_core.h>
+#include "library/usbd_ioreq.h"
+#include "library/usb_core.h"
 
 #define USB_CDC_CONFIG_DESC_SIZ                (67)
 #define USB_CDC_DESC_SIZ                       (67-9)
@@ -70,4 +70,4 @@ extern USBD_Class_cb_TypeDef  USBD_CDC_cb;
 
 #endif  // __USB_CDC_CORE_H_
   
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

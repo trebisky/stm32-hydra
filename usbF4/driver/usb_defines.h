@@ -126,5 +126,4 @@ enum USB_OTG_SPEED {
 
 #endif //__USB_DEFINES__H__
 
-
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

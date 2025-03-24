@@ -13,10 +13,9 @@
 #ifndef __USBD_CORE_H
 #define __USBD_CORE_H
 
-#include <driver/usb_dcd.h>
+#include "driver/usb_dcd.h"
 
 #include "usbd_def.h"
-// #include <vcp/usbd_conf.h>
 
 typedef enum {
   USBD_OK   = 0,
@@ -40,7 +39,4 @@ USBD_Status USBD_SetCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx);
 
 #endif /* __USBD_CORE_H */
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
-
-
+/* THE END */

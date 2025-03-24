@@ -87,9 +87,11 @@ export
 # CDEFS = -D$(CHIP) -DHYDRA -DHYDRA_USB
 CDEFS = $(CHIPDEFS) -DHYDRA -DHYDRA_USB
 
-CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) -I. -O
+INCDEFS = -I./library -I.
 
-all: show hydra.elf hydra.dump hydra.bin
+CC = $(TOOLS)-gcc -mcpu=$(ARM_CPU) -mthumb -Wno-implicit-function-declaration -fno-builtin  $(CDEFS) $(INCDEFS) -O
+
+all: show tags hydra.elf hydra.dump hydra.bin
 
 usbf4.o:	bogus
 	cd usbF4; make

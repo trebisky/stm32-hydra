@@ -13,11 +13,11 @@
 #ifndef __USB_CORE_H__
 #define __USB_CORE_H__
 
-#include <libmaple_types.h>
-// #include <vcp/usbd_conf.h>
-#include <usb_conf.h>
-#include "usb_regs.h"
-#include "usb_defines.h"
+#include "libmaple_types.h"
+#include "usb_conf.h"
+
+#include "driver/usb_regs.h"
+#include "driver/usb_defines.h"
 
 #define USB_OTG_EP0_IDLE                          0
 #define USB_OTG_EP0_SETUP                         1
@@ -343,5 +343,4 @@ uint32_t     USB_OTG_GetEPStatus(USB_OTG_CORE_HANDLE *pdev ,USB_OTG_EP *ep);
 
 #endif  /* __USB_CORE_H__ */
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+/* THE END */

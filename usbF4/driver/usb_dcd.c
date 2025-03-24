@@ -16,7 +16,7 @@
 #include "usb_regs.h"
 #include "usb_defines.h"
 
-#include "usb_core.h"
+#include "library/usb_core.h"
 #include "usb_dcd.h"
 
 void DCD_Init(USB_OTG_CORE_HANDLE *pdev , 

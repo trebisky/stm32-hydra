@@ -4,39 +4,68 @@
 
 #include <stdarg.h>
 
-#include "library/usbd_usr.h"
+#include "usbd_usr.h"
 
 #include "vcp/usbd_cdc_core.h"
 #include "vcp/usbd_desc.h"
 
+static void gpio_usb_init ( void );
 
-USB_OTG_CORE_HANDLE  USB_OTG_dev;
+void fust_init ( void );
+void fusb_puts ( int, char * );
+void fusb_write ( int, char *, int );
+int fusb_read ( int, char *, int );
 
-/* A footnote on figure 26, page 272 of the TRM says
- * that the value 12 is used for the usb HS when used in
- * FS mode.
+/* ============================================================================== */
+/* ============================================================================== */
+/* First we have routines exposed to the outside world (upstream) */
+
+/* The idea here is that the only functions exposed to the outside
+ * world are defined in this file.
+ *
+ * These typically begin with usb_ (like usb_init, usb_puts, ... )
  */
-#define GPIO_ALT_USB	10
-#define GPIO_ALT_USB_FS	12
 
-/* This is for the F411 and/or F429, F407 */
+static int usb_fd;
+
 void
-gpio_usb_init ( void )
+usb_init ( void )
 {
-        gpio_usb_pin_setup ( GPIOA, 11, GPIO_ALT_USB );   /* A11 - D- (DM) */
-        gpio_usb_pin_setup ( GPIOA, 12, GPIO_ALT_USB );   /* A12 - D+ (DP) */
-
-		/* This is the HS controller on the F429 discovery board
-		 *  as well as on the F407 Olimex E407 board
-		 * We just go ahead and configure these pins regardless
-		 * (lazy for now anyway) even if we aren't going to use them.
-		 */
-        gpio_usb_pin_setup ( GPIOB, 14, GPIO_ALT_USB_FS );   /* B14 - D- (DM) */
-        gpio_usb_pin_setup ( GPIOB, 15, GPIO_ALT_USB_FS );   /* B15 - D+ (DP) */
+		usb_fd = fusb_init ();
 }
 
 void
-usb_init (void)
+usb_puts ( char *msg )
+{
+		fusb_puts ( usb_fd, msg );
+}
+
+void
+usb_write ( int fd, char *buf, int len )
+{
+		fusb_write ( usb_fd, buf, len );
+}
+
+int
+usb_read ( char *buf, int len )
+{
+		return fusb_read ( usb_fd, buf, len );
+}
+
+/* ============================================================================== */
+/* ============================================================================== */
+/* Next we have things called from the above that are "glue" to the
+* private routines in the USB code.
+*/
+
+USB_OTG_CORE_HANDLE  USB_OTG_dev;
+
+/* For now, this can only initialize one interface.
+ * someday we want to be able to call this twice,
+ * once for each interface.
+ */
+int
+fusb_init (void)
 {
 
 #ifdef notdef
@@ -56,14 +85,6 @@ usb_init (void)
 #define IRQ_USB_HS_EP1_IN       75
 #define IRQ_USB_HS_WAKEUP       76
 #define IRQ_USB_HS      		77
-
-#ifdef notdef
-usb_hs_ep1_out      /* IRQ 74 */
-usb_hs_ep1_in       /* IRQ 75 */
-usb_hs_wakeup       /* IRQ 76 */
-usb_hs_irq_handler  /* IRQ 77 */
-#endif
-
 
 		nvic_enable ( IRQ_USB_WAKEUP );
         nvic_enable ( IRQ_USB_FS );
@@ -91,7 +112,69 @@ usb_hs_irq_handler  /* IRQ 77 */
             &USBD_CDC_cb,
             &USR_cb);
 #endif
+
+		/* XXX someday will be 0 or 1 */
+		return 0;
 }
+
+#ifdef notdef
+void
+usbPowerOff ( void )
+{
+	USBD_DeInitFull(&USB_OTG_dev);
+}
+#endif
+
+#ifdef notyet
+extern uint16_t VCP_DataTx (const uint8_t* Buf, uint32_t Len);
+extern uint8_t  VCPGetByte(void);
+extern uint32_t VCPGetBytes(uint8_t * rxBuf, uint32_t len);
+#endif
+
+void
+fusb_puts ( int fd, char *buf )
+{
+	char ubuf[128];
+	char *p;
+	int len;
+
+	p = ubuf;
+	len = 0;
+
+	while ( *buf ) {
+	    if ( *buf == '\n' ) {
+		*p++ = '\r';
+		len++;
+	    }
+	    *p++ = *buf++;
+	    len++;
+	}
+
+	// (void) VCP_DataTx ( buf, strlen(buf) );
+	// (void) VCP_DataTx ( buf, __builtin_strlen(buf) );
+	(void) VCP_DataTx ( ubuf, len );
+}
+
+/* This works fine, as expected */
+void
+fusb_write ( int fd, char *buf, int len )
+{
+	(void) VCP_DataTx ( buf, len );
+}
+
+/* This never blocks and returns 0 at a ferrocious rate. */
+int
+fusb_read ( int fd, char *buf, int len )
+{
+	return VCPGetBytes ( buf, len );
+}
+
+/* ============================================================================== */
+/* ============================================================================== */
+/* Lastly we have routines that are internal "utility" routines used
+ * by the USB code, but never seen by the outside world.
+ * This includes our interrupt glue routines
+ */
 
 /* Delay in microseconds
  */
@@ -116,8 +199,31 @@ board_mDelay (const uint32_t msec)
   board_uDelay ( msec * 1000 );
 }
 
+/* A footnote on figure 26, page 272 of the TRM says
+ * that the value 12 is used for the usb HS when used in
+ * FS mode.
+ */
+#define GPIO_ALT_USB	10
+#define GPIO_ALT_USB_FS	12
+
+/* This is for the F411 and/or F429, F407 */
+static void
+gpio_usb_init ( void )
+{
+        gpio_usb_pin_setup ( GPIOA, 11, GPIO_ALT_USB );   /* A11 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOA, 12, GPIO_ALT_USB );   /* A12 - D+ (DP) */
+
+		/* This is the HS controller on the F429 discovery board
+		 *  as well as on the F407 Olimex E407 board
+		 * We just go ahead and configure these pins regardless
+		 * (lazy for now anyway) even if we aren't going to use them.
+		 */
+        gpio_usb_pin_setup ( GPIOB, 14, GPIO_ALT_USB_FS );   /* B14 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOB, 15, GPIO_ALT_USB_FS );   /* B15 - D+ (DP) */
+}
+
 /* =========================================================================
- * USB debug facility
+ * USB debug facility (used only from within the USB code)
  */
 
 #define PRINTF_BUF_SIZE 128
@@ -178,83 +284,6 @@ mystrlen ( char *s )
 }
 #endif
 
-void
-usb_puts ( char *buf )
-{
-	char ubuf[128];
-	char *p;
-	int len;
-
-	p = ubuf;
-	len = 0;
-
-	while ( *buf ) {
-	    if ( *buf == '\n' ) {
-		*p++ = '\r';
-		len++;
-	    }
-	    *p++ = *buf++;
-	    len++;
-	}
-
-	// (void) VCP_DataTx ( buf, strlen(buf) );
-	// (void) VCP_DataTx ( buf, __builtin_strlen(buf) );
-	(void) VCP_DataTx ( ubuf, len );
-}
-
-/* This works fine, as expected */
-void
-usb_write ( char *buf, int len )
-{
-	(void) VCP_DataTx ( buf, len );
-}
-
-/* 5-16-2025 - data sending experiment */
-void
-usb_test_send ( void )
-{
-	char xbuf[1024];
-	int i;
-	int n = 800;
-
-	for ( i=0; i<1024; i++ )
-		xbuf[i] = 'A';
-
-	for ( i=n-5; i<n; i++ )
-		xbuf[i] = '-';
-
-	(void) VCP_DataTx ( xbuf, n );
-}
-
-/* This never blocks and returns 0 at a ferrocious rate. */
-int
-usb_read ( char *buf, int len )
-{
-	return VCPGetBytes ( buf, len );
-}
-
-#ifdef notyet
-extern uint16_t VCP_DataTx (const uint8_t* Buf, uint32_t Len);
-extern uint8_t  VCPGetByte(void);
-extern uint32_t VCPGetBytes(uint8_t * rxBuf, uint32_t len);
-
-uint32_t usbSendBytes(const uint8_t* sendBuf, uint32_t len)
-{
-	return VCP_DataTx(sendBuf, len);
-}
-
-uint32_t usbReceiveBytes(uint8_t* recvBuf, uint32_t len)
-{
-	return VCPGetBytes(recvBuf, len);
-}
-
-RESULT usbPowerOff(void)
-{
-	USBD_DeInitFull(&USB_OTG_dev);
-	return USB_SUCCESS;
-}
-#endif
-
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 /* Interrupt handlers below here.
@@ -281,12 +310,6 @@ usb_wakeup_handler ( void )
 {
 	printf ( "USB FS wakeup interrupt\n" );
 }
-
-#ifdef notdef
-usb_hs_ep1_out      /* IRQ 74 */
-usb_hs_ep1_in       /* IRQ 75 */
-usb_hs_wakeup       /* IRQ 76 */
-#endif
 
 void
 usb_hs_irq_handler ( void )

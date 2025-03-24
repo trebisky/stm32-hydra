@@ -7,18 +7,22 @@ ifndef TARGET
 $(error Don't run make here)
 endif
 
-BASE_OBJS = usb.o
+#BASE_OBJS = usb.o
 #VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
 VCP_OBJS = usbd_cdc_vcp.o  usbd_desc.o
 DRIVER_OBJS = usb_core.o  usb_dcd.o  usb_dcd_int.o
-LIBR_OBJS = usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
+LIBR_OBJS = public.o usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
 
 # Files we no longer need, but keep around for reference
 OLD_EXTRA = misc.c usb_bsp.c
 OLD_EXTRA_H = core_cm4.h  core_cmInstr.h misc.h  nvic.h  usb_bsp.h  usb_conf.h
 
-OBJS = $(BASE_OBJS) $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
 #OBJS = $(BASE_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
+#OBJS = $(BASE_OBJS) $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
+OBJS = $(VCP_OBJS) $(DRIVER_OBJS) $(LIBR_OBJS)
+
+# # no effect here, CC is already defined
+INCDEFS = -I./library -I.
 
 all: ../usbf4.o
 
@@ -51,6 +55,8 @@ usb_dcd_int.o: driver/usb_dcd_int.c
 # From library
 #usbd_cdc_core.o: library/usbd_cdc_core.c
 #	$(CC) -o $@ -c $<
+public.o: library/public.c
+	$(CC) -o $@ -c $<
 usbd_core.o: library/usbd_core.c
 	$(CC) -o $@ -c $<
 usbd_ioreq.o: library/usbd_ioreq.c
