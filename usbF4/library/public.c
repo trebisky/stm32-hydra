@@ -16,8 +16,8 @@
  */
 // library/public.c:124:14: error: 'USR_desc' undeclared (first use in this function)
 // library/public.c:125:14: error: 'USBD_CDC_cb' undeclared (first use in this function)
-#include "vcp/usbd_cdc_core.h"
-#include "vcp/usbd_desc.h"
+// #include "vcp/usbd_cdc_core.h"
+// #include "vcp/usbd_desc.h"
 
 typedef void (*bfptr) ( char *, int );
 
@@ -70,6 +70,25 @@ usb_hookup ( bfptr fn )
 		class_usb_hookup ( fn );
 }
 
+/* From -- vcp/usbd_desc.c */
+// static USBD_DEVICE USR_desc;
+static USBD_DEVICE *class_desc;
+
+/* From -- vcp/usbd_cdc_core.c */
+// static USBD_Class_cb_TypeDef  USBD_CDC_cb;
+static USBD_Class_cb_TypeDef  *class_cb;
+
+/* From -- library/usbd_usr.c */
+// static USBD_Usr_cb_TypeDef USR_cb;
+
+/* Called by the class in response to the class_init() call
+ */
+void
+usb_register ( USBD_DEVICE *desc, USBD_Class_cb_TypeDef *cb )
+{
+		class_desc = desc;
+		class_cb = cb;
+}
 
 /* ============================================================================== */
 /* ============================================================================== */
@@ -115,7 +134,27 @@ fusb_init (void)
 
         gpio_usb_init ();
 
-/* Change this in usb_conf.h */
+		/* Should trigger a callback to usb_register() */
+		class_init ();
+
+/* Change this choice in usb_conf.h */
+#ifdef USE_USB_OTG_HS
+	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
+      USBD_Init(&USB_OTG_dev,
+            USB_OTG_HS_CORE_ID,
+            class_desc,
+            class_cb,
+            &USR_cb);
+#else
+	  printf ( "Initialize FS usb core with IRQ %d\n", IRQ_USB_FS );
+      USBD_Init(&USB_OTG_dev,
+            USB_OTG_FS_CORE_ID,
+            class_desc,
+            class_cb,
+            &USR_cb);
+#endif
+
+#ifdef notdef
 #ifdef USE_USB_OTG_HS
 	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
       USBD_Init(&USB_OTG_dev,
@@ -132,6 +171,7 @@ fusb_init (void)
             &USR_cb);
 #endif
 
+#endif
 		/* XXX someday will be 0 or 1 */
 		return 0;
 }
@@ -252,7 +292,8 @@ void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 // static int usb_debug_mask = DM_READ1;
 // static int usb_debug_mask = DM_ORIG;
 // static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
-static int usb_debug_mask = 0;
+static int usb_debug_mask = DM_DESC;
+// static int usb_debug_mask = 0;
 
 void
 usb_debug ( int select, char *fmt, ... )

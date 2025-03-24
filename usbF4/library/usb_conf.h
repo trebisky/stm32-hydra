@@ -36,8 +36,8 @@ typedef unsigned char	u8;
 #define USE_EMBEDDED_PHY
 #define USB_OTG_EMBEDDED_PHY_ENABLED
 
-#define USE_USB_OTG_FS
-// #define USE_USB_OTG_HS
+// #define USE_USB_OTG_FS
+#define USE_USB_OTG_HS
 
 //#define USE_HOST_MODE
 #define USE_DEVICE_MODE

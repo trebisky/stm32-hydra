@@ -10,8 +10,8 @@
 #include <unistd.h>
 #include <time.h>
 
-#define TEST_DEVICE	"/dev/ttyACM0"
-// #define TEST_DEVICE	"/dev/ttyACM1"
+// #define TEST_DEVICE	"/dev/ttyACM0"
+#define TEST_DEVICE	"/dev/ttyACM1"
 
 static void
 error ( char *msg )
@@ -64,14 +64,18 @@ main ( int argc, char **argv )
 		int fd;
 		int i;
 		// int ntest = 500;
-		// int ntest = 1;
 		// int ntest = 10 * 1024 * 21;
-		int ntest = 1024 * 21;
+		// int ntest = 1024 * 21;
+		int ntest = 1;
 		int size = 512;
 
 		fd = open ( TEST_DEVICE, O_RDWR );
 		if ( fd < 0 )
 			error ("Cannot open serial device" );
+
+		printf ( "Sending %d packets of %d bytes to %s\n",
+			ntest, size, TEST_DEVICE );
+
 		printf ( "Open\n" );
 
 		// sleep ( 2 );

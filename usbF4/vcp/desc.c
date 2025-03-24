@@ -1,134 +1,120 @@
-/**
-  ******************************************************************************
-  * @file    usbd_cdc_core.c
-  * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    22-July-2011
-  * @brief   This file provides the high layer firmware functions to manage the 
-  *          following functionalities of the USB CDC Class:
-  *           - Initialization and Configuration of high and low layer
-  *           - Enumeration as CDC Device (and enumeration for each implemented memory interface)
-  *           - OUT/IN data transfer
-  *           - Command IN transfer (class requests management)
-  *           - Error management
-  *           
-  *  @verbatim
-  *      
-  *          ===================================================================      
-  *                                CDC Class Driver Description
-  *          =================================================================== 
-  *           This driver manages the "Universal Serial Bus Class Definitions for Communications Devices
-  *           Revision 1.2 November 16, 2007" and the sub-protocol specification of "Universal Serial Bus 
-  *           Communications Class Subclass Specification for PSTN Devices Revision 1.2 February 9, 2007"
-  *           This driver implements the following aspects of the specification:
-  *             - Device descriptor management
-  *             - Configuration descriptor management
-  *             - Enumeration as CDC device with 2 data endpoints (IN and OUT) and 1 command endpoint (IN)
-  *             - Requests management (as described in section 6.2 in specification)
-  *             - Abstract Control Model compliant
-  *             - Union Functional collection (using 1 IN endpoint for control)
-  *             - Data interface class
-
-  *           @note
-  *             For the Abstract Control Model, this core allows only transmitting the requests to
-  *             lower layer dispatcher (ie. usbd_cdc_vcp.c/.h) which should manage each request and
-  *             perform relative actions.
-  * 
-  *           These aspects may be enriched or modified for a specific user application.
-  *          
-  *            This driver doesn't implement the following aspects of the specification 
-  *            (but it is possible to manage these features with some modifications on this driver):
-  *             - Any class-specific aspect relative to communication classes should be managed by user application.
-  *             - All communication classes other than PSTN are not managed
-  *      
-  *  @endverbatim
-  *                                  
-  ******************************************************************************               
-  * COPYRIGHT 2011 STMicroelectronics
-  ******************************************************************************
-  */ 
-
+/* desc.c
+ * All the descriptors used during enumeration
+ *  for this class.
+ *
+ * Tom Trebisky  3-24-2025
+ *
+ */
 #include "hydra_usb.h"
 
 #include "usbd_cdc_core.h"
 #include "vcp/usbd_desc.h"
 #include "library/usbd_req.h"
 
-/*********************************************
-   CDC Device library callbacks
- *********************************************/
-static uint8_t  usbd_cdc_Init        (void  *pdev, uint8_t cfgidx);
-static uint8_t  usbd_cdc_DeInit      (void  *pdev, uint8_t cfgidx);
-static uint8_t  usbd_cdc_Setup       (void  *pdev, USB_SETUP_REQ *req);
-static uint8_t  usbd_cdc_EP0_RxReady  (void *pdev);
-static uint8_t  usbd_cdc_DataIn      (void *pdev, uint8_t epnum);
-static uint8_t  usbd_cdc_DataOut     (void *pdev, uint8_t epnum);
-static uint8_t  usbd_cdc_SOF         (void *pdev);
-
-/*********************************************
-   CDC specific management functions
- *********************************************/
-static void Handle_USBAsynchXfer  (void *pdev);
-static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length);
-
-#ifdef USE_USB_OTG_HS  
-static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
-#endif
-
-extern CDC_IF_Prop_TypeDef  APP_FOPS;
-extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
-
-__ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
-
-__ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
-
-__ALIGN_BEGIN static __IO uint32_t  usbd_cdc_AltSet  __ALIGN_END = 0;
-
-__ALIGN_BEGIN uint8_t __CCMRAM__ USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN_END ;
-
-/* tjt - XXX - it is odd that only the Tx buffer is not specified as
- * being in CCMRAM - and also note that depending on the linker file,
- * it could end up in CCMRAM anyway, this is just a hint to say
- * "put it ih CCMRAM if possible" -- however CCMRAM is supposed to
- * not work with DMA, so there could be trouble waiting here.
- */
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-__ALIGN_BEGIN uint8_t APP_Tx_Buffer   [APP_TX_DATA_SIZE] __ALIGN_END ;
-#else 
-__ALIGN_BEGIN uint8_t __CCMRAM__ APP_Tx_Buffer[APP_TX_DATA_SIZE] __ALIGN_END ;
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
- 
-__ALIGN_BEGIN uint8_t CmdBuff[CDC_CMD_PACKET_SZE] __ALIGN_END ;
-
-volatile uint16_t APP_Tx_ptr_in  = 0;
-volatile uint16_t APP_Tx_ptr_out = 0;
-
-uint8_t  USB_Tx_State = 0;
-
-static uint32_t cdcCmd = 0xFF;
-static uint32_t cdcLen = 0;
-
-/* CDC interface class callbacks structure */
-USBD_Class_cb_TypeDef  USBD_CDC_cb = 
+int
+class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *req,
+		uint8_t **apbuf, uint16_t *alen )
 {
-  usbd_cdc_Init,
-  usbd_cdc_DeInit,
-  usbd_cdc_Setup,
-  NULL,                 /* EP0_TxSent, */
-  usbd_cdc_EP0_RxReady,
-  usbd_cdc_DataIn,
-  usbd_cdc_DataOut,
-  usbd_cdc_SOF,
-  NULL,
-  NULL,     
-  USBD_cdc_GetCfgDesc,
-#ifdef USE_USB_OTG_HS   
-  USBD_cdc_GetOtherCfgDesc, /* use same cobfig as per FS */
-#endif /* USE_USB_OTG_HS  */
-};
+  uint16_t len;
+  uint8_t *pbuf;
+
+  usb_debug ( DM_DESC, "Get Descriptor: %d (wLength = %d)\n", type, req->wLength );
+
+  switch ( type ) {
+	  case USB_DESC_TYPE_DEVICE:
+		  pbuf = pdev->dev.usr_device->GetDeviceDescriptor(pdev->cfg.speed, &len);
+		  if ((req->wLength == 64) ||( pdev->dev.device_status == USB_OTG_DEFAULT))
+			  len = 8;
+		  break;
+    
+	  case USB_DESC_TYPE_CONFIGURATION:
+		  usb_debug ( DM_DESC, " ** getting CDC config descriptor **\n" );
+		  pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
+#ifdef USB_OTG_HS_CORE
+		  if((pdev->cfg.speed == USB_OTG_SPEED_FULL )&& (pdev->cfg.phy_itface  == USB_OTG_ULPI_PHY)) {
+			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
+		  }
+#endif  
+		  pbuf[1] = USB_DESC_TYPE_CONFIGURATION;
+
+		  pdev->dev.pConfig_descriptor = pbuf;    
+		  break;
+    
+	  case USB_DESC_TYPE_STRING:
+		  switch ((uint8_t)(req->wValue)) {
+			  case USBD_IDX_LANGID_STR:
+				  pbuf = pdev->dev.usr_device->GetLangIDStrDescriptor(pdev->cfg.speed, &len);        
+				  break;
+			  case USBD_IDX_MFC_STR:
+				  pbuf = pdev->dev.usr_device->GetManufacturerStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_PRODUCT_STR:
+				  pbuf = pdev->dev.usr_device->GetProductStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_SERIAL_STR:
+				  pbuf = pdev->dev.usr_device->GetSerialStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_CONFIG_STR:
+				  pbuf = pdev->dev.usr_device->GetConfigurationStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  case USBD_IDX_INTERFACE_STR:
+				  pbuf = pdev->dev.usr_device->GetInterfaceStrDescriptor(pdev->cfg.speed, &len);
+				  break;
+			  default:
+#ifdef USB_SUPPORT_USER_STRING_DESC
+				  pbuf = pdev->dev.class_cb->GetUsrStrDescriptor(pdev->cfg.speed, (req->wValue) , &len);
+				  break;
+#else      
+				  return 0;
+#endif
+		  }
+		  break;
+
+	  case USB_DESC_TYPE_DEVICE_QUALIFIER:                   
+#ifdef USB_OTG_HS_CORE
+		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
+			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
+            
+			  USBD_DeviceQualifierDesc[4]= pbuf[14];
+			  USBD_DeviceQualifierDesc[5]= pbuf[15];
+			  USBD_DeviceQualifierDesc[6]= pbuf[16];
+      
+			  pbuf = USBD_DeviceQualifierDesc;
+			  len  = USB_LEN_DEV_QUALIFIER_DESC;
+			  break;
+		  } else {
+		  	  return 0;
+		  }
+#else
+	  return 0;
+#endif    
+
+	  case USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION:
+#ifdef USB_OTG_HS_CORE   
+		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
+			  pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
+			  pbuf[1] = USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION;
+			  break; 
+		  } else {
+			  return 0;
+		  }
+#else
+		  return 0;
+#endif     
+
+	  default: 
+	  	  return 0;
+  }		/* end of big switch */
+
+  *apbuf = pbuf;
+  *alen = len;
+  return 1;
+}
+
+/* ---------------------- */
 
 /* USB CDC device Configuration Descriptor */
-__ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
+__ALIGN_BEGIN static uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
 {
   /*Configuration Descriptor*/
   0x09,   /* bLength: Configuration Descriptor size */
@@ -228,12 +214,7 @@ __ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
 } ;
 
 #ifdef USE_USB_OTG_HS
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-    #pragma data_alignment=4   
-  #endif
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */ 
-__ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
+__ALIGN_BEGIN static uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
 { 
   0x09,   /* bLength: Configuration Descriptor size */
   USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION,   
@@ -325,6 +306,88 @@ __ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_EN
   0x00                              /* bInterval */
 };
 #endif /* USE_USB_OTG_HS  */
+
+
+/* XXXXXXXXXXXXXXXXXXXXXXXXX */
+/* XXXXXXXXXXXXXXXXXXXXXXXXX */
+/* XXXXXXXXXXXXXXXXXXXXXXXXX */
+/* XXXXXXXXXXXXXXXXXXXXXXXXX */
+
+#ifdef not_a_chance
+
+/*********************************************
+   CDC Device library callbacks
+ *********************************************/
+static uint8_t  usbd_cdc_Init        (void  *pdev, uint8_t cfgidx);
+static uint8_t  usbd_cdc_DeInit      (void  *pdev, uint8_t cfgidx);
+static uint8_t  usbd_cdc_Setup       (void  *pdev, USB_SETUP_REQ *req);
+static uint8_t  usbd_cdc_EP0_RxReady  (void *pdev);
+static uint8_t  usbd_cdc_DataIn      (void *pdev, uint8_t epnum);
+static uint8_t  usbd_cdc_DataOut     (void *pdev, uint8_t epnum);
+static uint8_t  usbd_cdc_SOF         (void *pdev);
+
+/*********************************************
+   CDC specific management functions
+ *********************************************/
+static void Handle_USBAsynchXfer  (void *pdev);
+static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length);
+
+#ifdef USE_USB_OTG_HS  
+static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
+#endif
+
+extern CDC_IF_Prop_TypeDef  APP_FOPS;
+
+extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
+
+__ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
+
+__ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
+
+__ALIGN_BEGIN static __IO uint32_t  usbd_cdc_AltSet  __ALIGN_END = 0;
+
+__ALIGN_BEGIN uint8_t __CCMRAM__ USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN_END ;
+
+/* tjt - XXX - it is odd that only the Tx buffer is not specified as
+ * being in CCMRAM - and also note that depending on the linker file,
+ * it could end up in CCMRAM anyway, this is just a hint to say
+ * "put it ih CCMRAM if possible" -- however CCMRAM is supposed to
+ * not work with DMA, so there could be trouble waiting here.
+ */
+#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+__ALIGN_BEGIN uint8_t APP_Tx_Buffer   [APP_TX_DATA_SIZE] __ALIGN_END ;
+#else 
+__ALIGN_BEGIN uint8_t __CCMRAM__ APP_Tx_Buffer[APP_TX_DATA_SIZE] __ALIGN_END ;
+#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
+ 
+__ALIGN_BEGIN uint8_t CmdBuff[CDC_CMD_PACKET_SZE] __ALIGN_END ;
+
+volatile uint16_t APP_Tx_ptr_in  = 0;
+volatile uint16_t APP_Tx_ptr_out = 0;
+
+uint8_t  USB_Tx_State = 0;
+
+static uint32_t cdcCmd = 0xFF;
+static uint32_t cdcLen = 0;
+
+/* CDC interface class callbacks structure */
+USBD_Class_cb_TypeDef  USBD_CDC_cb = 
+{
+  usbd_cdc_Init,
+  usbd_cdc_DeInit,
+  usbd_cdc_Setup,
+  NULL,                 /* EP0_TxSent, */
+  usbd_cdc_EP0_RxReady,
+  usbd_cdc_DataIn,
+  usbd_cdc_DataOut,
+  usbd_cdc_SOF,
+  NULL,
+  NULL,     
+  USBD_cdc_GetCfgDesc,
+#ifdef USE_USB_OTG_HS   
+  USBD_cdc_GetOtherCfgDesc, /* use same cobfig as per FS */
+#endif /* USE_USB_OTG_HS  */
+};
 
 /**
   * @brief  usbd_cdc_Init
@@ -698,5 +761,7 @@ static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
   return usbd_cdc_OtherCfgDesc;
 }
 #endif
+
+#endif /* not_a_chance */
 
 /* THE END */

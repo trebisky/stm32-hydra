@@ -15,5 +15,6 @@ void usb_dump ( int, char *, char *, int );
 #define DM_ENUM		4
 #define DM_WRITE1	8		/* writes to endpoint */
 #define DM_READ1	0x10	/* reads from endpoint */
+#define DM_DESC		0x20	/* descriptors for enumeration */
 
 /* THE END */

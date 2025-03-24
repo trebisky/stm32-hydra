@@ -11,10 +11,16 @@
 
 #include "usbd_usr.h"
 
-#include "vcp/usbd_cdc_core.h"
-#include "vcp/usbd_desc.h"
+#include "usbd_cdc_core.h"
+#include "usbd_desc.h"
 
 typedef void (*bfptr) ( char *, int );
+
+void
+class_init ( void )
+{
+		usb_register ( &USR_desc, &USBD_CDC_cb );
+}
 
 void
 class_usb_hookup ( bfptr x )
@@ -34,5 +40,8 @@ class_usb_read ( char *buf, int len )
 {
 		return VCPGetBytes ( buf, len );
 }
+
+/* See descr.c for this: */
+// int class_get_descriptor ( int, char **buf, int *len );
 
 /* THE END */

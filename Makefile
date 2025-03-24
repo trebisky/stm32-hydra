@@ -8,8 +8,8 @@
 # "blue" is my STM32F103 "blue pill" board (or olimex or maple)
 
 #TARGET = e407
-#TARGET = disco
-TARGET = p405
+TARGET = disco
+#TARGET = p405
 #TARGET = black
 #TARGET = blue
 
