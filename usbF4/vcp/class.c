@@ -12,7 +12,7 @@
 #include "usbd_usr.h"
 
 #include "usbd_cdc_core.h"
-#include "usbd_desc.h"
+// #include "usbd_desc.h"
 
 typedef void (*bfptr) ( char *, int );
 

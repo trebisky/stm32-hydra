@@ -292,8 +292,8 @@ void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 // static int usb_debug_mask = DM_READ1;
 // static int usb_debug_mask = DM_ORIG;
 // static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
-// static int usb_debug_mask = DM_DESC;
-static int usb_debug_mask = DM_ALL;
+static int usb_debug_mask = DM_DESC;
+// static int usb_debug_mask = DM_ALL;
 // static int usb_debug_mask = 0;
 
 void

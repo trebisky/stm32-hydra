@@ -50,8 +50,10 @@
 
 #include "hydra_usb.h"
 
+#include "usbd_conf.h"
+
 #include "usbd_cdc_core.h"
-#include "vcp/usbd_desc.h"
+// #include "vcp/usbd_desc.h"
 #include "library/usbd_req.h"
 
 /*********************************************

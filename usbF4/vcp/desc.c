@@ -7,15 +7,18 @@
  */
 #include "hydra_usb.h"
 
+#include <library/usbd_def.h>
+#include "usbd_conf.h"
+
+
 #include "usbd_cdc_core.h"
-#include "vcp/usbd_desc.h"
+// #include "vcp/usbd_desc.h"
 #include "library/usbd_req.h"
 
 /* From the old usbd_desc.c */
 // #include <library/usbd_core.h>
 // #include "usbd_desc.h"
 // #include <library/usbd_req.h>
-// #include "usbd_conf.h"
 
 /* =========================================================================== */
 
@@ -39,8 +42,10 @@
 #define USBD_CONFIGURATION_FS_STRING    (uint8_t*)"VCP Config"
 #define USBD_INTERFACE_FS_STRING        (uint8_t*)"VCP Interface"
 
+#define USB_SIZ_DEVICE_DESC                     18
+#define USB_SIZ_STRING_LANGID                   4
+
 /* A place to build unicode from string descriptors */
-// __ALIGN_BEGIN uint8_t USBD_StrDesc[USB_MAX_STR_DESC_SIZ] __ALIGN_END ;
 __ALIGN_BEGIN uint8_t unibuf[USB_MAX_STR_DESC_SIZ] __ALIGN_END ;
 
 /* =========================================================================== */
