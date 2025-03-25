@@ -11,10 +11,102 @@
 #include "vcp/usbd_desc.h"
 #include "library/usbd_req.h"
 
+/* From the old usbd_desc.c */
+// #include <library/usbd_core.h>
+// #include "usbd_desc.h"
+// #include <library/usbd_req.h>
+// #include "usbd_conf.h"
+
+/* =========================================================================== */
+
+#define USBD_VID                        0x0483
+#define USBD_PID                        0x5740
+
+#define USBD_LANGID_STRING              0x409
+
+// #define USBD_MANUFACTURER_STRING        (uint8_t*)"STMicroelectronics"
+#define USBD_MANUFACTURER_STRING        (uint8_t*)"ACME bar and grill"
+
+#define USBD_PRODUCT_HS_STRING          (uint8_t*)"STM32 Virtual ComPort in HS Mode"
+#define USBD_SERIALNUMBER_HS_STRING     (uint8_t*)"00000000050B"
+
+#define USBD_PRODUCT_FS_STRING          (uint8_t*)"STM32 Virtual ComPort in FS Mode"
+#define USBD_SERIALNUMBER_FS_STRING     (uint8_t*)"00000000050C"
+
+#define USBD_CONFIGURATION_HS_STRING    (uint8_t*)"VCP Config"
+#define USBD_INTERFACE_HS_STRING        (uint8_t*)"VCP Interface"
+
+#define USBD_CONFIGURATION_FS_STRING    (uint8_t*)"VCP Config"
+#define USBD_INTERFACE_FS_STRING        (uint8_t*)"VCP Interface"
+
+/* A place to build unicode from string descriptors */
+// __ALIGN_BEGIN uint8_t USBD_StrDesc[USB_MAX_STR_DESC_SIZ] __ALIGN_END ;
+__ALIGN_BEGIN uint8_t unibuf[USB_MAX_STR_DESC_SIZ] __ALIGN_END ;
+
 /* =========================================================================== */
 /* =========================================================================== */
-/* =========================================================================== */
+
 /* The descriptor definitions come first */
+
+#ifdef notdef
+  /* This used to be "hacked in" by code in usbd_cdc_core.c
+   * Now I just "make it so" in the data below.
+   */
+  pbuf = (uint8_t *) USBD_DeviceDesc;
+  pbuf[4] = DEVICE_CLASS_CDC;
+  pbuf[5] = DEVICE_SUBCLASS_CDC;
+#endif
+
+/* USB Standard Device Descriptor */
+__ALIGN_BEGIN static uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC] __ALIGN_END =
+  {
+    0x12,                       /*bLength */
+    USB_DEVICE_DESCRIPTOR_TYPE, /*bDescriptorType*/
+    0x00,                       /*bcdUSB */
+    0x02,
+#ifdef notdef
+    0x00,                       /*bDeviceClass*/
+    0x00,                       /*bDeviceSubClass*/
+#endif
+    DEVICE_CLASS_CDC,           /*bDeviceClass*/
+    DEVICE_SUBCLASS_CDC,        /*bDeviceSubClass*/
+    0x00,                       /*bDeviceProtocol*/
+    USB_OTG_MAX_EP0_SIZE,       /*bMaxPacketSize*/
+    LOBYTE(USBD_VID),           /*idVendor*/
+    HIBYTE(USBD_VID),           /*idVendor*/
+    LOBYTE(USBD_PID),           /*idVendor*/
+    HIBYTE(USBD_PID),           /*idVendor*/
+    0x00,                       /*bcdDevice rel. 2.00*/
+    0x02,
+    USBD_IDX_MFC_STR,           /*Index of manufacturer  string*/
+    USBD_IDX_PRODUCT_STR,       /*Index of product string*/
+    USBD_IDX_SERIAL_STR,        /*Index of serial number string*/
+    USBD_CFG_MAX_NUM            /*bNumConfigurations*/
+  } ; /* USB_DeviceDescriptor */
+
+/* USB Standard Device Descriptor */
+__ALIGN_BEGIN static uint8_t USBD_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END =
+{
+  USB_LEN_DEV_QUALIFIER_DESC,
+  USB_DESC_TYPE_DEVICE_QUALIFIER,
+  0x00,
+  0x02,
+  0x00,
+  0x00,
+  0x00,
+  0x40,
+  0x01,
+  0x00,
+};
+
+/* USB Standard Device Descriptor */
+__ALIGN_BEGIN static uint8_t USBD_LangIDDesc[USB_SIZ_STRING_LANGID] __ALIGN_END =
+{
+     USB_SIZ_STRING_LANGID,         
+     USB_DESC_TYPE_STRING,       
+     LOBYTE(USBD_LANGID_STRING),
+     HIBYTE(USBD_LANGID_STRING), 
+};
 
 /* USB CDC device Configuration Descriptor */
 __ALIGN_BEGIN static uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
@@ -116,6 +208,9 @@ __ALIGN_BEGIN static uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_
   0x00                               /* bInterval: ignore for Bulk transfer */
 } ;
 
+/* This only would be used if we are actually in full speed mode
+ * with an external full speed Phy.
+ */
 #ifdef USE_USB_OTG_HS
 __ALIGN_BEGIN static uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
 { 
@@ -213,18 +308,78 @@ __ALIGN_BEGIN static uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __A
 /* =========================================================================== */
 /* =========================================================================== */
 
+#ifdef notdef
+static void
+USBD_GetString(uint8_t *desc, uint8_t *unicode, uint16_t *len)
+{
+  uint8_t idx = 0;
+
+  if (desc != NULL) {
+    *len =  USBD_GetLen(desc) * 2 + 2;
+    unicode[idx++] = *len;
+    unicode[idx++] =  USB_DESC_TYPE_STRING;
+
+    while (*desc != NULL) {
+      unicode[idx++] = *desc++;
+      unicode[idx++] =  0x00;
+    }
+  }
+}
+#endif
+
+/* Same as strlen ? */
+/* XXX maybe just use sizeof(str)-1 */
+static uint8_t
+USBD_GetLen(uint8_t *buf)
+{
+    uint8_t  len = 0;
+
+    while (*buf != NULL) {
+        len++;
+        buf++;
+    }
+
+    return len;
+}
+
+
+/* Convert string to unicode (yields double its size + 2).
+ */
+static uint16_t
+GetString(uint8_t *desc, uint8_t *unicode )
+{
+    uint8_t idx = 0;
+    uint16_t len = 0;
+
+    if ( desc == NULL )
+		return 0;
+
+    len =  USBD_GetLen(desc) * 2 + 2;
+    unicode[idx++] = len;
+    unicode[idx++] =  USB_DESC_TYPE_STRING;
+
+    while (*desc != NULL) {
+        unicode[idx++] = *desc++;
+        unicode[idx++] =  0x00;
+    }
+
+  return len;
+}
 int
 class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *req,
 		uint8_t **apbuf, uint16_t *alen )
 {
   uint16_t len;
   uint8_t *pbuf;
+  uint8_t speed = pdev->cfg.speed;
 
   usb_debug ( DM_DESC, "Get Descriptor: %d (wLength = %d)\n", type, req->wLength );
 
   switch ( type ) {
 	  case USB_DESC_TYPE_DEVICE:
-		  pbuf = pdev->dev.usr_device->GetDeviceDescriptor(pdev->cfg.speed, &len);
+		  // pbuf = pdev->dev.usr_device->GetDeviceDescriptor(pdev->cfg.speed, &len);
+		  pbuf = USBD_DeviceDesc;
+		  len = sizeof(USBD_DeviceDesc);
 		  if ((req->wLength == 64) ||( pdev->dev.device_status == USB_OTG_DEFAULT))
 			  len = 8;
 		  break;
@@ -252,26 +407,51 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 	  case USB_DESC_TYPE_STRING:
 		  switch ((uint8_t)(req->wValue)) {
 			  case USBD_IDX_LANGID_STR:
-				  pbuf = pdev->dev.usr_device->GetLangIDStrDescriptor(pdev->cfg.speed, &len);        
+				  // pbuf = pdev->dev.usr_device->GetLangIDStrDescriptor(pdev->cfg.speed, &len);        
+				  pbuf = USBD_LangIDDesc;
+				  len =  sizeof(USBD_LangIDDesc);  
 				  break;
 			  case USBD_IDX_MFC_STR:
-				  pbuf = pdev->dev.usr_device->GetManufacturerStrDescriptor(pdev->cfg.speed, &len);
+				  // pbuf = pdev->dev.usr_device->GetManufacturerStrDescriptor(pdev->cfg.speed, &len);
+				  len = GetString ( USBD_MANUFACTURER_STRING, unibuf );
+				  pbuf = unibuf;
 				  break;
 			  case USBD_IDX_PRODUCT_STR:
-				  pbuf = pdev->dev.usr_device->GetProductStrDescriptor(pdev->cfg.speed, &len);
+				  // pbuf = pdev->dev.usr_device->GetProductStrDescriptor(pdev->cfg.speed, &len);
+				  if ( speed == USB_OTG_SPEED_HIGH )
+					  len = GetString ( USBD_PRODUCT_HS_STRING, unibuf );
+				  else
+					  len = GetString ( USBD_PRODUCT_FS_STRING, unibuf );
+				  pbuf = unibuf;
 				  break;
 			  case USBD_IDX_SERIAL_STR:
-				  pbuf = pdev->dev.usr_device->GetSerialStrDescriptor(pdev->cfg.speed, &len);
+				  // pbuf = pdev->dev.usr_device->GetSerialStrDescriptor(pdev->cfg.speed, &len);
+				  if ( speed == USB_OTG_SPEED_HIGH )
+					  len = GetString ( USBD_SERIALNUMBER_HS_STRING, unibuf );
+				  else
+					  len = GetString ( USBD_SERIALNUMBER_FS_STRING, unibuf );
+				  pbuf = unibuf;
 				  break;
 			  case USBD_IDX_CONFIG_STR:
-				  pbuf = pdev->dev.usr_device->GetConfigurationStrDescriptor(pdev->cfg.speed, &len);
+				  // pbuf = pdev->dev.usr_device->GetConfigurationStrDescriptor(pdev->cfg.speed, &len);
+				  if ( speed == USB_OTG_SPEED_HIGH )
+					  len = GetString ( USBD_CONFIGURATION_HS_STRING, unibuf );
+				  else
+					  len = GetString ( USBD_CONFIGURATION_FS_STRING, unibuf );
+				  pbuf = unibuf;
 				  break;
 			  case USBD_IDX_INTERFACE_STR:
-				  pbuf = pdev->dev.usr_device->GetInterfaceStrDescriptor(pdev->cfg.speed, &len);
+				  // pbuf = pdev->dev.usr_device->GetInterfaceStrDescriptor(pdev->cfg.speed, &len);
+				  if ( speed == USB_OTG_SPEED_HIGH )
+					  len = GetString ( USBD_INTERFACE_HS_STRING, unibuf );
+				  else
+					  len = GetString ( USBD_INTERFACE_FS_STRING, unibuf );
+				  pbuf = unibuf;
 				  break;
 			  default:
 #ifdef USB_SUPPORT_USER_STRING_DESC
-				  pbuf = pdev->dev.class_cb->GetUsrStrDescriptor(pdev->cfg.speed, (req->wValue) , &len);
+				  // never set up.
+				  // pbuf = pdev->dev.class_cb->GetUsrStrDescriptor(pdev->cfg.speed, (req->wValue) , &len);
 				  break;
 #else      
 				  return 0;
@@ -320,463 +500,141 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
   return 1;
 }
 
-/* =========================================================================== */
-/* =========================================================================== */
-
-/* XXXXXXXXXXXXXXXXXXXXXXXXX */
-/* XXXXXXXXXXXXXXXXXXXXXXXXX */
-/* XXXXXXXXXXXXXXXXXXXXXXXXX */
-/* XXXXXXXXXXXXXXXXXXXXXXXXX */
-
-#ifdef not_a_chance
-
-/*********************************************
-   CDC Device library callbacks
- *********************************************/
-static uint8_t  usbd_cdc_Init        (void  *pdev, uint8_t cfgidx);
-static uint8_t  usbd_cdc_DeInit      (void  *pdev, uint8_t cfgidx);
-static uint8_t  usbd_cdc_Setup       (void  *pdev, USB_SETUP_REQ *req);
-static uint8_t  usbd_cdc_EP0_RxReady  (void *pdev);
-static uint8_t  usbd_cdc_DataIn      (void *pdev, uint8_t epnum);
-static uint8_t  usbd_cdc_DataOut     (void *pdev, uint8_t epnum);
-static uint8_t  usbd_cdc_SOF         (void *pdev);
-
-/*********************************************
-   CDC specific management functions
- *********************************************/
-static void Handle_USBAsynchXfer  (void *pdev);
-static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length);
-
-#ifdef USE_USB_OTG_HS  
-static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length);
-#endif
-
-extern CDC_IF_Prop_TypeDef  APP_FOPS;
-
-extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
-
-__ALIGN_BEGIN uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
-
-__ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END ;
-
-__ALIGN_BEGIN static __IO uint32_t  usbd_cdc_AltSet  __ALIGN_END = 0;
-
-__ALIGN_BEGIN uint8_t __CCMRAM__ USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN_END ;
-
-/* tjt - XXX - it is odd that only the Tx buffer is not specified as
- * being in CCMRAM - and also note that depending on the linker file,
- * it could end up in CCMRAM anyway, this is just a hint to say
- * "put it ih CCMRAM if possible" -- however CCMRAM is supposed to
- * not work with DMA, so there could be trouble waiting here.
- */
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-__ALIGN_BEGIN uint8_t APP_Tx_Buffer   [APP_TX_DATA_SIZE] __ALIGN_END ;
-#else 
-__ALIGN_BEGIN uint8_t __CCMRAM__ APP_Tx_Buffer[APP_TX_DATA_SIZE] __ALIGN_END ;
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
- 
-__ALIGN_BEGIN uint8_t CmdBuff[CDC_CMD_PACKET_SZE] __ALIGN_END ;
-
-volatile uint16_t APP_Tx_ptr_in  = 0;
-volatile uint16_t APP_Tx_ptr_out = 0;
-
-uint8_t  USB_Tx_State = 0;
-
-static uint32_t cdcCmd = 0xFF;
-static uint32_t cdcLen = 0;
-
-/* CDC interface class callbacks structure */
-USBD_Class_cb_TypeDef  USBD_CDC_cb = 
+#ifdef OLD_STUFF
+USBD_DEVICE USR_desc =
 {
-  usbd_cdc_Init,
-  usbd_cdc_DeInit,
-  usbd_cdc_Setup,
-  NULL,                 /* EP0_TxSent, */
-  usbd_cdc_EP0_RxReady,
-  usbd_cdc_DataIn,
-  usbd_cdc_DataOut,
-  usbd_cdc_SOF,
-  NULL,
-  NULL,     
-  USBD_cdc_GetCfgDesc,
-#ifdef USE_USB_OTG_HS   
-  USBD_cdc_GetOtherCfgDesc, /* use same cobfig as per FS */
-#endif /* USE_USB_OTG_HS  */
+  USBD_USR_DeviceDescriptor,
+  USBD_USR_LangIDStrDescriptor, 
+  USBD_USR_ManufacturerStrDescriptor,
+  USBD_USR_ProductStrDescriptor,
+  USBD_USR_SerialStrDescriptor,
+  USBD_USR_ConfigStrDescriptor,
+  USBD_USR_InterfaceStrDescriptor,
 };
 
+
 /**
-  * @brief  usbd_cdc_Init
-  *         Initialize the CDC interface
-  * @param  pdev: device instance
-  * @param  cfgidx: Configuration index
-  * @retval status
-  */
-static uint8_t  usbd_cdc_Init (void  *pdev, 
-                               uint8_t cfgidx)
+* @brief  USBD_USR_DeviceDescriptor 
+*         return the device descriptor
+* @param  speed : current device speed
+* @param  length : pointer to data length variable
+* @retval pointer to descriptor buffer
+*/
+uint8_t *  USBD_USR_DeviceDescriptor( uint8_t speed , uint16_t *length)
 {
-  uint8_t *pbuf;
-
-  /* Open EP IN */
-  DCD_EP_Open(pdev,
-              CDC_IN_EP,
-              CDC_DATA_IN_PACKET_SIZE,
-              USB_OTG_EP_BULK);
-  
-  /* Open EP OUT */
-  DCD_EP_Open(pdev,
-              CDC_OUT_EP,
-              CDC_DATA_OUT_PACKET_SIZE,
-              USB_OTG_EP_BULK);
-  
-  /* Open Command IN EP */
-  DCD_EP_Open(pdev,
-              CDC_CMD_EP,
-              CDC_CMD_PACKET_SZE,
-              USB_OTG_EP_INT);
-  
-  pbuf = (uint8_t *)USBD_DeviceDesc;
-  pbuf[4] = DEVICE_CLASS_CDC;
-  pbuf[5] = DEVICE_SUBCLASS_CDC;
-  
-  /* Initialize the Interface physical components */
-  APP_FOPS.pIf_Init(pdev);
-
-  /* Prepare Out endpoint to receive next packet */
-  DCD_EP_PrepareRx(pdev,
-                   CDC_OUT_EP,
-                   (uint8_t*)(USB_Rx_Buffer),
-                   CDC_DATA_OUT_PACKET_SIZE);
-  
-  return USBD_OK;
+  *length = sizeof(USBD_DeviceDesc);
+  return USBD_DeviceDesc;
 }
 
 /**
-  * @brief  usbd_cdc_Init
-  *         DeInitialize the CDC layer
-  * @param  pdev: device instance
-  * @param  cfgidx: Configuration index
-  * @retval status
-  */
-static uint8_t  usbd_cdc_DeInit (void  *pdev, 
-                                 uint8_t cfgidx)
+* @brief  USBD_USR_LangIDStrDescriptor 
+*         return the LangID string descriptor
+* @param  speed : current device speed
+* @param  length : pointer to data length variable
+* @retval pointer to descriptor buffer
+*/
+uint8_t *  USBD_USR_LangIDStrDescriptor( uint8_t speed , uint16_t *length)
 {
-  /* Open EP IN */
-  DCD_EP_Close(pdev,
-              CDC_IN_EP);
-  
-  /* Open EP OUT */
-  DCD_EP_Close(pdev,
-              CDC_OUT_EP);
-  
-  /* Open Command IN EP */
-  DCD_EP_Close(pdev,
-              CDC_CMD_EP);
-
-  /* Restore default state of the Interface physical components */
-  APP_FOPS.pIf_DeInit();
-  
-  return USBD_OK;
+  *length =  sizeof(USBD_LangIDDesc);  
+  return USBD_LangIDDesc;
 }
 
-/**
-  * @brief  usbd_cdc_Setup
-  *         Handle the CDC specific requests
-  * @param  pdev: instance
-  * @param  req: usb requests
-  * @retval status
-  */
-static uint8_t  usbd_cdc_Setup (void  *pdev, 
-                                USB_SETUP_REQ *req)
-{
-  switch (req->bmRequest & USB_REQ_TYPE_MASK)
-  {
-    /* CDC Class Requests -------------------------------*/
-  case USB_REQ_TYPE_CLASS :
-      /* Check if the request is a data setup packet */
-      if (req->wLength)
-      {
-        /* Check if the request is Device-to-Host */
-        if (req->bmRequest & 0x80)
-        {
-          /* Get the data to be sent to Host from interface layer */
-          APP_FOPS.pIf_Ctrl(req->bRequest, CmdBuff, req->wLength);
-          
-          /* Send the data to the host */
-          USBD_CtlSendData (pdev, 
-                            CmdBuff,
-                            req->wLength);          
-        }
-        else /* Host-to-Device request */
-        {
-          /* Set the value of the current command to be processed */
-          cdcCmd = req->bRequest;
-          cdcLen = req->wLength;
-          
-          /* Prepare the reception of the buffer over EP0
-          Next step: the received data will be managed in usbd_cdc_EP0_TxSent() 
-          function. */
-          USBD_CtlPrepareRx (pdev,
-                             CmdBuff,
-                             req->wLength);          
-        }
-      }
-      else /* No Data request */
-      {
-        /* Transfer the command to the interface layer */
-        APP_FOPS.pIf_Ctrl(req->bRequest, (uint8_t*)&req->wValue, sizeof(req->wValue));
-      }
-      
-      return USBD_OK;
-      
-    default:
-      USBD_CtlError (pdev, req);
-      return USBD_FAIL;
-    
-    /* Standard Requests -------------------------------*/
-  case USB_REQ_TYPE_STANDARD:
-    switch (req->bRequest)
-    {
-    case USB_REQ_GET_DESCRIPTOR: 
-      if( (req->wValue >> 8) == CDC_DESCRIPTOR_TYPE)
-      {
-        uint8_t  *pbuf;
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-		/* XXX - trouble here, where is this? */
-        pbuf = usbd_cdc_Desc;   
-#else
-        pbuf = usbd_cdc_CfgDesc + 9 + (9 * USBD_ITF_MAX_NUM);
-#endif 
-        uint16_t len = MIN(USB_CDC_DESC_SIZ , req->wLength);
-      
-        USBD_CtlSendData (pdev, 
-                          pbuf,
-                          len);
-      }
-      break;
-      
-    case USB_REQ_GET_INTERFACE :
-      USBD_CtlSendData (pdev,
-                        (uint8_t *)&usbd_cdc_AltSet,
-                        1);
-      break;
-      
-    case USB_REQ_SET_INTERFACE :
-      if ((uint8_t)(req->wValue) < USBD_ITF_MAX_NUM)
-      {
-        usbd_cdc_AltSet = (uint8_t)(req->wValue);
-      }
-      else
-      {
-        /* Call the error management function (command will be nacked */
-        USBD_CtlError (pdev, req);
-      }
-      break;
-    }
+/**
+* @brief  USBD_USR_ProductStrDescriptor 
+*         return the product string descriptor
+* @param  speed : current device speed
+* @param  length : pointer to data length variable
+* @retval pointer to descriptor buffer
+*/
+uint8_t *  USBD_USR_ProductStrDescriptor( uint8_t speed , uint16_t *length)
+{
+ 
+  
+  if(speed == 0)
+  {   
+    USBD_GetString (USBD_PRODUCT_HS_STRING, USBD_StrDesc, length);
   }
-  return USBD_OK;
-}
-
-/**
-  * @brief  usbd_cdc_EP0_RxReady
-  *         Data received on control endpoint
-  * @param  pdev: device instance
-  * @retval status
-  */
-static uint8_t  usbd_cdc_EP0_RxReady (void  *pdev)
-{ 
-  if (cdcCmd != NO_CMD)
+  else
   {
-    /* Process the data */
-    APP_FOPS.pIf_Ctrl(cdcCmd, CmdBuff, cdcLen);
-    
-    /* Reset the command variable to default value */
-    cdcCmd = NO_CMD;
+    USBD_GetString (USBD_PRODUCT_FS_STRING, USBD_StrDesc, length);    
   }
-  
-  return USBD_OK;
+  return USBD_StrDesc;
 }
 
 /**
-  * @brief  usbd_audio_DataIn
-  *         Data sent on non-control IN endpoint
-  * @param  pdev: device instance
-  * @param  epnum: endpoint number
-  * @retval status
-  */
-// ala42: applied fix from
-//https://my.st.com/public/STe2ecommunities/mcu/Lists/cortex_mx_stm32/Flat.aspx?RootFolder=%2fpublic%2f
-//STe2ecommunities%2fmcu%2fLists%2fcortex_mx_stm32%2fUSB%20CDC%20Device%20hung%20fix&
-//FolderCTID=0x01200200770978C69A1141439FE559EB459D7580009C4E14902C3CDE46A77F0FFD06506F5B&currentviews=75
-
-static uint8_t
-usbd_cdc_DataIn (void *pdev, uint8_t epnum)
+* @brief  USBD_USR_ManufacturerStrDescriptor 
+*         return the manufacturer string descriptor
+* @param  speed : current device speed
+* @param  length : pointer to data length variable
+* @retval pointer to descriptor buffer
+*/
+uint8_t *  USBD_USR_ManufacturerStrDescriptor( uint8_t speed , uint16_t *length)
 {
-	if (USB_Tx_State == 0) return USBD_OK;
-
-    uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
-    uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
-
-    usb_debug ( DM_ORIG, "usbd_cdc_DataIn called with %d bytes waiting to send on endpoint %d\n", USB_Tx_length, epnum );
-
-    if (USB_Tx_length == 0)
-    {
-        //USB_Tx_State = 0;
-        if (((USB_OTG_CORE_HANDLE*)pdev)->dev.in_ep[epnum].xfer_len != CDC_DATA_IN_PACKET_SIZE)
-        {
-            USB_Tx_State = 0;
-            return USBD_OK;
-        }
-        /* Transmit zero sized packet in case the last one has maximum allowed size. Otherwise
-         * the recipient may expect more data coming soon and not return buffered data to app.
-         * See section 5.8.3 Bulk Transfer Packet Size Constraints
-         * of the USB Specification document.
-        */
-    }
-
-	usb_debug ( DM_WRITE1, "USB Tx datain start: %d\n", USB_Tx_length );
-
-    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE)
-    {
-       USB_Tx_length = CDC_DATA_IN_PACKET_SIZE;
-    }
-    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) )
-    {
-       USB_Tx_length = (APP_TX_DATA_SIZE - USB_Tx_ptr);
-    }
-
-    APP_Tx_ptr_out = (USB_Tx_ptr + USB_Tx_length) & APP_TX_DATA_SIZE_MASK;
-
-	usb_debug ( DM_WRITE1, "USB Tx datain send: %d\n", USB_Tx_length );
-
-    /* Prepare the available data buffer to be sent on IN endpoint */
-    DCD_EP_Tx (pdev,
-                 CDC_IN_EP,
-                 (uint8_t*)&APP_Tx_Buffer[USB_Tx_ptr],
-                 USB_Tx_length);
-
-  return USBD_OK;
-}
-
-void usbd_cdc_PrepareRx (void *pdev)
-{
-    DCD_EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
+  USBD_GetString (USBD_MANUFACTURER_STRING, USBD_StrDesc, length);
+  return USBD_StrDesc;
 }
 
 /**
-  * @brief  usbd_cdc_DataOut
-  *         Data received on non-control Out endpoint
-  * @param  pdev: device instance
-  * @param  epnum: endpoint number
-  * @retval status
-  */
-static uint8_t usbd_cdc_DataOut(void *pdev, uint8_t epnum)
-{      
-  /* Get the received data buffer and update the counter */
-  uint16_t USB_Rx_Cnt = ((USB_OTG_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
-  
-  /* USB data will be immediately processed, this allow next USB traffic being 
-     NAKed till the end of the application Xfer */
-  if ( APP_FOPS.pIf_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==USBD_OK )
+* @brief  USBD_USR_SerialStrDescriptor 
+*         return the serial number string descriptor
+* @param  speed : current device speed
+* @param  length : pointer to data length variable
+* @retval pointer to descriptor buffer
+*/
+uint8_t *  USBD_USR_SerialStrDescriptor( uint8_t speed , uint16_t *length)
+{
+  if(speed  == USB_OTG_SPEED_HIGH)
+  {    
+    USBD_GetString (USBD_SERIALNUMBER_HS_STRING, USBD_StrDesc, length);
+  }
+  else
   {
-    /* Prepare Out endpoint to receive next packet */
-    DCD_EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
+    USBD_GetString (USBD_SERIALNUMBER_FS_STRING, USBD_StrDesc, length);    
   }
-  return USBD_OK;
+  return USBD_StrDesc;
 }
 
 /**
-  * @brief  usbd_cdc_SOF
-  *         Start Of Frame event management
-  * @param  pdev: instance
-  * @param  epnum: endpoint number
-  * @retval status
-  */
-static uint8_t  usbd_cdc_SOF(void *pdev)
-{      
-  static uint32_t FrameCount = 0;
-  
-  if (FrameCount++ == CDC_IN_FRAME_INTERVAL)
+* @brief  USBD_USR_ConfigStrDescriptor 
+*         return the configuration string descriptor
+* @param  speed : current device speed
+* @param  length : pointer to data length variable
+* @retval pointer to descriptor buffer
+*/
+uint8_t *  USBD_USR_ConfigStrDescriptor( uint8_t speed , uint16_t *length)
+{
+  if(speed  == USB_OTG_SPEED_HIGH)
+  {  
+    USBD_GetString (USBD_CONFIGURATION_HS_STRING, USBD_StrDesc, length);
+  }
+  else
   {
-    /* Reset the frame counter */
-    FrameCount = 0;
-    
-    /* Check the data to be sent through IN pipe */
-    Handle_USBAsynchXfer(pdev);
+    USBD_GetString (USBD_CONFIGURATION_FS_STRING, USBD_StrDesc, length); 
   }
-  
-  return USBD_OK;
+  return USBD_StrDesc;  
 }
 
-/**
-  * @brief  Handle_USBAsynchXfer
-  *         Send data to USB
-  * @param  pdev: instance
-  * @retval None
-  */
-static void
-Handle_USBAsynchXfer(void *pdev)
-{
-  if ( USB_Tx_State ) return;
 
-  uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
-  uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
-  if ( USB_Tx_length==0 )
+/**
+* @brief  USBD_USR_InterfaceStrDescriptor 
+*         return the interface string descriptor
+* @param  speed : current device speed
+* @param  length : pointer to data length variable
+* @retval pointer to descriptor buffer
+*/
+uint8_t *  USBD_USR_InterfaceStrDescriptor( uint8_t speed , uint16_t *length)
+{
+  if(speed == 0)
   {
-    return; // nothing to send
+    USBD_GetString (USBD_INTERFACE_HS_STRING, USBD_StrDesc, length);
   }
-
-	usb_debug ( DM_WRITE1, "USB Tx asynch start: %d\n", USB_Tx_length );
-
-    USB_Tx_State = 1;
-
-    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE)
-    {
-       USB_Tx_length = CDC_DATA_IN_PACKET_SIZE;
-    }
-    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) )
-    {
-       USB_Tx_length = (APP_TX_DATA_SIZE - USB_Tx_ptr);
-    }
-
-    APP_Tx_ptr_out = (USB_Tx_ptr+USB_Tx_length)&APP_TX_DATA_SIZE_MASK;
-
-	usb_debug ( DM_WRITE1, "USB Tx asynch send: %d\n", USB_Tx_length );
-
-    DCD_EP_Tx (pdev,
-               CDC_IN_EP,
-               (uint8_t*)&APP_Tx_Buffer[USB_Tx_ptr],
-               USB_Tx_length);
-}
-
-/**
-  * @brief  USBD_cdc_GetCfgDesc 
-  *         Return configuration descriptor
-  * @param  speed : current device speed
-  * @param  length : pointer data length
-  * @retval pointer to descriptor buffer
-  */
-static uint8_t  *USBD_cdc_GetCfgDesc (uint8_t speed, uint16_t *length)
-{
-  *length = sizeof (usbd_cdc_CfgDesc);
-  return usbd_cdc_CfgDesc;
-}
-
-/**
-  * @brief  USBD_cdc_GetCfgDesc 
-  *         Return configuration descriptor
-  * @param  speed : current device speed
-  * @param  length : pointer data length
-  * @retval pointer to descriptor buffer
-  */
-#ifdef USE_USB_OTG_HS 
-static uint8_t  *USBD_cdc_GetOtherCfgDesc (uint8_t speed, uint16_t *length)
-{
-  *length = sizeof (usbd_cdc_OtherCfgDesc);
-  return usbd_cdc_OtherCfgDesc;
+  else
+  {
+    USBD_GetString (USBD_INTERFACE_FS_STRING, USBD_StrDesc, length);
+  }
+  return USBD_StrDesc;  
 }
 #endif
-
-#endif /* not_a_chance */
 
 /* THE END */

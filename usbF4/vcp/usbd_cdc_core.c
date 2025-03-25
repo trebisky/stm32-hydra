@@ -82,7 +82,7 @@ __ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_END
 #endif /* OLDWAY */
 
 extern CDC_IF_Prop_TypeDef  APP_FOPS;
-extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
+// extern uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC];
 
 
 __ALIGN_BEGIN static __IO uint32_t  usbd_cdc_AltSet  __ALIGN_END = 0;
@@ -363,8 +363,8 @@ __ALIGN_BEGIN uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_EN
   * @param  cfgidx: Configuration index
   * @retval status
   */
-static uint8_t  usbd_cdc_Init (void  *pdev, 
-                               uint8_t cfgidx)
+static uint8_t
+usbd_cdc_Init (void  *pdev, uint8_t cfgidx)
 {
   uint8_t *pbuf;
 
@@ -385,10 +385,12 @@ static uint8_t  usbd_cdc_Init (void  *pdev,
               CDC_CMD_EP,
               CDC_CMD_PACKET_SZE,
               USB_OTG_EP_INT);
-  
-  pbuf = (uint8_t *)USBD_DeviceDesc;
+ 
+#ifdef notdef
+  pbuf = (uint8_t *) USBD_DeviceDesc;
   pbuf[4] = DEVICE_CLASS_CDC;
   pbuf[5] = DEVICE_SUBCLASS_CDC;
+#endif
   
   /* Initialize the Interface physical components */
   APP_FOPS.pIf_Init(pdev);

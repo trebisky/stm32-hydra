@@ -19,7 +19,8 @@ typedef void (*bfptr) ( char *, int );
 void
 class_init ( void )
 {
-		usb_register ( &USR_desc, &USBD_CDC_cb );
+		// usb_register ( &USR_desc, &USBD_CDC_cb );
+		usb_register ( NULL, &USBD_CDC_cb );
 }
 
 void

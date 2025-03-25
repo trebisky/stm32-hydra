@@ -13,6 +13,8 @@
 #ifndef __USB_DESC_H
 #define __USB_DESC_H
 
+/* XXX - now only used by usbd_desc.c, so may as well copy it in there */
+
 #include <library/usbd_def.h>
 #include <vcp/usbd_conf.h>
 
@@ -24,11 +26,11 @@
 #define USB_SIZ_DEVICE_DESC                     18
 #define USB_SIZ_STRING_LANGID                   4
 
-extern  uint8_t USBD_DeviceDesc  [USB_SIZ_DEVICE_DESC];
+// extern  uint8_t USBD_DeviceDesc  [USB_SIZ_DEVICE_DESC];
 extern  uint8_t USBD_StrDesc[USB_MAX_STR_DESC_SIZ];
 extern  uint8_t USBD_OtherSpeedCfgDesc[USB_LEN_CFG_DESC]; 
-extern  uint8_t USBD_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC];
-extern  uint8_t USBD_LangIDDesc[USB_SIZ_STRING_LANGID];
+// extern  uint8_t USBD_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC];
+// extern  uint8_t USBD_LangIDDesc[USB_SIZ_STRING_LANGID];
 extern  USBD_DEVICE USR_desc; 
 
 
@@ -46,4 +48,4 @@ uint8_t *     USBD_USR_USRStringDesc (uint8_t speed, uint8_t idx , uint16_t *len
   
 #endif /* __USBD_DESC_H */
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

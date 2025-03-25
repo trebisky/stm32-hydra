@@ -18,7 +18,7 @@
 #include "hydra_usb.h"
 
 /* XXX */
-#include "vcp/usbd_desc.h"
+// #include "vcp/usbd_desc.h"
 #include  "vcp/usbd_conf.h"
 
 __ALIGN_BEGIN uint32_t USBD_ep_status __ALIGN_END  = 0; 
@@ -653,7 +653,7 @@ USBD_CtlError( USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
   USB_OTG_EP0_OutStart(pdev);  
 }
 
-
+#ifdef notdef
 /**
   * @brief  USBD_GetString
   *         Convert Ascii string into unicode one
@@ -697,5 +697,6 @@ USBD_GetLen(uint8_t *buf)
 
     return len;
 }
+#endif
 
 /* THE END */
