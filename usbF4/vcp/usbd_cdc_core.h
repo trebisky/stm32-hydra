@@ -66,7 +66,7 @@ typedef struct _CDC_IF_PROP
 }
 CDC_IF_Prop_TypeDef;
 
-extern USBD_Class_cb_TypeDef  USBD_CDC_cb;
+// extern USBD_Class_cb_TypeDef  USBD_CDC_cb;
 
 #endif  // __USB_CDC_CORE_H_
   

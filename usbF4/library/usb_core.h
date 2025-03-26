@@ -186,6 +186,7 @@ typedef struct _Device_cb
   uint8_t  (*IsoINIncomplete)  (void *pdev); 
   uint8_t  (*IsoOUTIncomplete)  (void *pdev);   
 
+#ifdef notdef
   uint8_t  *(*GetConfigDescriptor)( uint8_t speed , uint16_t *length); 
 #ifdef USB_OTG_HS_CORE 
   uint8_t  *(*GetOtherConfigDescriptor)( uint8_t speed , uint16_t *length);   
@@ -194,6 +195,7 @@ typedef struct _Device_cb
 #ifdef USB_SUPPORT_USER_STRING_DESC 
   uint8_t  *(*GetUsrStrDescriptor)( uint8_t speed ,uint8_t index,  uint16_t *length);   
 #endif  
+#endif /* notdef */
   
 } USBD_Class_cb_TypeDef;
 

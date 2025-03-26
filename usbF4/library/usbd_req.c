@@ -113,10 +113,10 @@ USBD_StdItfReq (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ  *req)
   case USB_OTG_CONFIGURED:
     
     if (LOBYTE(req->wIndex) <= USBD_ITF_MAX_NUM) {
-      pdev->dev.class_cb->Setup (pdev, req); 
+      // pdev->dev.class_cb->Setup (pdev, req); 
+      Klass_Setup (pdev, req); 
       
-      if((req->wLength == 0)&& (ret == USBD_OK))
-      {
+      if((req->wLength == 0)&& (ret == USBD_OK)) {
          USBD_CtlSendStatus(pdev);
       }
     } else {                                               
@@ -164,7 +164,9 @@ USBD_StdEPReq (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ  *req)
           DCD_EP_Stall(pdev , ep_addr);
         }
       }
-      pdev->dev.class_cb->Setup (pdev, req);   
+
+      // pdev->dev.class_cb->Setup (pdev, req);   
+      Klass_Setup (pdev, req);   
       USBD_CtlSendStatus(pdev);
       
       break;
@@ -188,7 +190,8 @@ USBD_StdEPReq (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ  *req)
       if (req->wValue == USB_FEATURE_EP_HALT) {
         if ((ep_addr != 0x00) && (ep_addr != 0x80)) {        
           DCD_EP_ClrStall(pdev , ep_addr);
-          pdev->dev.class_cb->Setup (pdev, req);
+          // pdev->dev.class_cb->Setup (pdev, req);
+          Klass_Setup (pdev, req);
         }
         USBD_CtlSendStatus(pdev);
       }
@@ -322,8 +325,11 @@ USBD_SetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
   } else {
     switch (pdev->dev.device_status) {
     case USB_OTG_ADDRESSED:
+	  /* We do see this at the end of enumeration */
+	  usb_debug ( DM_ENUM, "Configured %d-- addressed\n", cfgidx );
       if (cfgidx) {                                			   							   							   				
         pdev->dev.device_config = cfgidx;
+		/* XXX swapped from below ? */
         pdev->dev.device_status = USB_OTG_CONFIGURED;
         USBD_SetCfg(pdev , cfgidx);
         USBD_CtlSendStatus(pdev);
@@ -333,7 +339,10 @@ USBD_SetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
       break;
       
     case USB_OTG_CONFIGURED:
+	  /* We ain't never seen this */
+	  usb_debug ( DM_ENUM, "====   Configured %d-- configured\n", cfgidx );
       if (cfgidx == 0) {                           
+		/* XXX swapped from above ? */
         pdev->dev.device_status = USB_OTG_ADDRESSED;
         pdev->dev.device_config = cfgidx;          
         USBD_ClrCfg(pdev , cfgidx);
@@ -435,7 +444,8 @@ USBD_SetFeature(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
  
   if (req->wValue == USB_FEATURE_REMOTE_WAKEUP) {
     pdev->dev.DevRemoteWakeup = 1;  
-    pdev->dev.class_cb->Setup (pdev, req);   
+    // pdev->dev.class_cb->Setup (pdev, req);   
+    Klass_Setup (pdev, req);   
     USBD_CtlSendStatus(pdev);
   } else if ((req->wValue == USB_FEATURE_TEST_MODE) && 
            ((req->wIndex & 0xFF) == 0)) {
@@ -484,7 +494,8 @@ USBD_ClrFeature(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
   case USB_OTG_CONFIGURED:
     if (req->wValue == USB_FEATURE_REMOTE_WAKEUP) {
       pdev->dev.DevRemoteWakeup = 0; 
-      pdev->dev.class_cb->Setup (pdev, req);   
+      // pdev->dev.class_cb->Setup (pdev, req);   
+      Klass_Setup (pdev, req);   
       USBD_CtlSendStatus(pdev);
     }
     break;

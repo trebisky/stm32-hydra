@@ -71,23 +71,25 @@ usb_hookup ( bfptr fn )
 }
 
 /* From -- vcp/usbd_desc.c */
-static USBD_DEVICE *class_desc;
+// static USBD_DEVICE *class_desc;
 
 /* From -- vcp/usbd_cdc_core.c */
 // static USBD_Class_cb_TypeDef  USBD_CDC_cb;
-static USBD_Class_cb_TypeDef  *class_cb;
+// static USBD_Class_cb_TypeDef  *class_cb;
 
 /* From -- library/usbd_usr.c */
 // static USBD_Usr_cb_TypeDef USR_cb;
 
+#ifdef notdef
 /* Called by the class in response to the class_init() call
  */
 void
 usb_register ( USBD_DEVICE *desc, USBD_Class_cb_TypeDef *cb )
 {
-		class_desc = desc;
-		class_cb = cb;
+		// class_desc = desc;
+		// class_cb = cb;
 }
+#endif
 
 /* ============================================================================== */
 /* ============================================================================== */
@@ -142,15 +144,15 @@ fusb_init (void)
 	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
       USBD_Init(&USB_OTG_dev,
             USB_OTG_HS_CORE_ID,
-            class_desc,
-            class_cb,
+            NULL,
+            NULL,
             &USR_cb);
 #else
 	  printf ( "Initialize FS usb core with IRQ %d\n", IRQ_USB_FS );
       USBD_Init(&USB_OTG_dev,
             USB_OTG_FS_CORE_ID,
-            class_desc,
-            class_cb,
+            NULL,
+            NULL,
             &USR_cb);
 #endif
 
@@ -297,8 +299,8 @@ void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 // static int usb_debug_mask = DM_READ1;
 // static int usb_debug_mask = DM_ORIG;
 // static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
-// static int usb_debug_mask = DM_DESC;
-static int usb_debug_mask = DM_ALL;
+static int usb_debug_mask = DM_DESC | DM_ENUM | DM_EVENT;;
+// static int usb_debug_mask = DM_ALL;
 // static int usb_debug_mask = 0;
 
 void

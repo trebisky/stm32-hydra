@@ -57,15 +57,15 @@
 #include "library/usbd_req.h"
 
 /*********************************************
-   CDC Device library callbacks
+   prototypes for CDC Device library callbacks
  *********************************************/
-static uint8_t  usbd_cdc_Init        (void  *pdev, uint8_t cfgidx);
-static uint8_t  usbd_cdc_DeInit      (void  *pdev, uint8_t cfgidx);
-static uint8_t  usbd_cdc_Setup       (void  *pdev, USB_SETUP_REQ *req);
-static uint8_t  usbd_cdc_EP0_RxReady  (void *pdev);
-static uint8_t  usbd_cdc_DataIn      (void *pdev, uint8_t epnum);
-static uint8_t  usbd_cdc_DataOut     (void *pdev, uint8_t epnum);
-static uint8_t  usbd_cdc_SOF         (void *pdev);
+// static uint8_t  usbd_cdc_Init        (void  *pdev, uint8_t cfgidx);
+// static uint8_t  usbd_cdc_DeInit      (void  *pdev, uint8_t cfgidx);
+//static uint8_t  usbd_cdc_Setup       (void  *pdev, USB_SETUP_REQ *req);
+// static uint8_t  usbd_cdc_EP0_RxReady  (void *pdev);
+// static uint8_t  usbd_cdc_DataIn      (void *pdev, uint8_t epnum);
+// static uint8_t  usbd_cdc_DataOut     (void *pdev, uint8_t epnum);
+// static uint8_t  usbd_cdc_SOF         (void *pdev);
 
 /*********************************************
    CDC specific management functions
@@ -106,7 +106,6 @@ bogusDesc (uint8_t speed, uint16_t *length)
 {
 	panic ( "bogusDesc" );
 }
-#endif
 
 /* CDC interface class callbacks structure */
 USBD_Class_cb_TypeDef  USBD_CDC_cb = 
@@ -128,6 +127,23 @@ USBD_Class_cb_TypeDef  USBD_CDC_cb =
 #endif /* USE_USB_OTG_HS  */
 #endif
 };
+#endif
+
+#ifdef notdef
+USBD_Class_cb_TypeDef  USBD_CDC_cb = 
+{
+  NULL,		/* Init */
+  NULL,
+  NULL,					/* Setup */
+  NULL,                 /* EP0_TxSent */
+  NULL,					/* EP0_RxReady */
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+#endif
 
 /**
   * @brief  usbd_cdc_Init
@@ -136,8 +152,10 @@ USBD_Class_cb_TypeDef  USBD_CDC_cb =
   * @param  cfgidx: Configuration index
   * @retval status
   */
-static uint8_t
-usbd_cdc_Init (void  *pdev, uint8_t cfgidx)
+// static uint8_t
+// usbd_cdc_Init (void  *pdev, uint8_t cfgidx)
+uint8_t
+Klass_Init (void  *pdev, uint8_t cfgidx)
 {
   uint8_t *pbuf;
 
@@ -184,8 +202,10 @@ usbd_cdc_Init (void  *pdev, uint8_t cfgidx)
   * @param  cfgidx: Configuration index
   * @retval status
   */
-static uint8_t  
-usbd_cdc_DeInit (void  *pdev, uint8_t cfgidx)
+// static uint8_t  
+// usbd_cdc_DeInit (void  *pdev, uint8_t cfgidx)
+uint8_t  
+Klass_DeInit (void  *pdev, uint8_t cfgidx)
 {
   /* Open EP IN */
   DCD_EP_Close(pdev,
@@ -205,6 +225,24 @@ usbd_cdc_DeInit (void  *pdev, uint8_t cfgidx)
   return USBD_OK;
 }
 
+void
+Klass_EP0_TxSent ( void *pdev )
+{
+	/* nothing */
+}
+
+void
+Klass_IsoINIncomplete ( void *pdev )
+{
+	/* nothing */
+}
+
+void
+Klass_IsoOUTIncomplete ( void *pdev )
+{
+	/* nothing */
+}
+
 /**
   * @brief  usbd_cdc_Setup
   *         Handle the CDC specific requests
@@ -212,8 +250,10 @@ usbd_cdc_DeInit (void  *pdev, uint8_t cfgidx)
   * @param  req: usb requests
   * @retval status
   */
-static uint8_t  usbd_cdc_Setup (void  *pdev, 
-                                USB_SETUP_REQ *req)
+// static uint8_t
+// usbd_cdc_Setup (void  *pdev, USB_SETUP_REQ *req)
+uint8_t
+Klass_Setup (void  *pdev, USB_SETUP_REQ *req)
 {
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
@@ -311,8 +351,10 @@ static uint8_t  usbd_cdc_Setup (void  *pdev,
   * @param  pdev: device instance
   * @retval status
   */
-static uint8_t
-usbd_cdc_EP0_RxReady (void  *pdev)
+// static uint8_t
+// usbd_cdc_EP0_RxReady (void  *pdev)
+uint8_t
+Klass_EP0_RxReady ( void  *pdev)
 { 
   if (cdcCmd != NO_CMD) {
     /* Process the data */
@@ -337,8 +379,10 @@ usbd_cdc_EP0_RxReady (void  *pdev)
 //STe2ecommunities%2fmcu%2fLists%2fcortex_mx_stm32%2fUSB%20CDC%20Device%20hung%20fix&
 //FolderCTID=0x01200200770978C69A1141439FE559EB459D7580009C4E14902C3CDE46A77F0FFD06506F5B&currentviews=75
 
-static uint8_t
-usbd_cdc_DataIn (void *pdev, uint8_t epnum)
+// static uint8_t
+// usbd_cdc_DataIn (void *pdev, uint8_t epnum)
+uint8_t
+Klass_DataIn (void *pdev, uint8_t epnum)
 {
 	if (USB_Tx_State == 0) return USBD_OK;
 
@@ -398,7 +442,8 @@ void usbd_cdc_PrepareRx (void *pdev)
   * @param  epnum: endpoint number
   * @retval status
   */
-static uint8_t usbd_cdc_DataOut(void *pdev, uint8_t epnum)
+// static uint8_t usbd_cdc_DataOut(void *pdev, uint8_t epnum)
+uint8_t Klass_DataOut(void *pdev, uint8_t epnum)
 {      
   /* Get the received data buffer and update the counter */
   uint16_t USB_Rx_Cnt = ((USB_OTG_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
@@ -420,12 +465,12 @@ static uint8_t usbd_cdc_DataOut(void *pdev, uint8_t epnum)
   * @param  epnum: endpoint number
   * @retval status
   */
-static uint8_t  usbd_cdc_SOF(void *pdev)
+// static uint8_t  usbd_cdc_SOF(void *pdev)
+uint8_t  Klass_SOF(void *pdev)
 {      
   static uint32_t FrameCount = 0;
   
-  if (FrameCount++ == CDC_IN_FRAME_INTERVAL)
-  {
+  if (FrameCount++ == CDC_IN_FRAME_INTERVAL) {
     /* Reset the frame counter */
     FrameCount = 0;
     
