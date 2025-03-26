@@ -14,10 +14,10 @@
 #include "libmaple_types.h"
 
 #include "usb_conf.h"
-#include "vcp/usbd_conf.h"
 
 #include "usb_regs.h"
 #include "usb_defines.h"
+
 #include "library/usb_core.h"
 
 /**
@@ -26,7 +26,8 @@
 * @param  pdev : Selected device
 * @retval None
 */
-static void USB_OTG_EnableCommonInt(USB_OTG_CORE_HANDLE *pdev)
+static void
+USB_OTG_EnableCommonInt(USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_GINTMSK_TypeDef  int_mask;
   

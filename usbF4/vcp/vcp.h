@@ -1,20 +1,22 @@
 /**
   ******************************************************************************
-  * @file    usbd_cdc_core.h
-  * @author  MCD Application Team
-  * @version V1.0.0
+  * @file    vcp.h
   * @date    22-July-2011
-  * @brief   header file for the usbd_cdc_core.c file.
   ******************************************************************************
   * COPYRIGHT 2011 STMicroelectronics</center></h2>
   ******************************************************************************
-  */ 
+  */
 
-#ifndef __USB_CDC_CORE_H_
-#define __USB_CDC_CORE_H_
+#ifndef __USBD_CDC_VCP_H
+#define __USBD_CDC_VCP_H
 
-#include "library/usbd_ioreq.h"
-#include "library/usb_core.h"
+/* The following structures groups all needed parameters to be configured for the
+   ComPort. These parameters can modified on the fly by the host through CDC class
+   command class requests. */
+
+/*  This all used to be in cdc.h.
+ * Everything that was in vcp.h got pulled into vcp.c
+ */
 
 #define USB_CDC_CONFIG_DESC_SIZ                (67)
 #define USB_CDC_DESC_SIZ                       (67-9)
@@ -66,8 +68,6 @@ typedef struct _CDC_IF_PROP
 }
 CDC_IF_Prop_TypeDef;
 
-// extern USBD_Class_cb_TypeDef  USBD_CDC_cb;
+#endif /* __USBD_CDC_VCP_H */
 
-#endif  // __USB_CDC_CORE_H_
-  
 /* THE END */

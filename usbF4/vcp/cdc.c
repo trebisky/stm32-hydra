@@ -11,9 +11,23 @@
   *           - OUT/IN data transfer
   *           - Command IN transfer (class requests management)
   *           - Error management
-  *           
-  *  @verbatim
-  *      
+  *
+  ******************************************************************************               
+  * COPYRIGHT 2011 STMicroelectronics
+  ******************************************************************************
+  */
+
+#include "hydra_usb.h"
+
+#include "usbd_core.h"
+#include "usbd_req.h"
+
+#include "usb_conf.h"
+#include "conf.h"
+#include "vcp.h"
+
+
+/**
   *          ===================================================================      
   *                                CDC Class Driver Description
   *          =================================================================== 
@@ -41,20 +55,8 @@
   *             - Any class-specific aspect relative to communication classes should be managed by user application.
   *             - All communication classes other than PSTN are not managed
   *      
-  *  @endverbatim
-  *                                  
-  ******************************************************************************               
-  * COPYRIGHT 2011 STMicroelectronics
-  ******************************************************************************
   */ 
 
-#include "hydra_usb.h"
-
-#include "usbd_conf.h"
-
-#include "usbd_cdc_core.h"
-// #include "vcp/usbd_desc.h"
-#include "library/usbd_req.h"
 
 /*********************************************
    prototypes for CDC Device library callbacks

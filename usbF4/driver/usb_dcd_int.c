@@ -24,8 +24,6 @@ typedef int IRQn_Type;
 #define __NVIC_PRIO_BITS          4
 #define __Vendor_SysTickConfig    1
 
-// #include <vcp/core_cm4.h>
-
 /* static functions */
 static uint32_t DCD_ReadDevInEP (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum);
 

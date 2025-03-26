@@ -26,6 +26,13 @@ typedef unsigned char	u8;
 
 /* ---------------------------------------------------------------------------- */
 
+/* These may change with a different class, this is correct for VCP */
+
+#define USBD_CFG_MAX_NUM                1
+#define USBD_ITF_MAX_NUM                1
+
+/* ---------------------------------------------------------------------------- */
+
 /* USB Core and PHY interface configuration.
    Tip: To avoid modifying these defines each time you need to change the USB
         configuration, you can declare the needed define in your toolchain

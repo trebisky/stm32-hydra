@@ -8,11 +8,14 @@
 #include "hydra_usb.h"
 
 #include "usbd_def.h"
-#include "usbd_conf.h"
+#include "usb_conf.h"
+#include "conf.h"
+
+#include "usbd_core.h"
+#include "usbd_req.h"
 
 // unsure if the following are needed
-#include "usbd_cdc_core.h"
-#include "usbd_req.h"
+#include "vcp.h"
 
 /* =========================================================================== */
 

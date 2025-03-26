@@ -17,13 +17,6 @@
 
 #include "hydra_usb.h"
 
-/* XXX */
-// #include "vcp/usbd_desc.h"
-#include  "vcp/usbd_conf.h"
-
-// __ALIGN_BEGIN uint8_t USBD_StrDesc[USB_MAX_STR_DESC_SIZ] __ALIGN_END ;
-
-
 __ALIGN_BEGIN uint32_t USBD_ep_status __ALIGN_END  = 0; 
 
 __ALIGN_BEGIN uint32_t  USBD_default_cfg __ALIGN_END  = 0;

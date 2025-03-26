@@ -21,7 +21,7 @@ typedef enum {
   USBD_OK   = 0,
   USBD_BUSY,
   USBD_FAIL,
-}USBD_Status;
+} USBD_Status;
 
 void USBD_Init(USB_OTG_CORE_HANDLE *pdev,
                USB_OTG_CORE_ID_TypeDef coreID, 

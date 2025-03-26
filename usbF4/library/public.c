@@ -10,15 +10,6 @@
 
 #include "usbd_usr.h"
 
-/* XXX - for now we need these include files,
- * but ultimately we will have the class register these
- * things in response to a init call
- */
-// library/public.c:124:14: error: 'USR_desc' undeclared (first use in this function)
-// library/public.c:125:14: error: 'USBD_CDC_cb' undeclared (first use in this function)
-// #include "vcp/usbd_cdc_core.h"
-// #include "vcp/usbd_desc.h"
-
 typedef void (*bfptr) ( char *, int );
 
 static void gpio_usb_init ( void );
@@ -70,26 +61,8 @@ usb_hookup ( bfptr fn )
 		class_usb_hookup ( fn );
 }
 
-/* From -- vcp/usbd_desc.c */
-// static USBD_DEVICE *class_desc;
-
-/* From -- vcp/usbd_cdc_core.c */
-// static USBD_Class_cb_TypeDef  USBD_CDC_cb;
-// static USBD_Class_cb_TypeDef  *class_cb;
-
 /* From -- library/usbd_usr.c */
 // static USBD_Usr_cb_TypeDef USR_cb;
-
-#ifdef notdef
-/* Called by the class in response to the class_init() call
- */
-void
-usb_register ( USBD_DEVICE *desc, USBD_Class_cb_TypeDef *cb )
-{
-		// class_desc = desc;
-		// class_cb = cb;
-}
-#endif
 
 /* ============================================================================== */
 /* ============================================================================== */

@@ -12,22 +12,32 @@
 
 #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
 #pragma     data_alignment = 4
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
+#endif
 
 #include "hydra_usb.h"
+#include "types.h"
+#include "usbd_core.h"
 
-#include "usbd_cdc_vcp.h"
+#include "conf.h"
+#include "vcp.h"
+
+#define DEFAULT_CONFIG                  0
+#define OTHER_CONFIG                    1
+
+typedef struct {
+  uint32_t bitrate;
+  uint8_t  format;
+  uint8_t  paritytype;
+  uint8_t  datatype;
+} LINE_CODING;
 
 LINE_CODING linecoding =
-  {
+{
     115200, /* baud rate*/
     0x00,   /* stop bits-1*/
     0x00,   /* parity - none*/
     0x08    /* nb. of bits 8*/
-  };
-
-
-//USART_InitTypeDef USART_InitStructure;
+};
 
 /* These are external variables imported from CDC core to be used for IN
    transfer management. */
@@ -43,6 +53,7 @@ extern volatile uint16_t APP_Tx_ptr_out;
 #define UsbRecBufferSizeMask (UsbRecBufferSize-1)
 
 uint8_t __CCMRAM__ UsbRecBuffer[UsbRecBufferSize];
+
 volatile int UsbRecRead = 0;
 volatile int UsbRecWrite = 0;
 volatile uint8_t VCP_DTRHIGH = 0;
@@ -54,7 +65,8 @@ USB_OTG_CORE_HANDLE * usbDevice = NULL;
 uint8_t VCPGetDTR(void) { return VCP_DTRHIGH; }
 uint8_t VCPGetRTS(void) { return VCP_RTSHIGH; }
 
-uint32_t VCPBytesAvailable(void)
+uint32_t
+VCPBytesAvailable(void)
 {
 	return (UsbRecWrite - UsbRecRead) & UsbRecBufferSizeMask;
 }

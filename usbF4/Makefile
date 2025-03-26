@@ -11,10 +11,11 @@ endif
 #VCP_OBJS = misc.o  usbd_cdc_vcp.o  usbd_desc.o  usbd_usr.o
 #VCP_OBJS = class.o usbd_cdc_vcp.o  usbd_desc.o
 #VCP_OBJS = class.o desc.o usbd_cdc_vcp.o  usbd_desc.o
-VCP_OBJS = class.o desc.o usbd_cdc_vcp.o
+#VCP_OBJS = class.o desc.o usbd_cdc_vcp.o
+VCP_OBJS = class.o desc.o vcp.o cdc.o
 
 DRIVER_OBJS = usb_core.o  usb_dcd.o  usb_dcd_int.o
-LIBR_OBJS = public.o usbd_cdc_core.o  usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
+LIBR_OBJS = public.o usbd_core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
 
 # Files we no longer need, but keep around for reference
 OLD_EXTRA = misc.c usb_bsp.c
@@ -40,11 +41,11 @@ class.o: vcp/class.c
 	$(CC) -o $@ -c $<
 desc.o: vcp/desc.c
 	$(CC) -o $@ -c $<
-usbd_cdc_vcp.o: vcp/usbd_cdc_vcp.c
+vcp.o: vcp/vcp.c
+	$(CC) -o $@ -c $<
+cdc.o: vcp/cdc.c
 	$(CC) -o $@ -c $<
 usbd_desc.o: vcp/usbd_desc.c
-	$(CC) -o $@ -c $<
-usbd_cdc_core.o: vcp/usbd_cdc_core.c
 	$(CC) -o $@ -c $<
 
 # From driver
@@ -56,8 +57,6 @@ usb_dcd_int.o: driver/usb_dcd_int.c
 	$(CC) -o $@ -c $<
 
 # From library
-#usbd_cdc_core.o: library/usbd_cdc_core.c
-#	$(CC) -o $@ -c $<
 public.o: library/public.c
 	$(CC) -o $@ -c $<
 usbd_core.o: library/usbd_core.c

@@ -13,11 +13,9 @@
 #ifndef __USBD_CONF__H__
 #define __USBD_CONF__H__
 
-//#include   "stm32f4_discovery.h"
-#include "usb_conf.h"
-
-#define USBD_CFG_MAX_NUM                1
-#define USBD_ITF_MAX_NUM                1
+// Moved to main conf file
+// #define USBD_CFG_MAX_NUM                1
+// #define USBD_ITF_MAX_NUM                1
 
 #define CDC_IN_EP                       0x81  /* EP1 for data IN */
 #define CDC_OUT_EP                      0x01  /* EP1 for data OUT */
@@ -46,5 +44,4 @@
 
 #endif //__USBD_CONF__H__
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+/* THE END */
