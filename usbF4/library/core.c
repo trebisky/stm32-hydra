@@ -19,6 +19,7 @@
 #include "driver/usb_dcd_int.h"
 #include "driver/usb_dcd.h"
 
+#ifdef notdef
 static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
 static uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
 static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev);
@@ -52,11 +53,17 @@ USBD_DCD_INT_cb_TypeDef USBD_DCD_INT_cb =
 };
 
 USBD_DCD_INT_cb_TypeDef  *USBD_DCD_INT_fops = &USBD_DCD_INT_cb;
+#endif
 
 /* These macros and functions replace USR_cb and all the stuff
  * in the file usbd_usr.c
  */
 static volatile uint8_t usb_status;
+
+/* XXX - note that there is also this, which seems to sort
+ * of redundantly duplicate our little status variable.
+ *   pdev->dev.device_status = USB_OTG_DEFAULT;
+ */
 
 #define ST_CONFIGURED 	0x01
 #define ST_CONNECTED 	0x02
@@ -142,7 +149,8 @@ USBD_Status USBD_DeInitFull(USB_OTG_CORE_HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev)
+uint8_t
+CORE_SetupStage(USB_OTG_CORE_HANDLE *pdev)
 {
   USB_SETUP_REQ req;
   
@@ -180,7 +188,10 @@ static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev)
 * @param  epnum: endpoint index
 * @retval status
 */
-static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
+// static uint8_t
+// USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
+uint8_t
+CORE_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
 {
   USB_OTG_EP *ep;
   
@@ -230,8 +241,8 @@ static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
 * @param  epnum: endpoint index
 * @retval status
 */
-static uint8_t
-USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
+uint8_t
+CORE_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
 {
   USB_OTG_EP *ep;
   
@@ -281,8 +292,8 @@ USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
   return USBD_OK;
 }
 
-static uint8_t
-USBD_Reset(USB_OTG_CORE_HANDLE  *pdev)
+uint8_t
+CORE_Reset(USB_OTG_CORE_HANDLE  *pdev)
 {
   /* Open EP0 OUT */
   DCD_EP_Open(pdev,
@@ -300,32 +311,35 @@ USBD_Reset(USB_OTG_CORE_HANDLE  *pdev)
   pdev->dev.device_status = USB_OTG_DEFAULT;
   // pdev->dev.usr_cb->DeviceReset(pdev->cfg.speed);
   STATUS_Reset();
+  usb_debug ( DM_EVENT, "Reset\n" );
   
   return USBD_OK;
 }
 
-static uint8_t
-USBD_Resume(USB_OTG_CORE_HANDLE  *pdev)
+uint8_t
+CORE_Resume(USB_OTG_CORE_HANDLE  *pdev)
 {
   /* Upon Resume call usr call back */
   // pdev->dev.usr_cb->DeviceResumed(); 
   STATUS_Set ( ST_RESUMED );
+  usb_debug ( DM_EVENT, "Resumed\n" );
   pdev->dev.device_status = USB_OTG_CONFIGURED;  
   return USBD_OK;
 }
 
-static uint8_t
-USBD_Suspend(USB_OTG_CORE_HANDLE  *pdev)
+uint8_t
+CORE_Suspend(USB_OTG_CORE_HANDLE  *pdev)
 {
   /* Upon Resume call usr call back */
   // pdev->dev.usr_cb->DeviceSuspended(); 
   STATUS_Clear ( ST_RESUMED );
+  usb_debug ( DM_EVENT, "Suspended\n" );
   pdev->dev.device_status  = USB_OTG_SUSPENDED;
   return USBD_OK;
 }
 
-static uint8_t
-USBD_SOF(USB_OTG_CORE_HANDLE  *pdev)
+uint8_t
+CORE_SOF(USB_OTG_CORE_HANDLE  *pdev)
 {
   // if(pdev->dev.class_cb->SOF) {
   //   pdev->dev.class_cb->SOF(pdev); 
@@ -343,6 +357,7 @@ USBD_SetCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx)
   /* Upon set config call usr call back */
   // pdev->dev.usr_cb->DeviceConfigured();
   STATUS_Set ( ST_CONFIGURED );
+  usb_debug ( DM_EVENT, "Configured\n" );
   return USBD_OK; 
 }
 
@@ -354,16 +369,16 @@ USBD_ClrCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx)
   return USBD_OK;
 }
 
-static uint8_t
-USBD_IsoINIncomplete(USB_OTG_CORE_HANDLE  *pdev)
+ uint8_t
+CORE_IsoINIncomplete(USB_OTG_CORE_HANDLE  *pdev)
 {
   // pdev->dev.class_cb->IsoINIncomplete(pdev);   
   CLASS_IsoINIncomplete ( pdev );   
   return USBD_OK;
 }
 
-static uint8_t
-USBD_IsoOUTIncomplete(USB_OTG_CORE_HANDLE  *pdev)
+uint8_t
+CORE_IsoOUTIncomplete(USB_OTG_CORE_HANDLE  *pdev)
 {
   // pdev->dev.class_cb->IsoOUTIncomplete(pdev);   
   CLASS_IsoOUTIncomplete ( pdev );   
@@ -371,19 +386,21 @@ USBD_IsoOUTIncomplete(USB_OTG_CORE_HANDLE  *pdev)
 }
 
 #ifdef VBUS_SENSING_ENABLED
-static uint8_t
-USBD_DevConnected(USB_OTG_CORE_HANDLE  *pdev)
+uint8_t
+CORE_DevConnected(USB_OTG_CORE_HANDLE  *pdev)
 {
   // pdev->dev.usr_cb->DeviceConnected();
   STATUS_Set ( ST_CONNECTED );
+  usb_debug ( DM_EVENT, "Connected\n" );
   return USBD_OK;
 }
 
-static uint8_t
-USBD_DevDisconnected(USB_OTG_CORE_HANDLE  *pdev)
+uint8_t
+CORE_DevDisconnected(USB_OTG_CORE_HANDLE  *pdev)
 {
   // pdev->dev.usr_cb->DeviceDisconnected();
   STATUS_Clear ( ST_CONNECTED );
+  usb_debug ( DM_EVENT, "Disconnected\n" );
   // pdev->dev.class_cb->DeInit(pdev, 0);
   CLASS_DeInit(pdev, 0);
   return USBD_OK;
