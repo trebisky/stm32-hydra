@@ -13,7 +13,7 @@
 #ifndef __USB_CORE_H__
 #define __USB_CORE_H__
 
-#include "libmaple_types.h"
+#include "types.h"
 #include "usb_conf.h"
 
 #include "driver/usb_regs.h"

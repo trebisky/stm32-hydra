@@ -8,7 +8,7 @@
 
 #include <stdarg.h>
 
-#include "usbd_usr.h"
+#include "usbd_core.h"
 
 typedef void (*bfptr) ( char *, int );
 
@@ -61,9 +61,6 @@ usb_hookup ( bfptr fn )
 		class_usb_hookup ( fn );
 }
 
-/* From -- library/usbd_usr.c */
-// static USBD_Usr_cb_TypeDef USR_cb;
-
 /* ============================================================================== */
 /* ============================================================================== */
 /* Next we have things called from the above that are "glue" to the
@@ -109,44 +106,21 @@ fusb_init (void)
 
         gpio_usb_init ();
 
-		/* Should trigger a callback to usb_register() */
+		/* Doesn't currently do anything */
 		class_init ();
 
 /* Change this choice in usb_conf.h */
+
 #ifdef USE_USB_OTG_HS
 	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
-      USBD_Init(&USB_OTG_dev,
-            USB_OTG_HS_CORE_ID,
-            NULL,
-            NULL,
-            &USR_cb);
+      // USBD_Init(&USB_OTG_dev, USB_OTG_HS_CORE_ID, &USR_cb );
+      USBD_Init(&USB_OTG_dev, USB_OTG_HS_CORE_ID );
 #else
 	  printf ( "Initialize FS usb core with IRQ %d\n", IRQ_USB_FS );
-      USBD_Init(&USB_OTG_dev,
-            USB_OTG_FS_CORE_ID,
-            NULL,
-            NULL,
-            &USR_cb);
+      // USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID, &USR_cb );
+      USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID );
 #endif
 
-#ifdef notdef
-#ifdef USE_USB_OTG_HS
-	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
-      USBD_Init(&USB_OTG_dev,
-            USB_OTG_HS_CORE_ID,
-            &USR_desc,
-            &USBD_CDC_cb,
-            &USR_cb);
-#else
-	  printf ( "Initialize FS usb core with IRQ %d\n", IRQ_USB_FS );
-      USBD_Init(&USB_OTG_dev,
-            USB_OTG_FS_CORE_ID,
-            &USR_desc,
-            &USBD_CDC_cb,
-            &USR_cb);
-#endif
-
-#endif
 		/* XXX someday will be 0 or 1 */
 		return 0;
 }

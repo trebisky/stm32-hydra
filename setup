@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# You must source this file
+
+# Add some aliases to make my work on this
+# project easier
+
+# No spaces in the assignment
+BASE=`pwd`
+
+CDL=$BASE/usbF4/library
+CDD=$BASE/usbF4/driver
+CDV=$BASE/usbF4/vcp
+
+echo $BASE
+
+alias cdl='cd $CDL'
+alias cdd='cd $CDD'
+alias cdv='cd $CDV'
+alias build='cd $BASE; make'
+alias cbuild='cd $BASE; make clean; make'

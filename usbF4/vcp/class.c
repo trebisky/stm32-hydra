@@ -9,7 +9,7 @@
 #include "hydra_usb.h"
 #include "usb.h"
 
-#include "usbd_usr.h"
+// #include "usbd_usr.h"
 #include "vcp.h"
 
 typedef void (*bfptr) ( char *, int );
