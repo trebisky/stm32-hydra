@@ -71,7 +71,6 @@ usb_hookup ( bfptr fn )
 }
 
 /* From -- vcp/usbd_desc.c */
-// static USBD_DEVICE USR_desc;
 static USBD_DEVICE *class_desc;
 
 /* From -- vcp/usbd_cdc_core.c */
@@ -110,7 +109,8 @@ fusb_init (void)
       gpio_set_mode(BOARD_USB_DP_PIN, GPIO_OUTPUT_OD); // ala42
 
       gpio_clear_pin(BOARD_USB_DP_PIN); // ala42
-      delay_us(50000);
+      // delay_us(50000);
+      delay_ms(50);
 
       /* initialize the usb application */
       gpio_set_pin(BOARD_USB_DP_PIN); // ala42 // presents us to the host
@@ -232,6 +232,10 @@ fusb_read ( int fd, char *buf, int len )
  * This includes our interrupt glue routines
  */
 
+#ifdef notdef
+/* XXX get rid of these, they are only correct for
+ * the CPU clock on the F411
+ */
 /* Delay in microseconds
  */
 void 
@@ -254,6 +258,7 @@ board_mDelay (const uint32_t msec)
 {
   board_uDelay ( msec * 1000 );
 }
+#endif
 
 /* A footnote on figure 26, page 272 of the TRM says
  * that the value 12 is used for the usb HS when used in
@@ -292,8 +297,8 @@ void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 // static int usb_debug_mask = DM_READ1;
 // static int usb_debug_mask = DM_ORIG;
 // static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
-static int usb_debug_mask = DM_DESC;
-// static int usb_debug_mask = DM_ALL;
+// static int usb_debug_mask = DM_DESC;
+static int usb_debug_mask = DM_ALL;
 // static int usb_debug_mask = 0;
 
 void

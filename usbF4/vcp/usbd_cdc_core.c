@@ -100,11 +100,13 @@ uint8_t  USB_Tx_State = 0;
 static uint32_t cdcCmd = 0xFF;
 static uint32_t cdcLen = 0;
 
+#ifdef notdef
 static uint8_t  *
 bogusDesc (uint8_t speed, uint16_t *length)
 {
 	panic ( "bogusDesc" );
 }
+#endif
 
 /* CDC interface class callbacks structure */
 USBD_Class_cb_TypeDef  USBD_CDC_cb = 
@@ -119,10 +121,12 @@ USBD_Class_cb_TypeDef  USBD_CDC_cb =
   usbd_cdc_SOF,
   NULL,
   NULL,     
+#ifdef notdef
   bogusDesc,
 #ifdef USE_USB_OTG_HS   
   bogusDesc
 #endif /* USE_USB_OTG_HS  */
+#endif
 };
 
 /**

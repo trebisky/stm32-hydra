@@ -64,12 +64,11 @@ static USB_OTG_STS USB_OTG_CoreReset(USB_OTG_CORE_HANDLE *pdev)
   greset.d32 = 0;
   /* Wait for AHB master IDLE state. */
   do {
-    board_uDelay(3);
+    // board_uDelay(3);
+    delay_us ( 3 );
     greset.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GRSTCTL);
     if (++count > 200000)
-    {
       return USB_OTG_OK;
-    }
   } while (greset.b.ahbidle == 0);
 
   /* Core Soft Reset */
@@ -80,13 +79,13 @@ static USB_OTG_STS USB_OTG_CoreReset(USB_OTG_CORE_HANDLE *pdev)
   do {
     greset.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GRSTCTL);
     if (++count > 200000)
-    {
       break;
-    }
   } while (greset.b.csftrst == 1);
 
   /* Wait for 3 PHY Clocks*/
-  board_uDelay(3);
+  // board_uDelay(3);
+  delay_us ( 3 );
+
   return status;
 }
 
@@ -329,12 +328,11 @@ USB_OTG_STS USB_OTG_CoreInit(USB_OTG_CORE_HANDLE *pdev)
 #endif
     
     if(pdev->cfg.Sof_output)
-    {
       gccfg.b.sofouten = 1;  
-    }
     
     USB_OTG_WRITE_REG32 (&pdev->regs.GREGS->GCCFG, gccfg.d32);
-    board_mDelay(20);
+    // board_mDelay(20);
+	delay_ms ( 20 );
   }
 
   /* case the HS core is working in FS mode */
@@ -439,7 +437,9 @@ USB_OTG_STS USB_OTG_FlushTxFifo (USB_OTG_CORE_HANDLE *pdev , uint32_t num )
   } while (greset.b.txfflsh == 1);
 
   /* Wait for 3 PHY Clocks*/
-  board_uDelay(3);
+  // board_uDelay(3);
+  delay_us ( 3 );
+
   return status;
 }
 
@@ -469,7 +469,9 @@ USB_OTG_STS USB_OTG_FlushRxFifo( USB_OTG_CORE_HANDLE *pdev )
   } while (greset.b.rxfflsh == 1);
 
   /* Wait for 3 PHY Clocks*/
-  board_uDelay(3);
+  // board_uDelay(3);
+  delay_us ( 3 );
+
   return status;
 }
 
@@ -480,7 +482,8 @@ USB_OTG_STS USB_OTG_FlushRxFifo( USB_OTG_CORE_HANDLE *pdev )
 * @param  mode :  (Host/device)
 * @retval USB_OTG_STS : status
 */
-USB_OTG_STS USB_OTG_SetCurrentMode(USB_OTG_CORE_HANDLE *pdev , uint8_t mode)
+USB_OTG_STS
+USB_OTG_SetCurrentMode(USB_OTG_CORE_HANDLE *pdev , uint8_t mode)
 {
   USB_OTG_STS status = USB_OTG_OK;
   USB_OTG_GUSBCFG_TypeDef  usbcfg;
@@ -490,17 +493,16 @@ USB_OTG_STS USB_OTG_SetCurrentMode(USB_OTG_CORE_HANDLE *pdev , uint8_t mode)
   usbcfg.b.force_host = 0;
   usbcfg.b.force_dev = 0;
   
-  if ( mode == HOST_MODE)
-  {
+  if ( mode == HOST_MODE) {
     usbcfg.b.force_host = 1;
-  }
-  else if ( mode == DEVICE_MODE)
-  {
+  } else if ( mode == DEVICE_MODE) {
     usbcfg.b.force_dev = 1;
   }
   
   USB_OTG_WRITE_REG32(&pdev->regs.GREGS->GUSBCFG, usbcfg.d32);
-  board_mDelay(50);
+  // board_mDelay(50);
+  delay_ms ( 50 );
+
   return status;
 }
 
@@ -705,7 +707,8 @@ uint32_t USB_OTG_ReadOtgItr (USB_OTG_CORE_HANDLE *pdev)
 --    USB_OTG_WRITE_REG32(pdev->regs.HPRT0, hprt0.d32);
 --  }
 --  
---  board_mDelay(200);
+--  // board_mDelay(200);
+--  delay_ms ( 200 );
 --}
 --/**
 --* @brief  USB_OTG_EnableHostInt: Enables the Host mode interrupts
@@ -806,10 +809,12 @@ uint32_t USB_OTG_ReadOtgItr (USB_OTG_CORE_HANDLE *pdev)
 --  hprt0.d32 = USB_OTG_ReadHPRT0(pdev);
 --  hprt0.b.prtrst = 1;
 --  USB_OTG_WRITE_REG32(pdev->regs.HPRT0, hprt0.d32);
---  board_mDelay (10);                                /* See Note #1 */
+--  // board_mDelay (10);                         /* See Note #1 */
+--  delay_ms (10);                                /* See Note #1 */
 --  hprt0.b.prtrst = 0;
 --  USB_OTG_WRITE_REG32(pdev->regs.HPRT0, hprt0.d32);
---  board_mDelay (20);   
+--  // board_mDelay (20);   
+--  delay_ms (20);   
 --  return 1;
 --}
 --
@@ -1379,14 +1384,15 @@ USB_OTG_STS USB_OTG_EnableDevInt(USB_OTG_CORE_HANDLE *pdev)
   return status;
 }
 
-
 /**
+* Called when speed enumeration is done.
 * @brief  USB_OTG_GetDeviceSpeed
 *         Get the device speed from the device status register
 * @param  None
 * @retval status
 */
-enum USB_OTG_SPEED USB_OTG_GetDeviceSpeed (USB_OTG_CORE_HANDLE *pdev)
+enum USB_OTG_SPEED
+USB_OTG_GetDeviceSpeed (USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_DSTS_TypeDef  dsts;
   enum USB_OTG_SPEED speed = USB_SPEED_UNKNOWN;
@@ -1399,6 +1405,7 @@ enum USB_OTG_SPEED USB_OTG_GetDeviceSpeed (USB_OTG_CORE_HANDLE *pdev)
   case DSTS_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ:
     speed = USB_SPEED_HIGH;
     break;
+
   case DSTS_ENUMSPD_FS_PHY_30MHZ_OR_60MHZ:
   case DSTS_ENUMSPD_FS_PHY_48MHZ:
     speed = USB_SPEED_FULL;
@@ -1407,6 +1414,7 @@ enum USB_OTG_SPEED USB_OTG_GetDeviceSpeed (USB_OTG_CORE_HANDLE *pdev)
   case DSTS_ENUMSPD_LS_PHY_6MHZ:
     speed = USB_SPEED_LOW;
     break;
+
   default:
     speed = USB_SPEED_FULL;
     break; 
@@ -1901,20 +1909,17 @@ void USB_OTG_EP0_OutStart(USB_OTG_CORE_HANDLE *pdev)
 * @param  None
 * @retval : None
 */
-void USB_OTG_ActiveRemoteWakeup(USB_OTG_CORE_HANDLE *pdev)
+void
+USB_OTG_ActiveRemoteWakeup(USB_OTG_CORE_HANDLE *pdev)
 {
-  
   USB_OTG_DCTL_TypeDef     dctl;
   USB_OTG_DSTS_TypeDef     dsts;
   USB_OTG_PCGCCTL_TypeDef  power;  
   
-  if (pdev->dev.DevRemoteWakeup) 
-  {
+  if (pdev->dev.DevRemoteWakeup) {
     dsts.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DSTS);
-    if(dsts.b.suspsts == 1)
-    {
-      if(pdev->cfg.low_power)
-      {
+    if(dsts.b.suspsts == 1) {
+      if(pdev->cfg.low_power) {
         /* un-gate USB Core clock */
         power.d32 = USB_OTG_READ_REG32(pdev->regs.PCGCCTL);
         power.b.gatehclk = 0;
@@ -1925,7 +1930,8 @@ void USB_OTG_ActiveRemoteWakeup(USB_OTG_CORE_HANDLE *pdev)
       dctl.d32 = 0;
       dctl.b.rmtwkupsig = 1;
       USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DCTL, 0, dctl.d32);
-      board_mDelay(5);
+      // board_mDelay(5);
+	  delay_ms ( 5 );
       USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DCTL, dctl.d32, 0 );
     }
   }

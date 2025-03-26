@@ -249,8 +249,12 @@ uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
     }
 
     if (gintr_status.b.enumdone) {
-      usb_debug ( DM_EVENT, "interrupt - enumeration done\n" );
+      usb_debug ( DM_EVENT, "interrupt - speed enumeration done\n" );
       retval |= DCD_HandleEnumDone_ISR(pdev);
+	  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )
+		  usb_debug ( DM_ENUM, "interface running at HS\n" );
+	  else
+		  usb_debug ( DM_ENUM, "interface running at FS\n" );
     }
     
     if (gintr_status.b.incomplisoin) {
@@ -742,12 +746,14 @@ static uint32_t DCD_HandleUsbReset_ISR(USB_OTG_CORE_HANDLE *pdev)
 }
 
 /**
+* This is speed enumeration
 * @brief  DCD_HandleEnumDone_ISR
 *         Read the device status register and set the device speed
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t DCD_HandleEnumDone_ISR(USB_OTG_CORE_HANDLE *pdev)
+static uint32_t
+DCD_HandleEnumDone_ISR(USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_GINTSTS_TypeDef  gintsts;
   USB_OTG_GUSBCFG_TypeDef  gusbcfg;
@@ -758,14 +764,11 @@ static uint32_t DCD_HandleEnumDone_ISR(USB_OTG_CORE_HANDLE *pdev)
   gusbcfg.d32 = USB_OTG_READ_REG32(&pdev->regs.GREGS->GUSBCFG);
   
   /* Full or High speed */
-  if ( USB_OTG_GetDeviceSpeed(pdev) == USB_SPEED_HIGH)
-  {
+  if ( USB_OTG_GetDeviceSpeed(pdev) == USB_SPEED_HIGH) {
     pdev->cfg.speed            = USB_OTG_SPEED_HIGH;
     pdev->cfg.mps              = USB_OTG_HS_MAX_PACKET_SIZE ;
     gusbcfg.b.usbtrdtim = 9;
-  }
-  else
-  {
+  } else {
     pdev->cfg.speed            = USB_OTG_SPEED_FULL;
     pdev->cfg.mps              = USB_OTG_FS_MAX_PACKET_SIZE ;
     gusbcfg.b.usbtrdtim = 5;
@@ -777,6 +780,7 @@ static uint32_t DCD_HandleEnumDone_ISR(USB_OTG_CORE_HANDLE *pdev)
   gintsts.d32 = 0;
   gintsts.b.enumdone = 1;
   USB_OTG_WRITE_REG32( &pdev->regs.GREGS->GINTSTS, gintsts.d32 );
+
   return 1;
 }
 

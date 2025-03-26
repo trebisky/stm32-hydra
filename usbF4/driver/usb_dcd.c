@@ -340,7 +340,8 @@ void  DCD_DevConnect (USB_OTG_CORE_HANDLE *pdev)
   /* Connect device */
   dctl.b.sftdiscon  = 0;
   USB_OTG_WRITE_REG32(&pdev->regs.DREGS->DCTL, dctl.d32);
-  board_mDelay(3);
+  // board_mDelay(3);
+  delay_ms ( 3 );
 #endif
 }
 
@@ -358,7 +359,8 @@ void  DCD_DevDisconnect (USB_OTG_CORE_HANDLE *pdev)
   /* Disconnect device for 3ms */
   dctl.b.sftdiscon  = 1;
   USB_OTG_WRITE_REG32(&pdev->regs.DREGS->DCTL, dctl.d32);
-  board_mDelay(3);
+  // board_mDelay(3);
+  delay_ms ( 3 );
 #endif
 }
 
