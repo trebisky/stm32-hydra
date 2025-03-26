@@ -57,6 +57,7 @@
 #define SEND_BREAK                              0x23
 #define NO_CMD                                  0xFF
 
+#ifdef notdef
 /* tjt - this structure is used only in usbd_cdc_core.c */
 typedef struct _CDC_IF_PROP
 {
@@ -67,6 +68,7 @@ typedef struct _CDC_IF_PROP
   uint16_t (*pIf_DataRx)   (uint8_t* Buf, uint32_t Len);
 }
 CDC_IF_Prop_TypeDef;
+#endif
 
 #endif /* __USBD_CDC_VCP_H */
 

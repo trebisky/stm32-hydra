@@ -188,7 +188,7 @@ static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
         //    (pdev->dev.device_status == USB_OTG_CONFIGURED)) {
         if ( pdev->dev.device_status == USB_OTG_CONFIGURED ) {
           // pdev->dev.class_cb->EP0_RxReady(pdev); 
-          Klass_EP0_RxReady(pdev); 
+          CLASS_EP0_RxReady(pdev); 
         }
         USBD_CtlSendStatus(pdev);
       }
@@ -198,7 +198,7 @@ static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
   //         (pdev->dev.device_status == USB_OTG_CONFIGURED)) {
   else if (pdev->dev.device_status == USB_OTG_CONFIGURED) {
     // pdev->dev.class_cb->DataOut(pdev, epnum); 
-    Klass_DataOut(pdev, epnum); 
+    CLASS_DataOut(pdev, epnum); 
   }
   return USBD_OK;
 }
@@ -244,7 +244,7 @@ static uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
           //    (pdev->dev.device_status == USB_OTG_CONFIGURED)) {
           if ( pdev->dev.device_status == USB_OTG_CONFIGURED ) {
             // pdev->dev.class_cb->EP0_TxSent(pdev); 
-            Klass_EP0_TxSent ( pdev ); 
+            CLASS_EP0_TxSent ( pdev ); 
           }          
           USBD_CtlReceiveStatus(pdev);
         }
@@ -255,7 +255,7 @@ static uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
   //         (pdev->dev.device_status == USB_OTG_CONFIGURED)) {
   else if (pdev->dev.device_status == USB_OTG_CONFIGURED) {
     // pdev->dev.class_cb->DataIn(pdev, epnum); 
-    Klass_DataIn(pdev, epnum); 
+    CLASS_DataIn(pdev, epnum); 
   }
   return USBD_OK;
 }
@@ -333,7 +333,7 @@ static uint8_t USBD_SOF(USB_OTG_CORE_HANDLE  *pdev)
   // if(pdev->dev.class_cb->SOF) {
   //   pdev->dev.class_cb->SOF(pdev); 
   // }
-  Klass_SOF(pdev); 
+  CLASS_SOF(pdev); 
   return USBD_OK;
 }
 /**
@@ -347,7 +347,7 @@ static uint8_t USBD_SOF(USB_OTG_CORE_HANDLE  *pdev)
 USBD_Status USBD_SetCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx)
 {
   // pdev->dev.class_cb->Init(pdev, cfgidx); 
-  Klass_Init(pdev, cfgidx); 
+  CLASS_Init(pdev, cfgidx); 
   
   /* Upon set config call usr call back */
   pdev->dev.usr_cb->DeviceConfigured();
@@ -364,7 +364,7 @@ USBD_Status USBD_SetCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx)
 USBD_Status USBD_ClrCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx)
 {
   // pdev->dev.class_cb->DeInit(pdev, cfgidx);   
-  Klass_DeInit(pdev, cfgidx);   
+  CLASS_DeInit(pdev, cfgidx);   
   return USBD_OK;
 }
 
@@ -378,7 +378,7 @@ static uint8_t
 USBD_IsoINIncomplete(USB_OTG_CORE_HANDLE  *pdev)
 {
   // pdev->dev.class_cb->IsoINIncomplete(pdev);   
-  Klass_IsoINIncomplete ( pdev );   
+  CLASS_IsoINIncomplete ( pdev );   
   return USBD_OK;
 }
 
@@ -392,7 +392,7 @@ static uint8_t
 USBD_IsoOUTIncomplete(USB_OTG_CORE_HANDLE  *pdev)
 {
   // pdev->dev.class_cb->IsoOUTIncomplete(pdev);   
-  Klass_IsoOUTIncomplete ( pdev );   
+  CLASS_IsoOUTIncomplete ( pdev );   
   return USBD_OK;
 }
 
@@ -419,7 +419,7 @@ static uint8_t USBD_DevDisconnected(USB_OTG_CORE_HANDLE  *pdev)
 {
   pdev->dev.usr_cb->DeviceDisconnected();
   // pdev->dev.class_cb->DeInit(pdev, 0);
-  Klass_DeInit(pdev, 0);
+  CLASS_DeInit(pdev, 0);
   return USBD_OK;
 }
 #endif

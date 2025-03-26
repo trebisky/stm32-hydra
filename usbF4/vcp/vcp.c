@@ -31,7 +31,7 @@ typedef struct {
   uint8_t  datatype;
 } LINE_CODING;
 
-LINE_CODING linecoding =
+static LINE_CODING linecoding =
 {
     115200, /* baud rate*/
     0x00,   /* stop bits-1*/
@@ -56,12 +56,13 @@ uint8_t __CCMRAM__ UsbRecBuffer[UsbRecBufferSize];
 
 volatile int UsbRecRead = 0;
 volatile int UsbRecWrite = 0;
-volatile uint8_t VCP_DTRHIGH = 0;
-volatile uint8_t VCP_RTSHIGH = 0;
 uint8_t UsbTXBlock = 1;
+
 uint8_t rxDisabled = 1;
 USB_OTG_CORE_HANDLE * usbDevice = NULL;
 
+volatile uint8_t VCP_DTRHIGH = 0;
+volatile uint8_t VCP_RTSHIGH = 0;
 uint8_t VCPGetDTR(void) { return VCP_DTRHIGH; }
 uint8_t VCPGetRTS(void) { return VCP_RTSHIGH; }
 
@@ -76,7 +77,8 @@ extern void usbd_cdc_PrepareRx (void *pdev);
 /* tjt -- This never blocks, just returns 0 immediately if there
  * is nothing available.
  */
-uint32_t VCPGetBytes(uint8_t * rxBuf, uint32_t len)
+uint32_t
+VCPGetBytes(uint8_t * rxBuf, uint32_t len)
 {
 	int usbRxRead = UsbRecRead; // take volatile
 
@@ -106,13 +108,15 @@ uint32_t VCPGetBytes(uint8_t * rxBuf, uint32_t len)
 }
 
 /* Private function prototypes -----------------------------------------------*/
+
+// static uint16_t VCP_COMConfig(uint8_t Conf);
+
+#ifdef notdef
 static uint16_t VCP_Init  (void *pdev);
 static uint16_t VCP_DeInit(void);
 static uint16_t VCP_Ctrl  (uint32_t Cmd, uint8_t* Buf, uint32_t Len);
 uint32_t VCP_DataTx   (const uint8_t* Buf, uint32_t Len);
 static uint16_t VCP_DataRx(uint8_t* Buf, uint32_t Len);
-
-static uint16_t VCP_COMConfig(uint8_t Conf);
 
 CDC_IF_Prop_TypeDef VCP_fops =
 {
@@ -122,6 +126,7 @@ CDC_IF_Prop_TypeDef VCP_fops =
   VCP_DataTx,
   VCP_DataRx
 };
+#endif
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -130,7 +135,8 @@ CDC_IF_Prop_TypeDef VCP_fops =
   * @param  None
   * @retval Result of the opeartion (USBD_OK in all cases)
   */
-static uint16_t VCP_Init(void *pdev)
+uint16_t
+VCP_Init(void *pdev)
 {
   usbDevice = pdev;
   rxDisabled = 0;
@@ -143,7 +149,8 @@ static uint16_t VCP_Init(void *pdev)
   * @param  None
   * @retval Result of the opeartion (USBD_OK in all cases)
   */
-static uint16_t VCP_DeInit(void)
+uint16_t
+VCP_DeInit(void)
 {
   usbDevice = NULL;
   rxDisabled = 1;
@@ -170,7 +177,8 @@ void VCP_SetUSBTxBlocking(uint8_t Mode)
   * @param  Len: Number of data to be sent (in bytes)
   * @retval Result of the opeartion (USBD_OK in all cases)
   */
-static uint16_t VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
+uint16_t
+VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
 {
   switch (Cmd)
   {
@@ -200,7 +208,8 @@ static uint16_t VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
     linecoding.paritytype = Buf[5];
     linecoding.datatype = Buf[6];
     /* Set the new configuration */
-    VCP_COMConfig(OTHER_CONFIG);
+	// This routine is just a stub
+    // VCP_COMConfig(OTHER_CONFIG);
     break;
 
   case GET_LINE_CODING:
@@ -233,13 +242,13 @@ static uint16_t VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
 
 /**
   * @brief  VCP_DataTx
-  *         CDC received data to be send over USB IN endpoint are managed in
-  *         this function.
+  *			Data we are sending over an IN endpoint is handled here.
   * @param  Buf: Buffer of data to be sent
   * @param  Len: Number of data to be sent (in bytes)
   * @retval cnt: number of bytes sent
   */
-uint32_t VCP_DataTx (const uint8_t* Buf, uint32_t Len)
+uint32_t
+VCP_DataTx (const uint8_t* Buf, uint32_t Len)
 {
 	uint32_t ptrIn = APP_Tx_ptr_in; // get volatile
 	uint32_t cnt = 0;
@@ -270,45 +279,6 @@ tx_exit:
 	return cnt;
 }
 
-#ifndef HYDRA
-typedef volatile unsigned long      vu32;
-
-typedef struct {
-  vu32 CPUID;
-  vu32 ICSR;
-  vu32 VTOR;
-  vu32 AIRCR;
-  vu32 SCR;
-  vu32 CCR;
-  vu32 SHPR[3];
-  vu32 SHCSR;
-  vu32 CFSR;
-  vu32 HFSR;
-  vu32 DFSR;
-  vu32 MMFAR;
-  vu32 BFAR;
-  vu32 AFSR;
-} SCB_TypeDef;
-
-#define AIRCR_RESET         0x05FA0000
-#define AIRCR_RESET_REQ     (AIRCR_RESET | (u32)0x04);
-#define SCS_BASE   ((u32)0xE000E000)
-#define SCB_BASE   (SCS_BASE + 0x0D00)
-
-void systemHardReset(void) {
-    SCB_TypeDef* rSCB = (SCB_TypeDef *) SCB_BASE;
-    //typedef void (*funcPtr)(void); // not used
-
-    /* Reset */
-    rSCB->AIRCR = (u32)AIRCR_RESET_REQ;
-
-    /* Should never get here */
-    while (1) {
-        asm volatile("nop");
-    }
-}
-#endif
-
 /* tjt -- added for Hydra */
 typedef void (*bfptr) ( char *, int );
 
@@ -337,7 +307,8 @@ VCP_hookup ( bfptr f )
   * @param  Len: Number of data received (in bytes)
   * @retval Result of the opeartion: USBD_OK if all operations are OK else VCP_FAIL
   */
-static uint16_t VCP_DataRx(uint8_t* Buf, uint32_t Len)
+uint16_t
+VCP_DataRx(uint8_t* Buf, uint32_t Len)
 {
 	if (!VCP_DTRHIGH) return USBD_BUSY;
 
@@ -381,6 +352,7 @@ static uint16_t VCP_DataRx(uint8_t* Buf, uint32_t Len)
 	return USBD_OK;
 }
 
+#ifdef notdef
 /**
   * @brief  VCP_COMConfig
   *         Configure the COM Port with default values or values received from host.
@@ -388,7 +360,8 @@ static uint16_t VCP_DataRx(uint8_t* Buf, uint32_t Len)
   *         to set a configuration received from the host.
   * @retval None.
   */
-static uint16_t VCP_COMConfig(uint8_t Conf)
+static uint16_t
+VCP_COMConfig(uint8_t Conf)
 {
 #if 0
   if (Conf == DEFAULT_CONFIG)
@@ -484,5 +457,6 @@ static uint16_t VCP_COMConfig(uint8_t Conf)
 #endif
   return USBD_OK;
 }
+#endif
 
 /* THE END */

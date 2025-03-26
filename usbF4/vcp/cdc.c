@@ -74,8 +74,6 @@
  *********************************************/
 static void Handle_USBAsynchXfer  (void *pdev);
 
-extern CDC_IF_Prop_TypeDef  APP_FOPS;
-
 __ALIGN_BEGIN static __IO uint32_t  usbd_cdc_AltSet  __ALIGN_END = 0;
 
 __ALIGN_BEGIN uint8_t __CCMRAM__ USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN_END ;
@@ -157,7 +155,7 @@ USBD_Class_cb_TypeDef  USBD_CDC_cb =
 // static uint8_t
 // usbd_cdc_Init (void  *pdev, uint8_t cfgidx)
 uint8_t
-Klass_Init (void  *pdev, uint8_t cfgidx)
+CLASS_Init (void  *pdev, uint8_t cfgidx)
 {
   uint8_t *pbuf;
 
@@ -186,7 +184,8 @@ Klass_Init (void  *pdev, uint8_t cfgidx)
 #endif
   
   /* Initialize the Interface physical components */
-  APP_FOPS.pIf_Init(pdev);
+  // APP_FOPS.pIf_Init(pdev);
+  VCP_Init(pdev);
 
   /* Prepare Out endpoint to receive next packet */
   DCD_EP_PrepareRx(pdev,
@@ -207,7 +206,7 @@ Klass_Init (void  *pdev, uint8_t cfgidx)
 // static uint8_t  
 // usbd_cdc_DeInit (void  *pdev, uint8_t cfgidx)
 uint8_t  
-Klass_DeInit (void  *pdev, uint8_t cfgidx)
+CLASS_DeInit (void  *pdev, uint8_t cfgidx)
 {
   /* Open EP IN */
   DCD_EP_Close(pdev,
@@ -222,25 +221,26 @@ Klass_DeInit (void  *pdev, uint8_t cfgidx)
               CDC_CMD_EP);
 
   /* Restore default state of the Interface physical components */
-  APP_FOPS.pIf_DeInit();
+  // APP_FOPS.pIf_DeInit();
+  VCP_DeInit();
   
   return USBD_OK;
 }
 
 void
-Klass_EP0_TxSent ( void *pdev )
+CLASS_EP0_TxSent ( void *pdev )
 {
 	/* nothing */
 }
 
 void
-Klass_IsoINIncomplete ( void *pdev )
+CLASS_IsoINIncomplete ( void *pdev )
 {
 	/* nothing */
 }
 
 void
-Klass_IsoOUTIncomplete ( void *pdev )
+CLASS_IsoOUTIncomplete ( void *pdev )
 {
 	/* nothing */
 }
@@ -255,7 +255,7 @@ Klass_IsoOUTIncomplete ( void *pdev )
 // static uint8_t
 // usbd_cdc_Setup (void  *pdev, USB_SETUP_REQ *req)
 uint8_t
-Klass_Setup (void  *pdev, USB_SETUP_REQ *req)
+CLASS_Setup (void  *pdev, USB_SETUP_REQ *req)
 {
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
@@ -268,7 +268,8 @@ Klass_Setup (void  *pdev, USB_SETUP_REQ *req)
         if (req->bmRequest & 0x80)
         {
           /* Get the data to be sent to Host from interface layer */
-          APP_FOPS.pIf_Ctrl(req->bRequest, CmdBuff, req->wLength);
+          // APP_FOPS.pIf_Ctrl(req->bRequest, CmdBuff, req->wLength);
+          VCP_Ctrl(req->bRequest, CmdBuff, req->wLength);
           
           /* Send the data to the host */
           USBD_CtlSendData (pdev, 
@@ -292,7 +293,8 @@ Klass_Setup (void  *pdev, USB_SETUP_REQ *req)
       else /* No Data request */
       {
         /* Transfer the command to the interface layer */
-        APP_FOPS.pIf_Ctrl(req->bRequest, (uint8_t*)&req->wValue, sizeof(req->wValue));
+        // APP_FOPS.pIf_Ctrl(req->bRequest, (uint8_t*)&req->wValue, sizeof(req->wValue));
+        VCP_Ctrl(req->bRequest, (uint8_t*)&req->wValue, sizeof(req->wValue));
       }
       
       return USBD_OK;
@@ -356,11 +358,12 @@ Klass_Setup (void  *pdev, USB_SETUP_REQ *req)
 // static uint8_t
 // usbd_cdc_EP0_RxReady (void  *pdev)
 uint8_t
-Klass_EP0_RxReady ( void  *pdev)
+CLASS_EP0_RxReady ( void  *pdev)
 { 
   if (cdcCmd != NO_CMD) {
     /* Process the data */
-    APP_FOPS.pIf_Ctrl(cdcCmd, CmdBuff, cdcLen);
+    // APP_FOPS.pIf_Ctrl(cdcCmd, CmdBuff, cdcLen);
+    VCP_Ctrl(cdcCmd, CmdBuff, cdcLen);
     
     /* Reset the command variable to default value */
     cdcCmd = NO_CMD;
@@ -384,7 +387,7 @@ Klass_EP0_RxReady ( void  *pdev)
 // static uint8_t
 // usbd_cdc_DataIn (void *pdev, uint8_t epnum)
 uint8_t
-Klass_DataIn (void *pdev, uint8_t epnum)
+CLASS_DataIn (void *pdev, uint8_t epnum)
 {
 	if (USB_Tx_State == 0) return USBD_OK;
 
@@ -445,15 +448,16 @@ void usbd_cdc_PrepareRx (void *pdev)
   * @retval status
   */
 // static uint8_t usbd_cdc_DataOut(void *pdev, uint8_t epnum)
-uint8_t Klass_DataOut(void *pdev, uint8_t epnum)
+uint8_t
+CLASS_DataOut(void *pdev, uint8_t epnum)
 {      
   /* Get the received data buffer and update the counter */
   uint16_t USB_Rx_Cnt = ((USB_OTG_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
   
   /* USB data will be immediately processed, this allow next USB traffic being 
      NAKed till the end of the application Xfer */
-  if ( APP_FOPS.pIf_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==USBD_OK )
-  {
+  // if ( APP_FOPS.pIf_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==USBD_OK ) {
+  if ( VCP_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==USBD_OK ) {
     /* Prepare Out endpoint to receive next packet */
     DCD_EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
   }
@@ -468,7 +472,8 @@ uint8_t Klass_DataOut(void *pdev, uint8_t epnum)
   * @retval status
   */
 // static uint8_t  usbd_cdc_SOF(void *pdev)
-uint8_t  Klass_SOF(void *pdev)
+uint8_t
+CLASS_SOF(void *pdev)
 {      
   static uint32_t FrameCount = 0;
   
