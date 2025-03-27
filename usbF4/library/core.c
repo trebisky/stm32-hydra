@@ -19,42 +19,6 @@
 #include "driver/usb_dcd_int.h"
 #include "driver/usb_dcd.h"
 
-#ifdef notdef
-static uint8_t USBD_DataOutStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
-static uint8_t USBD_DataInStage(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
-static uint8_t USBD_SetupStage(USB_OTG_CORE_HANDLE *pdev);
-static uint8_t USBD_SOF(USB_OTG_CORE_HANDLE  *pdev);
-static uint8_t USBD_Reset(USB_OTG_CORE_HANDLE  *pdev);
-static uint8_t USBD_Suspend(USB_OTG_CORE_HANDLE  *pdev);
-static uint8_t USBD_Resume(USB_OTG_CORE_HANDLE  *pdev);
-
-static uint8_t USBD_IsoINIncomplete(USB_OTG_CORE_HANDLE  *pdev);
-static uint8_t USBD_IsoOUTIncomplete(USB_OTG_CORE_HANDLE  *pdev);
-#ifdef VBUS_SENSING_ENABLED
-static uint8_t USBD_DevConnected(USB_OTG_CORE_HANDLE  *pdev);
-static uint8_t USBD_DevDisconnected(USB_OTG_CORE_HANDLE  *pdev);
-#endif
-
-USBD_DCD_INT_cb_TypeDef USBD_DCD_INT_cb = 
-{
-  USBD_DataOutStage,
-  USBD_DataInStage,
-  USBD_SetupStage,
-  USBD_SOF,
-  USBD_Reset,
-  USBD_Suspend,
-  USBD_Resume,
-  USBD_IsoINIncomplete,
-  USBD_IsoOUTIncomplete,
-#ifdef VBUS_SENSING_ENABLED
-  USBD_DevConnected,
-  USBD_DevDisconnected,
-#endif  
-};
-
-USBD_DCD_INT_cb_TypeDef  *USBD_DCD_INT_fops = &USBD_DCD_INT_cb;
-#endif
-
 /* These macros and functions replace USR_cb and all the stuff
  * in the file usbd_usr.c
  */
@@ -91,9 +55,6 @@ uint8_t usb_isConnected(void) { return ST_CONNECTED; }
 */
 void
 USBD_Init(USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID )
-               // USBD_DEVICE *pDevice,                  
-               // USBD_Class_cb_TypeDef *class_cb, 
-               // USBD_Usr_cb_TypeDef *usr_cb)
 {
 
 #ifndef HYDRA
@@ -103,8 +64,8 @@ USBD_Init(USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID )
   
   /* Register class and user callbacks */
   /* XXX most of these are gone now */
-  pdev->dev.class_cb = NULL;
-  pdev->dev.usr_device = NULL;    
+  // pdev->dev.class_cb = NULL;
+  // pdev->dev.usr_device = NULL;    
   // pdev->dev.usr_cb = usr_cb;  
   // pdev->dev.usr_cb = &USR_cb;
   

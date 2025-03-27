@@ -1764,7 +1764,6 @@ USB_OTG_STS USB_OTG_EP0StartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   return status;
 }
 
-
 /**
 * @brief  USB_OTG_EPSetStall : Set the EP STALL
 * @param  pdev : Selected device
@@ -1777,20 +1776,16 @@ USB_OTG_STS USB_OTG_EPSetStall(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   __IO uint32_t *depctl_addr;
   
   depctl.d32 = 0;
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     depctl_addr = &(pdev->regs.INEP_REGS[ep->num]->DIEPCTL);
     depctl.d32 = USB_OTG_READ_REG32(depctl_addr);
     /* set the disable and stall bits */
-    if (depctl.b.epena)
-    {
+    if (depctl.b.epena) {
       depctl.b.epdis = 1;
     }
     depctl.b.stall = 1;
     USB_OTG_WRITE_REG32(depctl_addr, depctl.d32);
-  }
-  else
-  {
+  } else {
     depctl_addr = &(pdev->regs.OUTEP_REGS[ep->num]->DOEPCTL);
     depctl.d32 = USB_OTG_READ_REG32(depctl_addr);
     /* set the stall bit */
@@ -1800,13 +1795,13 @@ USB_OTG_STS USB_OTG_EPSetStall(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   return status;
 }
 
-
 /**
 * @brief  Clear the EP STALL
 * @param  pdev : Selected device
 * @retval USB_OTG_STS : status
 */
-USB_OTG_STS USB_OTG_EPClearStall(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
+USB_OTG_STS
+USB_OTG_EPClearStall(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
 {
   USB_OTG_STS status = USB_OTG_OK;
   USB_OTG_DEPCTL_TypeDef  depctl;
@@ -1814,39 +1809,36 @@ USB_OTG_STS USB_OTG_EPClearStall(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   
   depctl.d32 = 0;
   
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     depctl_addr = &(pdev->regs.INEP_REGS[ep->num]->DIEPCTL);
-  }
-  else
-  {
+  } else {
     depctl_addr = &(pdev->regs.OUTEP_REGS[ep->num]->DOEPCTL);
   }
+
   depctl.d32 = USB_OTG_READ_REG32(depctl_addr);
   /* clear the stall bits */
   depctl.b.stall = 0;
-  if (ep->type == EP_TYPE_INTR || ep->type == EP_TYPE_BULK)
-  {
+  if (ep->type == EP_TYPE_INTR || ep->type == EP_TYPE_BULK) {
     depctl.b.setd0pid = 1; /* DATA0 */
   }
+
   USB_OTG_WRITE_REG32(depctl_addr, depctl.d32);
   return status;
 }
-
 
 /**
 * @brief  USB_OTG_ReadDevAllOutEp_itr : returns OUT endpoint interrupt bits
 * @param  pdev : Selected device
 * @retval OUT endpoint interrupt bits
 */
-uint32_t USB_OTG_ReadDevAllOutEp_itr(USB_OTG_CORE_HANDLE *pdev)
+uint32_t
+USB_OTG_ReadDevAllOutEp_itr(USB_OTG_CORE_HANDLE *pdev)
 {
   uint32_t v;
   v  = USB_OTG_READ_REG32(&pdev->regs.DREGS->DAINT);
   v &= USB_OTG_READ_REG32(&pdev->regs.DREGS->DAINTMSK);
   return ((v & 0xffff0000) >> 16);
 }
-
 
 /**
 * @brief  USB_OTG_ReadDevOutEP_itr : returns Device OUT EP Interrupt register
@@ -1861,7 +1853,6 @@ uint32_t USB_OTG_ReadDevOutEP_itr(USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
   v &= USB_OTG_READ_REG32(&pdev->regs.DREGS->DOEPMSK);
   return v;
 }
-
 
 /**
 * @brief  USB_OTG_ReadDevAllInEPItr : Get int status register
@@ -1884,14 +1875,14 @@ uint32_t USB_OTG_ReadDevAllInEPItr(USB_OTG_CORE_HANDLE *pdev)
 void USB_OTG_EP0_OutStart(USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_DEP0XFRSIZ_TypeDef  doeptsize0;
+
   doeptsize0.d32 = 0;
   doeptsize0.b.supcnt = 3;
   doeptsize0.b.pktcnt = 1;
   doeptsize0.b.xfersize = 8 * 3;
   USB_OTG_WRITE_REG32( &pdev->regs.OUTEP_REGS[0]->DOEPTSIZ, doeptsize0.d32 );
   
-  if (pdev->cfg.dma_enable == 1)
-  {
+  if (pdev->cfg.dma_enable == 1) {
     USB_OTG_DEPCTL_TypeDef  doepctl;
     doepctl.d32 = 0;
     USB_OTG_WRITE_REG32( &pdev->regs.OUTEP_REGS[0]->DOEPDMA, 
@@ -1954,14 +1945,12 @@ void USB_OTG_UngateClock(USB_OTG_CORE_HANDLE *pdev)
     
     dsts.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DSTS);
     
-    if(dsts.b.suspsts == 1)
-    {
+    if(dsts.b.suspsts == 1) {
       /* un-gate USB Core clock */
       power.d32 = USB_OTG_READ_REG32(pdev->regs.PCGCCTL);
       power.b.gatehclk = 0;
       power.b.stoppclk = 0;
       USB_OTG_WRITE_REG32(pdev->regs.PCGCCTL, power.d32);
-      
     }
   }
 }
@@ -1977,8 +1966,7 @@ void USB_OTG_StopDevice(USB_OTG_CORE_HANDLE *pdev)
   
   pdev->dev.device_status = 1;
   
-  for (i = 0; i < pdev->cfg.dev_endpoints ; i++)
-  {
+  for (i = 0; i < pdev->cfg.dev_endpoints ; i++) {
     USB_OTG_WRITE_REG32( &pdev->regs.INEP_REGS[i]->DIEPINT, 0xFF);
     USB_OTG_WRITE_REG32( &pdev->regs.OUTEP_REGS[i]->DOEPINT, 0xFF);
   }
@@ -2007,38 +1995,25 @@ uint32_t USB_OTG_GetEPStatus(USB_OTG_CORE_HANDLE *pdev ,USB_OTG_EP *ep)
   uint32_t Status = 0;  
   
   depctl.d32 = 0;
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     depctl_addr = &(pdev->regs.INEP_REGS[ep->num]->DIEPCTL);
     depctl.d32 = USB_OTG_READ_REG32(depctl_addr);
     
-    if (depctl.b.stall == 1)
-    {
+    if (depctl.b.stall == 1) {
       Status = USB_OTG_EP_TX_STALL;
-    }
-    else if (depctl.b.naksts == 1)
-    {
+    } else if (depctl.b.naksts == 1) {
       Status = USB_OTG_EP_TX_NAK;
-    }
-    else 
-    {
+    } else {
       Status = USB_OTG_EP_TX_VALID;     
     }
-  }
-  else
-  {
+  } else {
     depctl_addr = &(pdev->regs.OUTEP_REGS[ep->num]->DOEPCTL);
     depctl.d32 = USB_OTG_READ_REG32(depctl_addr);
-    if (depctl.b.stall == 1)
-    {
+    if (depctl.b.stall == 1) {
       Status = USB_OTG_EP_RX_STALL;
-    }
-    else if (depctl.b.naksts == 1)
-    {
+    } else if (depctl.b.naksts == 1) {
       Status = USB_OTG_EP_RX_NAK;
-    }
-    else 
-    {
+    } else {
       Status = USB_OTG_EP_RX_VALID; 
     }
   } 
@@ -2062,23 +2037,16 @@ void USB_OTG_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep , uint32_t 
   depctl.d32 = 0;
   
   /* Process for IN endpoint */
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     depctl_addr = &(pdev->regs.INEP_REGS[ep->num]->DIEPCTL);
     depctl.d32 = USB_OTG_READ_REG32(depctl_addr);
     
-    if (Status == USB_OTG_EP_TX_STALL)  
-    {
+    if (Status == USB_OTG_EP_TX_STALL)  {
       USB_OTG_EPSetStall(pdev, ep); return;
-    }
-    else if (Status == USB_OTG_EP_TX_NAK)
-    {
+    } else if (Status == USB_OTG_EP_TX_NAK) {
       depctl.b.snak = 1;
-    }
-    else if (Status == USB_OTG_EP_TX_VALID)
-    {
-      if (depctl.b.stall == 1)
-      {  
+    } else if (Status == USB_OTG_EP_TX_VALID) {
+      if (depctl.b.stall == 1) {  
         ep->even_odd_frame = 0;
         USB_OTG_EPClearStall(pdev, ep);
         return;
@@ -2086,28 +2054,19 @@ void USB_OTG_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep , uint32_t 
       depctl.b.cnak = 1;
       depctl.b.usbactep = 1; 
       depctl.b.epena = 1;
-    }
-    else if (Status == USB_OTG_EP_TX_DIS)
-    {
+    } else if (Status == USB_OTG_EP_TX_DIS) {
       depctl.b.usbactep = 0;
     }
-  } 
-  else /* Process for OUT endpoint */
-  {
+  } else /* Process for OUT endpoint */ {
     depctl_addr = &(pdev->regs.OUTEP_REGS[ep->num]->DOEPCTL);
     depctl.d32 = USB_OTG_READ_REG32(depctl_addr);    
     
     if (Status == USB_OTG_EP_RX_STALL)  {
       depctl.b.stall = 1;
-    }
-    else if (Status == USB_OTG_EP_RX_NAK)
-    {
+    } else if (Status == USB_OTG_EP_RX_NAK) {
       depctl.b.snak = 1;
-    }
-    else if (Status == USB_OTG_EP_RX_VALID)
-    {
-      if (depctl.b.stall == 1)
-      {  
+    } else if (Status == USB_OTG_EP_RX_VALID) {
+      if (depctl.b.stall == 1) {  
         ep->even_odd_frame = 0;
         USB_OTG_EPClearStall(pdev, ep);
         return;
@@ -2115,9 +2074,7 @@ void USB_OTG_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep , uint32_t 
       depctl.b.cnak = 1;
       depctl.b.usbactep = 1;    
       depctl.b.epena = 1;
-    }
-    else if (Status == USB_OTG_EP_RX_DIS)
-    {
+    } else if (Status == USB_OTG_EP_RX_DIS) {
       depctl.b.usbactep = 0;    
     }
   }

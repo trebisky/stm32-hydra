@@ -83,5 +83,4 @@ void DCD_SetEPStatus (USB_OTG_CORE_HANDLE *pdev ,
 
 #endif //__DCD_H__
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+/* THE END */
