@@ -2,9 +2,9 @@
  * public.c
  * Tom Trebisky  3-23-2025
  */
-#include "../hydra.h"
+// #include "../hydra.h"
 #include "hydra_usb.h"
-#include "usb.h"
+// #include "usb.h"
 
 #include <stdarg.h>
 
@@ -12,7 +12,7 @@
 
 typedef void (*bfptr) ( char *, int );
 
-static void gpio_usb_init ( void );
+// static void gpio_usb_init ( void );
 
 int fusb_init ( void );
 void fusb_puts ( int, char * );
@@ -104,6 +104,7 @@ fusb_init (void)
 		nvic_enable ( IRQ_USB_HS_WAKEUP );
         nvic_enable ( IRQ_USB_HS );
 
+		/* set up GPIO alt function for USB */
         gpio_usb_init ();
 
 		/* Doesn't currently do anything */
@@ -180,57 +181,6 @@ fusb_read ( int fd, char *buf, int len )
  * by the USB code, but never seen by the outside world.
  * This includes our interrupt glue routines
  */
-
-#ifdef notdef
-/* XXX get rid of these, they are only correct for
- * the CPU clock on the F411
- */
-/* Delay in microseconds
- */
-void 
-board_uDelay (const uint32_t usec)
-{
-  uint32_t count = 0;
-  const uint32_t utime = (120 * usec / 7);
-
-  do {
-    if ( ++count > utime )
-      return ;
-  } while (1);
-}
-
-
-/* Delay in milliseconds
- */
-void
-board_mDelay (const uint32_t msec)
-{
-  board_uDelay ( msec * 1000 );
-}
-#endif
-
-/* A footnote on figure 26, page 272 of the TRM says
- * that the value 12 is used for the usb HS when used in
- * FS mode.
- */
-#define GPIO_ALT_USB	10
-#define GPIO_ALT_USB_FS	12
-
-/* This is for the F411 and/or F429, F407 */
-static void
-gpio_usb_init ( void )
-{
-        gpio_usb_pin_setup ( GPIOA, 11, GPIO_ALT_USB );   /* A11 - D- (DM) */
-        gpio_usb_pin_setup ( GPIOA, 12, GPIO_ALT_USB );   /* A12 - D+ (DP) */
-
-		/* This is the HS controller on the F429 discovery board
-		 *  as well as on the F407 Olimex E407 board
-		 * We just go ahead and configure these pins regardless
-		 * (lazy for now anyway) even if we aren't going to use them.
-		 */
-        gpio_usb_pin_setup ( GPIOB, 14, GPIO_ALT_USB_FS );   /* B14 - D- (DM) */
-        gpio_usb_pin_setup ( GPIOB, 15, GPIO_ALT_USB_FS );   /* B15 - D+ (DP) */
-}
 
 /* =========================================================================
  * USB debug facility (used only from within the USB code)

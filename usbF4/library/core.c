@@ -35,7 +35,9 @@ static volatile uint8_t usb_status;
 
 #define STATUS_Set(bit)		(usb_status |= bit)
 #define STATUS_Clear(bit)	(usb_status &= ~bit)
-#define STATUS_Reset()		(usb_status = 0);
+
+// inline void  STATUS_Reset() { (usb_status = 0); }
+void  STATUS_Reset() { (usb_status = 0); }
 
 /* Accessor functions for the status */
 
@@ -47,62 +49,7 @@ uint8_t usb_isConnected(void) { return ( usb_status & ST_CONNECTED ); }
 uint8_t usb_isConnected(void) { return ST_CONNECTED; }
 #endif
 
-/**
-* @brief  USBD_Init
-*         Initialize the device stack and load the class driver
-* @param  pdev: device instance
-* @param  core_address: USB OTG core ID
-*/
-void
-USBD_Init(USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID )
-{
-
-#ifndef HYDRA
-  /* No harm to call this, but it does nothing */
-  USBD_DeInit(pdev);
-#endif
-  
-  /* Register class and user callbacks */
-  /* XXX most of these are gone now */
-  // pdev->dev.class_cb = NULL;
-  // pdev->dev.usr_device = NULL;    
-  // pdev->dev.usr_cb = usr_cb;  
-  // pdev->dev.usr_cb = &USR_cb;
-  
-  /* set USB OTG core params */
-  DCD_Init(pdev , coreID);
-  
-  /* Upon Init call usr callback */
-  // pdev->dev.usr_cb->Init();
-  STATUS_Reset();
-  
-#ifndef HYDRA
-  /* Enable Interrupts */
-  USB_OTG_BSP_EnableInterrupt(pdev);
-#endif
-}
-
-/**
-* @brief  USBD_DeInit 
-*         Re-Initialize the device library
-* @param  pdev: device instance
-* @retval status: status
-*/
-USBD_Status USBD_DeInit(USB_OTG_CORE_HANDLE *pdev)
-{
-  return USBD_OK;
-}
-
-USBD_Status USBD_DeInitFull(USB_OTG_CORE_HANDLE *pdev)
-{
-  /* Software Init */
-#ifndef HYDRA
-  USB_OTG_BSP_DisableInterrupt(pdev);
-  USB_OTG_BSP_DeInit(pdev);
-#endif
-  
-  return USBD_OK;
-}
+/* ============================================================== */
 
 /**
 * @brief  USBD_SetupStage 
