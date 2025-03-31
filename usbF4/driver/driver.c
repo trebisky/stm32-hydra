@@ -1,17 +1,17 @@
 /**
   ******************************************************************************
   * @file    usb_core.c
-  * @author  MCD Application Team
-  * @version V2.0.0
   * @date    22-July-2011
-  * @brief   USB-OTG Core Layer
   ******************************************************************************
   * COPYRIGHT 2011 STMicroelectronics
   ******************************************************************************
   */
 
+/* driver.c -- was driver/usb_core.c
+ */
+
 #include "hydra_usb.h"
-#include "libmaple_types.h"
+#include "types.h"
 
 #include "usb_conf.h"
 
@@ -99,7 +99,8 @@ static USB_OTG_STS USB_OTG_CoreReset(USB_OTG_CORE_HANDLE *pdev)
 * @param  bytes : No. of bytes
 * @retval USB_OTG_STS : status
 */
-USB_OTG_STS USB_OTG_WritePacket(USB_OTG_CORE_HANDLE *pdev, 
+USB_OTG_STS
+USB_OTG_WritePacket(USB_OTG_CORE_HANDLE *pdev, 
                                 uint8_t             *src, 
                                 uint8_t             ch_ep_num, 
                                 uint16_t            len)
@@ -1575,6 +1576,7 @@ USB_OTG_STS USB_OTG_EPStartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   if (ep->is_in == 1) {
     depctl.d32  = USB_OTG_READ_REG32(&(pdev->regs.INEP_REGS[ep->num]->DIEPCTL));
     deptsiz.d32 = USB_OTG_READ_REG32(&(pdev->regs.INEP_REGS[ep->num]->DIEPTSIZ));
+
     /* Zero Length Packet? */
     if (ep->xfer_len == 0) {
       deptsiz.b.xfersize = 0;

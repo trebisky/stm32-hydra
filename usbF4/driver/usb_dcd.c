@@ -11,7 +11,7 @@
   */
 
 #include "hydra_usb.h"
-#include "libmaple_types.h"
+#include "types.h"
 
 #include "usb_regs.h"
 #include "usb_defines.h"
@@ -32,11 +32,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   pdev->dev.device_status = USB_OTG_DEFAULT;
   pdev->dev.device_address = 0;
 
-  /* XXX - tjt -- why these two loops ??? */
-  
-  /* Init ep structure */
-  for (i = 0; i < pdev->cfg.dev_endpoints ; i++)
-  {
+  /* Init ep structure for IN endpoints*/
+  for (i = 0; i < pdev->cfg.dev_endpoints ; i++) {
     ep = &pdev->dev.in_ep[i];
     /* Init ep structure */
     ep->is_in = 1;
@@ -49,8 +46,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
     ep->xfer_len = 0;
   }
   
-  for (i = 0; i < pdev->cfg.dev_endpoints; i++)
-  {
+  /* Init ep structure for OUT endpoints*/
+  for (i = 0; i < pdev->cfg.dev_endpoints; i++) {
     ep = &pdev->dev.out_ep[i];
     /* Init ep structure */
     ep->is_in = 0;	/* <<< XXX */
@@ -225,12 +222,9 @@ uint32_t  DCD_EP_Tx ( USB_OTG_CORE_HANDLE *pdev,
   ep->xfer_count = 0;
   ep->xfer_len  = buf_len;
   
-  if ( ep->num == 0 )
-  {
+  if ( ep->num == 0 ) {
     USB_OTG_EP0StartXfer(pdev , ep);
-  }
-  else
-  {
+  } else {
     USB_OTG_EPStartXfer(pdev, ep );
   }
   return 0;
@@ -298,12 +292,9 @@ uint32_t  DCD_EP_ClrStall (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum)
 uint32_t  DCD_EP_Flush (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
 {
 
-  if ((epnum & 0x80) == 0x80)
-  {
+  if ((epnum & 0x80) == 0x80) {
     USB_OTG_FlushTxFifo(pdev, epnum & 0x7F);
-  }
-  else
-  {
+  } else {
     USB_OTG_FlushRxFifo(pdev);
   }
 

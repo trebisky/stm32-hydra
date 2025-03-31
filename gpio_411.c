@@ -9,6 +9,8 @@
 
 #include "hydra.h"
 
+void gpio_usb_pin_setup ( int, int, int );
+
 /* Here is the F411 gpio structure.
  *  very different from the F103.
  */
@@ -225,6 +227,29 @@ gpio_uart_pin_setup ( int gpio, int pin )
 	gpio_af ( gpio, pin, 7 );
 	gpio_mode ( gpio, pin, MODE_AF );
 	gpio_uart ( gpio, pin );
+}
+
+/* A footnote on figure 26, page 272 of the TRM says
+ * that the value 12 is used for the usb HS when used in
+ * FS mode.
+ */
+#define GPIO_ALT_USB	10
+#define GPIO_ALT_USB_FS	12
+
+/* This is for the F411 and/or F429, F407 */
+void
+gpio_usb_init ( void )
+{
+        gpio_usb_pin_setup ( GPIOA, 11, GPIO_ALT_USB );   /* A11 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOA, 12, GPIO_ALT_USB );   /* A12 - D+ (DP) */
+
+		/* This is the HS controller on the F429 discovery board
+		 *  as well as on the F407 Olimex E407 board
+		 * We just go ahead and configure these pins regardless
+		 * (lazy for now anyway) even if we aren't going to use them.
+		 */
+        gpio_usb_pin_setup ( GPIOB, 14, GPIO_ALT_USB_FS );   /* B14 - D- (DM) */
+        gpio_usb_pin_setup ( GPIOB, 15, GPIO_ALT_USB_FS );   /* B15 - D+ (DP) */
 }
 
 /* Note that UART1 can be moved around a lot.

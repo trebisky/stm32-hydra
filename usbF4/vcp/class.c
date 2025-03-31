@@ -5,9 +5,10 @@
  *
  * Tom Trebisky  3/23/2025
  */
-#include "../hydra.h"
+
+// #include "../hydra.h"
 #include "hydra_usb.h"
-#include "usb.h"
+// #include "usb.h"
 
 // #include "usbd_usr.h"
 #include "vcp.h"

@@ -11,7 +11,7 @@
   */
 
 #include "hydra_usb.h"
-#include "libmaple_types.h"
+#include "types.h"
 
 #include "usb_regs.h"
 #include "usb_defines.h"
@@ -627,7 +627,8 @@ static uint32_t DCD_HandleRxStatusQueueLevel_ISR(USB_OTG_CORE_HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t DCD_WriteEmptyTxFifo(USB_OTG_CORE_HANDLE *pdev, uint32_t epnum)
+static uint32_t 
+DCD_WriteEmptyTxFifo(USB_OTG_CORE_HANDLE *pdev, uint32_t epnum)
 {
   USB_OTG_DTXFSTSn_TypeDef  txstatus;
   USB_OTG_EP *ep;
@@ -639,9 +640,8 @@ static uint32_t DCD_WriteEmptyTxFifo(USB_OTG_CORE_HANDLE *pdev, uint32_t epnum)
   
   len = ep->xfer_len - ep->xfer_count;
   
-  if (len > ep->maxpacket) {
+  if (len > ep->maxpacket)
     len = ep->maxpacket;
-  }
   
   len32b = (len + 3) / 4;
   txstatus.d32 = USB_OTG_READ_REG32( &pdev->regs.INEP_REGS[epnum]->DTXFSTS);
@@ -652,9 +652,9 @@ static uint32_t DCD_WriteEmptyTxFifo(USB_OTG_CORE_HANDLE *pdev, uint32_t epnum)
     /* Write the FIFO */
     len = ep->xfer_len - ep->xfer_count;
     
-    if (len > ep->maxpacket) {
+    if (len > ep->maxpacket)
       len = ep->maxpacket;
-    }
+
     len32b = (len + 3) / 4;
     
     USB_OTG_WritePacket (pdev , ep->xfer_buff, epnum, len);

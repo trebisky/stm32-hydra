@@ -27,6 +27,8 @@
 #define USB_OTG_CONFIGURED                       3
 #define USB_OTG_SUSPENDED                        4
 
+#ifdef notdef
+/* never used */
 typedef struct
 {
   uint8_t  bLength;
@@ -37,6 +39,7 @@ typedef struct
   uint8_t  bInterval;
 }
 EP_DESCRIPTOR , *PEP_DESCRIPTOR;
+#endif
 
 /********************************************************************************
 EXPORTED FUNCTION FROM THE USB-OTG LAYER
