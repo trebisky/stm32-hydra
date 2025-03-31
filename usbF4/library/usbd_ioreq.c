@@ -12,7 +12,9 @@
 
 #include "hydra_usb.h"
 
-#include <library/usbd_ioreq.h>
+#include "usbd_core.h"
+
+// #include <library/usbd_ioreq.h>
 
 /**
 * @brief  USBD_CtlSendData

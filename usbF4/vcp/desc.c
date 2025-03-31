@@ -12,7 +12,7 @@
 #include "conf.h"
 
 #include "usbd_core.h"
-#include "usbd_req.h"
+// #include "usbd_req.h"
 
 // unsure if the following are needed
 #include "vcp.h"

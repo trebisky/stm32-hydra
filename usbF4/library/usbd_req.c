@@ -12,8 +12,12 @@
 
 #include "usbd_def.h"
 #include "usbd_core.h"
-#include "usbd_req.h"
-#include "usbd_ioreq.h"
+#include "usb_core.h"
+
+#include "protos.h"
+
+// #include "usbd_req.h"
+// #include "usbd_ioreq.h"
 
 #include "hydra_usb.h"
 

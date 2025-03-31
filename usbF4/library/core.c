@@ -13,8 +13,12 @@
 #include "hydra_usb.h"
 
 #include "usbd_core.h"
-#include "usbd_req.h"
-#include "usbd_ioreq.h"
+#include "usb_core.h"
+
+#include "protos.h"
+
+// #include "usbd_req.h"
+// #include "usbd_ioreq.h"
 
 #include "driver/usb_dcd_int.h"
 #include "driver/usb_dcd.h"
