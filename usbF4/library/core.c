@@ -18,8 +18,6 @@
 #include "usb_core.h"
 #include "protos.h"
 
-// #include "driver/usb_dcd.h"
-
 /* These macros and functions replace USR_cb and all the stuff
  * in the file usbd_usr.c -- all to set up this redundant status
  * variable.
@@ -37,9 +35,10 @@ static volatile uint8_t usb_status;
 
 #define STATUS_Set(bit)		(usb_status |= bit)
 #define STATUS_Clear(bit)	(usb_status &= ~bit)
+#define STATUS_Reset()		(usb_status =0)
 
 // inline void  STATUS_Reset() { (usb_status = 0); }
-void  STATUS_Reset() { (usb_status = 0); }
+// void  STATUS_Reset() { (usb_status = 0); }
 
 /* Accessor functions for the status */
 
@@ -51,7 +50,40 @@ uint8_t usb_isConnected(void) { return ( usb_status & ST_CONNECTED ); }
 uint8_t usb_isConnected(void) { return ST_CONNECTED; }
 #endif
 
-/* ============================================================== */
+/* ################################################################## */
+/* ################################################################## */
+/* ################################################################## */
+
+void
+USBD_Init ( USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID )
+{
+  /* No harm to call this, but it does nothing */
+  // USBD_DeInit(pdev);
+  
+  /* set USB OTG core params */
+  DCD_Init(pdev , coreID);
+  
+  /* Upon Init call usr callback */
+  /* XXX should clean this up */
+  STATUS_Reset();
+}
+
+USBD_Status
+USBD_DeInit ( USB_OTG_CORE_HANDLE *pdev )
+{
+  return USBD_OK;
+}
+
+USBD_Status
+USBD_DeInitFull ( USB_OTG_CORE_HANDLE *pdev )
+{
+  /* Software Init */
+  return USBD_OK;
+}
+
+/* ################################################################## */
+/* ################################################################## */
+/* ################################################################## */
 
 /**
 * @brief  USBD_SetupStage 

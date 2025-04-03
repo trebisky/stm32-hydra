@@ -10,6 +10,11 @@
   ******************************************************************************
   */
 
+/* XXX - tjt  4-2-2025
+ * This file is NOT actually used, but has interesting comments
+ * and reference information that make me want to keep it around.
+ */
+
 #ifndef __USB_CONF__H__
 #define __USB_CONF__H__
 
@@ -18,6 +23,7 @@
         configuration, you can declare the needed define in your toolchain
         compiler preprocessor.
    */
+
 /****************** USB OTG FS PHY CONFIGURATION *******************************
 *  The USB OTG FS Core supports one on-chip Full Speed PHY.
 *  

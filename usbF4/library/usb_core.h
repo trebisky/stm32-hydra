@@ -26,6 +26,13 @@ typedef enum {
   USBD_FAIL,
 } USBD_Status;
 
+/* Endpoint types */
+#define USB_OTG_EP_CONTROL                       0
+#define USB_OTG_EP_ISOC                          1
+#define USB_OTG_EP_BULK                          2
+#define USB_OTG_EP_INT                           3
+#define USB_OTG_EP_MASK                          3
+
 /* Thus used to be in device/usb_cdc.h, but it really belongs here */
 /*  Device Status */
 #define USB_OTG_DEFAULT                          1

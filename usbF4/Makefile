@@ -19,7 +19,8 @@ DRIVER_OBJS = driver.o  usb_dcd.o  interrupts.o
 
 #LIBR_OBJS = public.o core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
 #LIBR_OBJS = public.o init.o core.o  usbd_ioreq.o  usbd_req.o
-LIBR_OBJS = public.o init.o core.o
+#LIBR_OBJS = public.o init.o core.o
+LIBR_OBJS = public.o core.o
 
 # Files we no longer need, but keep around for reference
 OLD_EXTRA = misc.c usb_bsp.c
@@ -49,8 +50,8 @@ vcp.o: vcp/vcp.c
 	$(CC) -o $@ -c $<
 cdc.o: vcp/cdc.c
 	$(CC) -o $@ -c $<
-usbd_desc.o: vcp/usbd_desc.c
-	$(CC) -o $@ -c $<
+#usbd_desc.o: vcp/usbd_desc.c
+#	$(CC) -o $@ -c $<
 
 # From driver
 driver.o: driver/driver.c
@@ -63,10 +64,10 @@ interrupts.o: driver/interrupts.c
 # From library
 public.o: library/public.c
 	$(CC) -o $@ -c $<
-init.o: library/init.c
-	$(CC) -o $@ -c $<
 core.o: library/core.c
 	$(CC) -o $@ -c $<
+#init.o: library/init.c
+#	$(CC) -o $@ -c $<
 #usbd_ioreq.o: library/usbd_ioreq.c
 #	$(CC) -o $@ -c $<
 #usbd_req.o: library/usbd_req.c
