@@ -185,35 +185,7 @@ typedef struct USB_OTG_hPort
   uint8_t DisconnHandled;
 } USB_OTG_hPort_TypeDef;
 
-typedef struct _Device_cb
-{
-  uint8_t  (*Init)         (void *pdev , uint8_t cfgidx);
-  uint8_t  (*DeInit)       (void *pdev , uint8_t cfgidx);
- /* Control Endpoints*/
-  uint8_t  (*Setup)        (void *pdev , USB_SETUP_REQ  *req);  
-  uint8_t  (*EP0_TxSent)   (void *pdev );    
-  uint8_t  (*EP0_RxReady)  (void *pdev );  
-  /* Class Specific Endpoints*/
-  uint8_t  (*DataIn)       (void *pdev , uint8_t epnum);   
-  uint8_t  (*DataOut)      (void *pdev , uint8_t epnum); 
-  uint8_t  (*SOF)          (void *pdev); 
-  uint8_t  (*IsoINIncomplete)  (void *pdev); 
-  uint8_t  (*IsoOUTIncomplete)  (void *pdev);   
-
-#ifdef notdef
-  uint8_t  *(*GetConfigDescriptor)( uint8_t speed , uint16_t *length); 
-#ifdef USB_OTG_HS_CORE 
-  uint8_t  *(*GetOtherConfigDescriptor)( uint8_t speed , uint16_t *length);   
-#endif
-
-#ifdef USB_SUPPORT_USER_STRING_DESC 
-  uint8_t  *(*GetUsrStrDescriptor)( uint8_t speed ,uint8_t index,  uint16_t *length);   
-#endif  
-#endif /* notdef */
-  
-} USBD_Class_cb_TypeDef;
-
-
+#ifdef long_gone
 typedef struct _USBD_USR_PROP
 {
   void (*Init)(void);   
@@ -227,6 +199,7 @@ typedef struct _USBD_USR_PROP
   
 }
 USBD_Usr_cb_TypeDef;
+#endif
 
 typedef struct _DCD
 {
@@ -249,6 +222,7 @@ typedef struct _DCD
 DCD_DEV , *DCD_PDEV;
 
 
+#ifdef notdef
 typedef struct _HCD
 {
   uint8_t                  Rx_Buffer [MAX_DATA_LENGTH];  
@@ -263,7 +237,7 @@ typedef struct _HCD
   USB_OTG_hPort_TypeDef    *port_cb;  
 }
 HCD_DEV , *USB_OTG_USBH_PDEV;
-
+#endif
 
 typedef struct _OTG
 {
