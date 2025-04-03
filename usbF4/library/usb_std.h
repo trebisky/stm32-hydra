@@ -14,6 +14,7 @@
 #define __USBD_DEF_H
 
 /* These are all "official" parts of USB.
+ * (except some odds and ends at the start).
 */
 
 #ifndef NULL

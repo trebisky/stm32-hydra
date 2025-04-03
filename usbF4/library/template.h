@@ -13,8 +13,6 @@
 #ifndef __USB_CONF__H__
 #define __USB_CONF__H__
 
-// #include "usb_conf.h"
-
 /* USB Core and PHY interface configuration.
    Tip: To avoid modifying these defines each time you need to change the USB
         configuration, you can declare the needed define in your toolchain

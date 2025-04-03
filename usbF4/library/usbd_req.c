@@ -18,35 +18,21 @@
 #include "usb_core.h"
 #include "protos.h"
 
-// #include "usbd_def.h"
-// #include "usbd_core.h"
-// #include "usb_core.h"
-
-
-// #include "usbd_req.h"
-// #include "usbd_ioreq.h"
-
-__ALIGN_BEGIN uint32_t USBD_ep_status __ALIGN_END  = 0; 
-
-__ALIGN_BEGIN uint32_t  USBD_default_cfg __ALIGN_END  = 0;
-
-__ALIGN_BEGIN uint32_t  USBD_cfg_status __ALIGN_END  = 0;  
+/* 3 globals -- shouldn't these go someplace else?
+ * Maybe not, I make them static and nobody complains.
+ */
+__ALIGN_BEGIN static uint32_t  USBD_ep_status __ALIGN_END  = 0; 
+__ALIGN_BEGIN static uint32_t  USBD_default_cfg __ALIGN_END  = 0;
+__ALIGN_BEGIN static uint32_t  USBD_cfg_status __ALIGN_END  = 0;  
 
 static void USBD_GetDescriptor(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
-
 static void USBD_SetAddress(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
-
 static void USBD_SetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
-
 static void USBD_GetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
-
 static void USBD_GetStatus(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
-
 static void USBD_SetFeature(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
-
 static void USBD_ClrFeature(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
-
-static uint8_t USBD_GetLen(uint8_t *buf);
+// static uint8_t USBD_GetLen(uint8_t *buf);
 
 /**
 * @brief  USBD_StdDevReq
@@ -376,7 +362,8 @@ USBD_SetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
 * @param  req: usb request
 * @retval status
 */
-static void USBD_GetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
+static void
+USBD_GetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
 {
  
   if (req->wLength != 1) {                   
@@ -384,6 +371,7 @@ static void USBD_GetConfig(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
   } else {
     switch (pdev->dev.device_status )  {
     case USB_OTG_ADDRESSED:                     
+	  /* XXX this value is never defineed */
       USBD_CtlSendData (pdev, (uint8_t *)&USBD_default_cfg, 1);
       break;
       
