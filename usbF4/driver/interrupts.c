@@ -13,11 +13,29 @@
 #include "types.h"
 #include "usb_conf.h"
 
+#include "usb_core.h"
+#include "protos.h"
+
 #include "usb_regs.h"
 #include "usb_defines.h"
 
-#include "usb_dcd.h"
-#include "usb_dcd_int.h"
+/* From usb_dcd_int.h */
+// #include "usb_dcd_int.h"
+#define CLEAR_IN_EP_INTR(epnum,intr) \
+  diepint.d32=0; \
+  diepint.b.intr = 1; \
+  USB_OTG_WRITE_REG32(&pdev->regs.INEP_REGS[epnum]->DIEPINT,diepint.d32);
+
+#define CLEAR_OUT_EP_INTR(epnum,intr) \
+  doepint.d32=0; \
+  doepint.b.intr = 1; \
+  USB_OTG_WRITE_REG32(&pdev->regs.OUTEP_REGS[(epnum)]->DOEPINT,doepint.d32);
+
+uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev);
+uint32_t USBD_OTG_EP1OUT_ISR_Handler (USB_OTG_CORE_HANDLE *pdev);
+uint32_t USBD_OTG_EP1IN_ISR_Handler (USB_OTG_CORE_HANDLE *pdev);
+
+/* END - From usb_dcd_int.h */
 
 typedef int IRQn_Type;
 

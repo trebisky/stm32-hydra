@@ -14,7 +14,8 @@ endif
 #VCP_OBJS = class.o desc.o usbd_cdc_vcp.o
 VCP_OBJS = class.o desc.o vcp.o cdc.o
 
-DRIVER_OBJS = driver.o  usb_dcd.o  usb_dcd_int.o
+#DRIVER_OBJS = driver.o  usb_dcd.o  usb_dcd_int.o
+DRIVER_OBJS = driver.o  usb_dcd.o  interrupts.o
 
 #LIBR_OBJS = public.o core.o  usbd_ioreq.o  usbd_req.o usbd_usr.o
 #LIBR_OBJS = public.o init.o core.o  usbd_ioreq.o  usbd_req.o
@@ -56,7 +57,7 @@ driver.o: driver/driver.c
 	$(CC) -o $@ -c $<
 usb_dcd.o: driver/usb_dcd.c
 	$(CC) -o $@ -c $<
-usb_dcd_int.o: driver/usb_dcd_int.c
+interrupts.o: driver/interrupts.c
 	$(CC) -o $@ -c $<
 
 # From library

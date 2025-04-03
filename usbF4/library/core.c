@@ -18,8 +18,7 @@
 #include "usb_core.h"
 #include "protos.h"
 
-#include "driver/usb_dcd_int.h"
-#include "driver/usb_dcd.h"
+// #include "driver/usb_dcd.h"
 
 /* These macros and functions replace USR_cb and all the stuff
  * in the file usbd_usr.c -- all to set up this redundant status
