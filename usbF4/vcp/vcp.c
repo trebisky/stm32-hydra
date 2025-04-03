@@ -16,7 +16,9 @@
 
 #include "hydra_usb.h"
 #include "types.h"
-#include "usbd_core.h"
+// #include "usbd_core.h"
+#include "usb_core.h"
+#include "protos.h"
 
 #include "conf.h"
 #include "vcp.h"

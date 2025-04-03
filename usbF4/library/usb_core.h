@@ -19,6 +19,20 @@
 #include "driver/usb_regs.h"
 #include "driver/usb_defines.h"
 
+/* Thus used to be in usbd_core.h, but it really belongs here */
+typedef enum {
+  USBD_OK   = 0,
+  USBD_BUSY,
+  USBD_FAIL,
+} USBD_Status;
+
+/* Thus used to be in device/usb_cdc.h, but it really belongs here */
+/*  Device Status */
+#define USB_OTG_DEFAULT                          1
+#define USB_OTG_ADDRESSED                        2
+#define USB_OTG_CONFIGURED                       3
+#define USB_OTG_SUSPENDED                        4
+
 #define USB_OTG_EP0_IDLE                          0
 #define USB_OTG_EP0_SETUP                         1
 #define USB_OTG_EP0_DATA_IN                       2

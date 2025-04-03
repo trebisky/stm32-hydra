@@ -13,17 +13,6 @@
 #ifndef __USB_CONF__H__
 #define __USB_CONF__H__
 
-#include <stdint.h>
-
-#define     __IO    volatile
-
-//typedef unsigned int	uint32_t;
-typedef unsigned int	u32;
-//typedef unsigned short	uint16_t;
-typedef unsigned short	u16;
-//typedef unsigned char	uint8_t;
-typedef unsigned char	u8;
-
 /* ---------------------------------------------------------------------------- */
 
 /* These may change with a different class, this is correct for VCP */
@@ -147,11 +136,11 @@ typedef unsigned char	u8;
  #define TXH_NP_HS_FIFOSIZ                         96
  #define TXH_P_HS_FIFOSIZ                          96
 
- //#define USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
- //#define USB_OTG_HS_SOF_OUTPUT_ENABLED
+//#define USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
+//#define USB_OTG_HS_SOF_OUTPUT_ENABLED
 
- //#define USB_OTG_INTERNAL_VBUS_ENABLED
- #define USB_OTG_EXTERNAL_VBUS_ENABLED
+//#define USB_OTG_INTERNAL_VBUS_ENABLED
+#define USB_OTG_EXTERNAL_VBUS_ENABLED
 
  #ifdef USE_ULPI_PHY
   #define USB_OTG_ULPI_PHY_ENABLED
@@ -163,47 +152,22 @@ typedef unsigned char	u8;
  #define USB_OTG_HS_DEDICATED_EP1_ENABLED
 #endif
 
-
-/****************** USB OTG MODE CONFIGURATION ********************************/
-
-
-
-/****************** C Compilers dependant keywords ****************************/
 /* In HS mode and when the DMA is used, all variables and data structures dealing
    with the DMA during the transaction process should be 4-bytes aligned */
+
 #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-  #if defined   (__GNUC__)        /* GNU Compiler */
-    #define __ALIGN_END    __attribute__ ((aligned (4)))
-    #define __ALIGN_BEGIN
-  #else
-    #define __ALIGN_END
-    #if defined   (__CC_ARM)      /* ARM Compiler */
-      #define __ALIGN_BEGIN    __align(4)
-    #elif defined (__ICCARM__)    /* IAR Compiler */
-      #define __ALIGN_BEGIN
-    #elif defined  (__TASKING__)  /* TASKING Compiler */
-      #define __ALIGN_BEGIN    __align(4)
-    #endif /* __CC_ARM */
-  #endif /* __GNUC__ */
+  #define __ALIGN_BEGIN
+  #define __ALIGN_END    __attribute__ ((aligned (4)))
 #else
   #define __ALIGN_BEGIN
   #define __ALIGN_END    __attribute__ ((aligned (4)))
 #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
 
-/* __packed keyword used to decrease the data type alignment to 1-byte */
-#if defined (__CC_ARM)         /* ARM Compiler */
-  #define __packed    __packed
-#elif defined (__ICCARM__)     /* IAR Compiler */
-  #define __packed    __packed
-#elif defined   ( __GNUC__ )   /* GNU Compiler */
- #ifndef __packed
+/* I only expect to ever use gcc */
+#ifndef __packed
   #define __packed    __attribute__ ((__packed__))
- #endif
-#elif defined   (__TASKING__)  /* TASKING Compiler */
-  #define __packed    __unaligned
-#endif /* __CC_ARM */
+#endif
 
 #endif //__USB_CONF__H__
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
+/* THE END */

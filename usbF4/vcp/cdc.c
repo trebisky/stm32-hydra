@@ -18,9 +18,10 @@
   */
 
 #include "hydra_usb.h"
+#include "usb_std.h"
 
 #include "usb_core.h"
-#include "usbd_core.h"
+#include "driver/usb_dcd.h"
 
 #include "protos.h"
 

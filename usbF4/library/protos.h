@@ -12,6 +12,7 @@ USBD_Status  USBD_StdEPReq (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ  *req);
 void		USBD_ParseSetupRequest (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
 void		USBD_CtlError (USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req);
 
+
 // #include  "usbd_def.h"
 // #include  "usbd_core.h"
 
@@ -23,5 +24,14 @@ USBD_Status  USBD_CtlContinueRx (USB_OTG_CORE_HANDLE  *pdev, uint8_t *pbuf, uint
 USBD_Status  USBD_CtlSendStatus (USB_OTG_CORE_HANDLE  *pdev);
 USBD_Status  USBD_CtlReceiveStatus (USB_OTG_CORE_HANDLE  *pdev);
 uint16_t  USBD_GetRxCount (USB_OTG_CORE_HANDLE  *pdev , uint8_t epnum);
+
+// #include "driver/usb_dcd.h"
+
+/* Defined in core.c */
+void USBD_Init(USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID );
+USBD_Status USBD_DeInit(USB_OTG_CORE_HANDLE *pdev);
+USBD_Status USBD_DeInitFull(USB_OTG_CORE_HANDLE *pdev);
+USBD_Status USBD_ClrCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx);
+USBD_Status USBD_SetCfg(USB_OTG_CORE_HANDLE  *pdev, uint8_t cfgidx);
 
 /* THE END */

@@ -2,13 +2,18 @@
  * public.c
  * Tom Trebisky  3-23-2025
  */
+
 // #include "../hydra.h"
+
 #include "hydra_usb.h"
 // #include "usb.h"
 
 #include <stdarg.h>
 
-#include "usbd_core.h"
+#include "usb_core.h"
+#include "protos.h"
+
+// #include "usbd_core.h"
 
 typedef void (*bfptr) ( char *, int );
 

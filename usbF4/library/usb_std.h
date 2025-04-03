@@ -20,6 +20,13 @@
 #define NULL    0
 #endif
 
+#define  SWAPBYTE(addr)        (((uint16_t)(*((uint8_t *)(addr)))) + \
+                               (((uint16_t)(*(((uint8_t *)(addr)) + 1))) << 8))
+
+#define LOBYTE(x)  ((uint8_t)((x) & 0x00FF))
+#define HIBYTE(x)  ((uint8_t)(((x) & 0xFF00) >>8))
+
+
 #define  USB_LEN_DEV_QUALIFIER_DESC                     0x0A
 #define  USB_LEN_DEV_DESC                               0x12
 #define  USB_LEN_CFG_DESC                               0x09
@@ -72,12 +79,6 @@
 #define USB_FEATURE_REMOTE_WAKEUP                          1
 #define USB_FEATURE_TEST_MODE                              2
 
-#define  SWAPBYTE(addr)        (((uint16_t)(*((uint8_t *)(addr)))) + \
-                               (((uint16_t)(*(((uint8_t *)(addr)) + 1))) << 8))
-
-#define LOBYTE(x)  ((uint8_t)((x) & 0x00FF))
-#define HIBYTE(x)  ((uint8_t)(((x) & 0xFF00) >>8))
-
 #endif /* __USBD_DEF_H */
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+/* THE END */

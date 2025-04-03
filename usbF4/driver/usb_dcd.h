@@ -13,7 +13,7 @@
 #ifndef __DCD_H__
 #define __DCD_H__
 
-#include "library/usb_core.h"
+#include "usb_core.h"
 
 #define USB_OTG_EP_CONTROL                       0
 #define USB_OTG_EP_ISOC                          1
@@ -21,24 +21,13 @@
 #define USB_OTG_EP_INT                           3
 #define USB_OTG_EP_MASK                          3
 
+#ifdef notdef
+/* Moved to usb_core.h 4-2-2025 */
 /*  Device Status */
 #define USB_OTG_DEFAULT                          1
 #define USB_OTG_ADDRESSED                        2
 #define USB_OTG_CONFIGURED                       3
 #define USB_OTG_SUSPENDED                        4
-
-#ifdef notdef
-/* never used */
-typedef struct
-{
-  uint8_t  bLength;
-  uint8_t  bDescriptorType;
-  uint8_t  bEndpointAddress;
-  uint8_t  bmAttributes;
-  uint16_t wMaxPacketSize;
-  uint8_t  bInterval;
-}
-EP_DESCRIPTOR , *PEP_DESCRIPTOR;
 #endif
 
 /********************************************************************************

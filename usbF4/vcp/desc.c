@@ -6,12 +6,16 @@
  *
  */
 #include "hydra_usb.h"
+#include "usb_std.h"
 
-#include "usbd_def.h"
 #include "usb_conf.h"
 #include "conf.h"
 
-#include "usbd_core.h"
+#include "usb_core.h"
+// #include "driver/usb_dcd.h"
+#include "protos.h"
+
+// #include "usbd_core.h"
 // #include "usbd_req.h"
 
 // unsure if the following are needed

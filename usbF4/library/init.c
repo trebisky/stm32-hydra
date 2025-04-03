@@ -5,7 +5,10 @@
 #include "hydra_usb.h"
 
 #include "types.h"
-#include "usbd_core.h"
+
+// #include "usbd_core.h"
+#include "usb_core.h"
+#include "protos.h"
 
 void
 USBD_Init ( USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID )
