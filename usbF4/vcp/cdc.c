@@ -17,15 +17,15 @@
   ******************************************************************************
   */
 
-#include "hydra_usb.h"
+#include "types.h"
+#include "usb_conf.h"
+
 #include "usb_std.h"
 
 #include "usb_core.h"
 #include "driver/usb_dcd.h"
 
 #include "protos.h"
-
-// #include "usbd_req.h"
 
 #include "usb_conf.h"
 #include "conf.h"

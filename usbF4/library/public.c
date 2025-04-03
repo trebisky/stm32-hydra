@@ -3,10 +3,8 @@
  * Tom Trebisky  3-23-2025
  */
 
-// #include "../hydra.h"
-
-#include "hydra_usb.h"
-// #include "usb.h"
+#include "types.h"
+#include "usb_conf.h"
 
 #include <stdarg.h>
 

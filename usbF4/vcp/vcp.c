@@ -14,9 +14,9 @@
 #pragma     data_alignment = 4
 #endif
 
-#include "hydra_usb.h"
 #include "types.h"
-// #include "usbd_core.h"
+#include "usb_conf.h"
+
 #include "usb_core.h"
 #include "protos.h"
 

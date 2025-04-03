@@ -10,15 +10,13 @@
 /* driver.c -- was driver/usb_core.c
  */
 
-#include "hydra_usb.h"
 #include "types.h"
-
 #include "usb_conf.h"
 
 #include "usb_regs.h"
 #include "usb_defines.h"
 
-#include "library/usb_core.h"
+#include "usb_core.h"
 
 /**
 * @brief  USB_OTG_EnableCommonInt

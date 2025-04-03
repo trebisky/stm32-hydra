@@ -2,12 +2,12 @@
  * library/init.c - initialization code
  */
 
-#include "hydra_usb.h"
-
 #include "types.h"
+#include "usb_conf.h"
 
 // #include "usbd_core.h"
 #include "usb_core.h"
+
 #include "protos.h"
 
 void

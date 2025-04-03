@@ -13,6 +13,24 @@
 #ifndef __USB_CONF__H__
 #define __USB_CONF__H__
 
+/* Tom Trebisky (c) 3-6-2025
+ */
+void usb_debug ( int, char *, ... );
+void usb_dump ( int, char *, char *, int );
+
+/* debug selectors --
+ *  first argument to the above.
+ * These are bits in a mask, so we get 32 possibilities.
+ */
+
+#define DM_ORIG		1
+#define DM_EVENT	2
+#define DM_ENUM		4
+#define DM_WRITE1	8		/* writes to endpoint */
+#define DM_READ1	0x10	/* reads from endpoint */
+#define DM_DESC		0x20	/* descriptors for enumeration */
+#define DM_ALL		0xffffffff
+
 /* ---------------------------------------------------------------------------- */
 
 /* These may change with a different class, this is correct for VCP */

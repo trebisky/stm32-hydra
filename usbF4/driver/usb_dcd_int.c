@@ -10,8 +10,8 @@
   ******************************************************************************
   */
 
-#include "hydra_usb.h"
 #include "types.h"
+#include "usb_conf.h"
 
 #include "usb_regs.h"
 #include "usb_defines.h"
