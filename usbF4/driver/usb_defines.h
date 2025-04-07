@@ -13,15 +13,39 @@
 #ifndef __USB_DEF_H__
 #define __USB_DEF_H__
 
-#define USB_OTG_SPEED_PARAM_HIGH 0
-#define USB_OTG_SPEED_PARAM_HIGH_IN_FULL 1
-#define USB_OTG_SPEED_PARAM_FULL 3
-
+#ifdef notdef
+/* Moved to usb_conf.h */
 #define USB_OTG_SPEED_HIGH      0
 #define USB_OTG_SPEED_FULL      1
 
 #define USB_OTG_ULPI_PHY      1
 #define USB_OTG_EMBEDDED_PHY  2
+
+typedef enum
+{
+  USB_OTG_HS_CORE_ID = 0,
+  USB_OTG_FS_CORE_ID = 1
+} USB_OTG_CORE_ID_TypeDef;
+
+
+enum USB_OTG_SPEED {
+  USB_SPEED_UNKNOWN = 0,
+  USB_SPEED_LOW,
+  USB_SPEED_FULL,
+  USB_SPEED_HIGH
+};
+
+#define EP_TYPE_CTRL                           0
+#define EP_TYPE_ISOC                           1
+#define EP_TYPE_BULK                           2
+#define EP_TYPE_INTR                           3
+#define EP_TYPE_MSK                            3
+
+#endif
+
+#define USB_OTG_SPEED_PARAM_HIGH 0
+#define USB_OTG_SPEED_PARAM_HIGH_IN_FULL 1
+#define USB_OTG_SPEED_PARAM_FULL 3
 
 #define GAHBCFG_TXFEMPTYLVL_EMPTY              1
 #define GAHBCFG_TXFEMPTYLVL_HALFEMPTY          0
@@ -74,12 +98,6 @@
 #define EP_SPEED_FULL                          1
 #define EP_SPEED_HIGH                          2
 
-#define EP_TYPE_CTRL                           0
-#define EP_TYPE_ISOC                           1
-#define EP_TYPE_BULK                           2
-#define EP_TYPE_INTR                           3
-#define EP_TYPE_MSK                            3
-
 #define STS_GOUT_NAK                           1
 #define STS_DATA_UPDT                          2
 #define STS_XFER_COMP                          3
@@ -104,25 +122,10 @@
 #define HCCHAR_BULK                            2
 #define HCCHAR_INTR                            3
 
-#define  MIN(a, b)      (((a) < (b)) ? (a) : (b))
-
-typedef enum
-{
-  USB_OTG_HS_CORE_ID = 0,
-  USB_OTG_FS_CORE_ID = 1
-} USB_OTG_CORE_ID_TypeDef;
-
 #define USB_OTG_READ_REG32(reg)  (*(__IO uint32_t *)(reg))
 #define USB_OTG_WRITE_REG32(reg,value) (*(__IO uint32_t *)(reg) = (value))
 #define USB_OTG_MODIFY_REG32(reg,clear_mask,set_mask) \
   USB_OTG_WRITE_REG32((reg), (((USB_OTG_READ_REG32(reg)) & ~(clear_mask)) | (set_mask)) )
-
-enum USB_OTG_SPEED {
-  USB_SPEED_UNKNOWN = 0,
-  USB_SPEED_LOW,
-  USB_SPEED_FULL,
-  USB_SPEED_HIGH
-};
 
 #endif //__USB_DEFINES__H__
 

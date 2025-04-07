@@ -13,12 +13,11 @@
 #ifndef __USB_CORE_H__
 #define __USB_CORE_H__
 
+#define  MIN(a, b)      (((a) < (b)) ? (a) : (b))
+
 /* Was in usb_regs.h */
 #define USB_OTG_MAX_TX_FIFOS                 7
 #define USB_OTG_MAX_EP0_SIZE                 64
-
-// We need a variety of things from here XXX
-#include "driver/usb_defines.h"
 
 /* Standard USB, belongs is usb_std.h someday */
 typedef  struct  usb_setup_req {
@@ -28,6 +27,27 @@ typedef  struct  usb_setup_req {
     uint16_t  wIndex;                             
     uint16_t  wLength;                            
 } USB_SETUP_REQ;
+
+typedef enum
+{
+  USB_OTG_HS_CORE_ID = 0,
+  USB_OTG_FS_CORE_ID = 1
+} USB_OTG_CORE_ID_TypeDef;
+
+enum USB_OTG_SPEED {
+  USB_SPEED_UNKNOWN = 0,
+  USB_SPEED_LOW,
+  USB_SPEED_FULL,
+  USB_SPEED_HIGH
+};
+
+/* Why both this and the above XXX ?*/
+#define USB_OTG_SPEED_HIGH      0
+#define USB_OTG_SPEED_FULL      1
+
+/* Which PHY we are using */
+#define USB_OTG_ULPI_PHY      1
+#define USB_OTG_EMBEDDED_PHY  2
 
 typedef enum {
   USBD_OK   = 0,
@@ -41,6 +61,13 @@ typedef enum {
 #define USB_OTG_EP_BULK                          2
 #define USB_OTG_EP_INT                           3
 #define USB_OTG_EP_MASK                          3
+
+/* More silly redundandy to clean up XXX */
+#define EP_TYPE_CTRL                           0
+#define EP_TYPE_ISOC                           1
+#define EP_TYPE_BULK                           2
+#define EP_TYPE_INTR                           3
+#define EP_TYPE_MSK                            3
 
 /* Thus used to be in device/usb_cdc.h, but it really belongs here */
 /*  Device Status */
