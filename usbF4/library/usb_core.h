@@ -17,9 +17,6 @@
 #define USB_OTG_MAX_TX_FIFOS                 7
 #define USB_OTG_MAX_EP0_SIZE                 64
 
-// See below, we need USB_OTG_core_regs XXX
-#include "driver/usb_regs.h"
-
 // We need a variety of things from here XXX
 #include "driver/usb_defines.h"
 
