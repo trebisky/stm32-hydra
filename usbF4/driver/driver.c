@@ -1243,8 +1243,7 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
   USB_OTG_WRITE_REG32( &pdev->hw->DREGS->DCFG, dcfg.d32 );
 
 #ifdef USB_OTG_FS_CORE
-  if(pdev->cfg.coreID == USB_OTG_FS_CORE_ID  )
-  {  
+  if(pdev->cfg.coreID == USB_OTG_FS_CORE_ID  ) {  
     /* Set Full speed phy */
     USB_OTG_InitDevSpeed (pdev , USB_OTG_SPEED_PARAM_FULL);
     
@@ -1256,18 +1255,15 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
     nptxfifosize.b.startaddr = RX_FIFO_FS_SIZE;
     USB_OTG_WRITE_REG32( &pdev->hw->GREGS->DIEPTXF0_HNPTXFSIZ, nptxfifosize.d32 );
     
-    
     /* EP1 TX*/
     txfifosize.b.startaddr = nptxfifosize.b.startaddr + nptxfifosize.b.depth;
     txfifosize.b.depth = TX1_FIFO_FS_SIZE;
     USB_OTG_WRITE_REG32( &pdev->hw->GREGS->DIEPTXF[0], txfifosize.d32 );
     
-    
     /* EP2 TX*/
     txfifosize.b.startaddr += txfifosize.b.depth;
     txfifosize.b.depth = TX2_FIFO_FS_SIZE;
     USB_OTG_WRITE_REG32( &pdev->hw->GREGS->DIEPTXF[1], txfifosize.d32 );
-    
     
     /* EP3 TX*/  
     txfifosize.b.startaddr += txfifosize.b.depth;
@@ -1277,17 +1273,12 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
 #endif
 
 #ifdef USB_OTG_HS_CORE
-  if(pdev->cfg.coreID == USB_OTG_HS_CORE_ID  )
-  {
-    
+  if(pdev->cfg.coreID == USB_OTG_HS_CORE_ID  ) {
+
     /* Set High speed phy */
-    
-    if(pdev->cfg.phy_itface  == USB_OTG_ULPI_PHY)
-    {
+    if(pdev->cfg.phy_itface  == USB_OTG_ULPI_PHY) {
       USB_OTG_InitDevSpeed (pdev , USB_OTG_SPEED_PARAM_HIGH);
-    }
-    else /* set High speed phy in Full speed mode */
-    {
+    } else { /* set High speed phy in Full speed mode */
       USB_OTG_InitDevSpeed (pdev , USB_OTG_SPEED_PARAM_HIGH_IN_FULL);
     }
     
@@ -1299,18 +1290,15 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
     nptxfifosize.b.startaddr = RX_FIFO_HS_SIZE;
     USB_OTG_WRITE_REG32( &pdev->hw->GREGS->DIEPTXF0_HNPTXFSIZ, nptxfifosize.d32 );
     
-    
     /* EP1 TX*/
     txfifosize.b.startaddr = nptxfifosize.b.startaddr + nptxfifosize.b.depth;
     txfifosize.b.depth = TX1_FIFO_HS_SIZE;
     USB_OTG_WRITE_REG32( &pdev->hw->GREGS->DIEPTXF[0], txfifosize.d32 );
     
-    
     /* EP2 TX*/
     txfifosize.b.startaddr += txfifosize.b.depth;
     txfifosize.b.depth = TX2_FIFO_HS_SIZE;
     USB_OTG_WRITE_REG32( &pdev->hw->GREGS->DIEPTXF[1], txfifosize.d32 );
-    
     
     /* EP3 TX*/  
     txfifosize.b.startaddr += txfifosize.b.depth;
@@ -1321,7 +1309,6 @@ USB_OTG_STS USB_OTG_CoreInitDev (USB_OTG_CORE_HANDLE *pdev)
     txfifosize.b.startaddr += txfifosize.b.depth;
     txfifosize.b.depth = TX4_FIFO_HS_SIZE;
     USB_OTG_WRITE_REG32( &pdev->hw->GREGS->DIEPTXF[3], txfifosize.d32 );
-    
     
     /* EP5 TX*/  
     txfifosize.b.startaddr += txfifosize.b.depth;
@@ -1408,8 +1395,7 @@ USB_OTG_STS USB_OTG_EnableDevInt(USB_OTG_CORE_HANDLE *pdev)
   /* Enable the common interrupts */
   USB_OTG_EnableCommonInt(pdev);
   
-  if (pdev->cfg.dma_enable == 0)
-  {
+  if (pdev->cfg.dma_enable == 0) {
     intmsk.b.rxstsqlvl = 1;
   }
   
@@ -1525,21 +1511,18 @@ USB_OTG_STS USB_OTG_EPActivate(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep)
   depctl.d32 = 0;
   daintmsk.d32 = 0;
   /* Read DEPCTLn register */
-  if (ep->is_in == 1)
-  {
+  if (ep->is_in == 1) {
     addr = &pdev->hw->INEP_REGS[ep->num]->DIEPCTL;
     daintmsk.ep.in = 1 << ep->num;
-  }
-  else
-  {
+  } else {
     addr = &pdev->hw->OUTEP_REGS[ep->num]->DOEPCTL;
     daintmsk.ep.out = 1 << ep->num;
   }
+
   /* If the EP is already active don't change the EP Control
   * register. */
   depctl.d32 = USB_OTG_READ_REG32(addr);
-  if (!depctl.b.usbactep)
-  {
+  if (!depctl.b.usbactep) {
     depctl.b.mps    = ep->maxpacket;
     depctl.b.eptype = ep->type;
     depctl.b.txfnum = ep->tx_fifo_num;
