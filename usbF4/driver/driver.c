@@ -275,9 +275,11 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
 				(i * USB_OTG_EP_REG_OFFSET));
   }
 
+#ifdef USE_HOST_MODE
+  pdev->hw->HPRT0 = (uint32_t *)(baseAddress + USB_OTG_HOST_PORT_REGS_OFFSET);
+
   pdev->hw->HREGS = (USB_OTG_HREGS *)(baseAddress + \
 			USB_OTG_HOST_GLOBAL_REG_OFFSET);
-  pdev->hw->HPRT0 = (uint32_t *)(baseAddress + USB_OTG_HOST_PORT_REGS_OFFSET);
 
   /* 8 (FS)  or 12 (HS) */
   for (i = 0; i < pdev->cfg.host_channels; i++) {
@@ -285,6 +287,7 @@ USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev,
 		  USB_OTG_HOST_CHAN_REGS_OFFSET + \
 				(i * USB_OTG_CHAN_REGS_OFFSET));
   }
+#endif
 
   // 4-6-2025 fix bug. We were looping over 12 here,
   // but the DFIFO array was only size 6 (for endpoints).

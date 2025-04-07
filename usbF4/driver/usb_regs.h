@@ -108,6 +108,7 @@ typedef struct _USB_OTG_OUTEPREGS
 }
 USB_OTG_OUTEPREGS;
 
+#ifdef USE_HOST_MODE
 typedef struct _USB_OTG_HREGS
 {
   __IO uint32_t HCFG;             /* Host Configuration Register    400h*/
@@ -131,17 +132,20 @@ typedef struct _USB_OTG_HC_REGS
   uint32_t Reserved[2];
 }
 USB_OTG_HC_REGS;
+#endif
 
 // typedef struct USB_OTG_core_regs //000h
 struct core_regs
 {
   USB_OTG_GREGS         *GREGS;
   USB_OTG_DREGS         *DREGS;
-  USB_OTG_HREGS         *HREGS;
   USB_OTG_INEPREGS      *INEP_REGS[USB_OTG_MAX_TX_FIFOS];
   USB_OTG_OUTEPREGS     *OUTEP_REGS[USB_OTG_MAX_TX_FIFOS];
+#ifdef USE_HOST_MODE
+  USB_OTG_HREGS         *HREGS;
   USB_OTG_HC_REGS       *HC_REGS[USB_OTG_MAX_TX_FIFOS];
   __IO uint32_t         *HPRT0;
+#endif
   __IO uint32_t         *DFIFO[USB_OTG_MAX_TX_FIFOS];
   __IO uint32_t         *PCGCCTL;
 };
@@ -876,6 +880,7 @@ uint32_t ptxqspcavail :
   b;
 } USB_OTG_HPTXSTS_TypeDef ;
 
+#ifdef USE_HOST_MODE
 typedef union _USB_OTG_HPRT0_TypeDef 
 {
   uint32_t d32;
@@ -914,6 +919,7 @@ uint32_t Reserved19_31 :
   }
   b;
 } USB_OTG_HPRT0_TypeDef ;
+#endif
 
 typedef union _USB_OTG_HAINT_TypeDef 
 {
