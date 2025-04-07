@@ -80,6 +80,16 @@
 #define USB_FEATURE_REMOTE_WAKEUP                          1
 #define USB_FEATURE_TEST_MODE                              2
 
+#ifdef notdef
+typedef  struct  usb_setup_req {
+    uint8_t   bmRequest;                      
+    uint8_t   bRequest;                           
+    uint16_t  wValue;                             
+    uint16_t  wIndex;                             
+    uint16_t  wLength;                            
+} USB_SETUP_REQ;
+#endif
+
 #endif /* __USBD_DEF_H */
 
 /* THE END */

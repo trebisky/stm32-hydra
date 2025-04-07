@@ -13,10 +13,11 @@
 #include "types.h"
 #include "usb_conf.h"
 
+#include "usb_core.h"
+
 #include "usb_regs.h"
 #include "usb_defines.h"
 
-#include "usb_core.h"
 #include "usb_dcd.h"
 
 void DCD_Init(USB_OTG_CORE_HANDLE *pdev , 
@@ -27,7 +28,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   
   USB_OTG_SelectCore (pdev , coreID);
 
-  usb_debug ( DM_EVENT, "Event - init" );
+  usb_debug ( DM_EVENT, "Event - init\n" );
+	printf ( "dev endpoints: %d\n", pdev->cfg.dev_endpoints );
   
   pdev->dev.device_status = USB_OTG_DEFAULT;
   pdev->dev.device_address = 0;
@@ -45,6 +47,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
     ep->xfer_buff = 0;
     ep->xfer_len = 0;
   }
+  usb_debug ( DM_EVENT, "Event - init A\n" );
+	printf ( "dev endpoints: %d\n", pdev->cfg.dev_endpoints );
   
   /* Init ep structure for OUT endpoints*/
   for (i = 0; i < pdev->cfg.dev_endpoints; i++) {
@@ -59,6 +63,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
     ep->xfer_buff = 0;
     ep->xfer_len = 0;
   }
+  usb_debug ( DM_EVENT, "Event - init B\n" );
+	printf ( "dev endpoints: %d\n", pdev->cfg.dev_endpoints );
   
   USB_OTG_DisableGlobalInt(pdev);
 
@@ -67,6 +73,8 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   
   /*Init the Core (common init.) */
   USB_OTG_CoreInit(pdev);
+  usb_debug ( DM_EVENT, "Event - init C\n" );
+	printf ( "dev endpoints: %d\n", pdev->cfg.dev_endpoints );
 
 /* XXX - why is this order so special ?? */
 #ifndef HYDRA
@@ -84,12 +92,17 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   USB_OTG_SetCurrentMode(pdev, DEVICE_MODE);
 #endif
 #endif /* HYDRA */
+  usb_debug ( DM_EVENT, "Event - init D\n" );
+	printf ( "dev endpoints: %d\n", pdev->cfg.dev_endpoints );
   
   /* Init Device */
   USB_OTG_CoreInitDev(pdev);
+  usb_debug ( DM_EVENT, "Event - init E\n" );
+	printf ( "dev endpoints: %d\n", pdev->cfg.dev_endpoints );
   
   /* Enable USB Global interrupt */
   USB_OTG_EnableGlobalInt(pdev);
+  usb_debug ( DM_EVENT, "Event - init F\n" );
 }
 
 
@@ -313,7 +326,8 @@ void  DCD_EP_SetAddress (USB_OTG_CORE_HANDLE *pdev, uint8_t address)
   USB_OTG_DCFG_TypeDef  dcfg;
   dcfg.d32 = 0;
   dcfg.b.devaddr = address;
-  USB_OTG_MODIFY_REG32( &pdev->regs.DREGS->DCFG, 0, dcfg.d32);
+  // USB_OTG_MODIFY_REG32( &pdev->regs.DREGS->DCFG, 0, dcfg.d32);
+  USB_OTG_MODIFY_REG32( &pdev->hw->DREGS->DCFG, 0, dcfg.d32);
 }
 
 /**
@@ -325,10 +339,11 @@ void  DCD_DevConnect (USB_OTG_CORE_HANDLE *pdev)
 {
 #ifndef USE_OTG_MODE
   USB_OTG_DCTL_TypeDef  dctl;
-  dctl.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DCTL);
+  // dctl.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DCTL);
+  dctl.d32 = USB_OTG_READ_REG32(&pdev->hw->DREGS->DCTL);
   /* Connect device */
   dctl.b.sftdiscon  = 0;
-  USB_OTG_WRITE_REG32(&pdev->regs.DREGS->DCTL, dctl.d32);
+  USB_OTG_WRITE_REG32(&pdev->hw->DREGS->DCTL, dctl.d32);
   // board_mDelay(3);
   delay_ms ( 3 );
 #endif
@@ -344,10 +359,10 @@ void  DCD_DevDisconnect (USB_OTG_CORE_HANDLE *pdev)
 {
 #ifndef USE_OTG_MODE
   USB_OTG_DCTL_TypeDef  dctl;
-  dctl.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DCTL);
+  dctl.d32 = USB_OTG_READ_REG32(&pdev->hw->DREGS->DCTL);
   /* Disconnect device for 3ms */
   dctl.b.sftdiscon  = 1;
-  USB_OTG_WRITE_REG32(&pdev->regs.DREGS->DCTL, dctl.d32);
+  USB_OTG_WRITE_REG32(&pdev->hw->DREGS->DCTL, dctl.d32);
   // board_mDelay(3);
   delay_ms ( 3 );
 #endif

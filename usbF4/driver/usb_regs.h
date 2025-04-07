@@ -30,11 +30,12 @@
 #define USB_OTG_DATA_FIFO_SIZE               0x1000
 
 
-#define USB_OTG_MAX_TX_FIFOS                 7
+// moved to usb_core.h
+// #define USB_OTG_MAX_TX_FIFOS                 7
+// #define USB_OTG_MAX_EP0_SIZE                 64
 
 #define USB_OTG_HS_MAX_PACKET_SIZE           512
 #define USB_OTG_FS_MAX_PACKET_SIZE           64
-#define USB_OTG_MAX_EP0_SIZE                 64
 
 typedef struct _USB_OTG_GREGS  //000h
 {
@@ -133,7 +134,8 @@ typedef struct _USB_OTG_HC_REGS
 }
 USB_OTG_HC_REGS;
 
-typedef struct USB_OTG_core_regs //000h
+// typedef struct USB_OTG_core_regs //000h
+struct core_regs
 {
   USB_OTG_GREGS         *GREGS;
   USB_OTG_DREGS         *DREGS;
@@ -144,8 +146,10 @@ typedef struct USB_OTG_core_regs //000h
   __IO uint32_t         *HPRT0;
   __IO uint32_t         *DFIFO[USB_OTG_MAX_TX_FIFOS];
   __IO uint32_t         *PCGCCTL;
-}
-USB_OTG_CORE_REGS , *PUSB_OTG_CORE_REGS;
+};
+
+typedef struct core_regs USB_OTG_CORE_REGS;
+// typedef struct core_regs *PUSB_OTG_CORE_REGS;
 
 typedef union _USB_OTG_GOTGCTL_TypeDef 
 {

@@ -13,13 +13,25 @@
 #ifndef __USB_CORE_H__
 #define __USB_CORE_H__
 
-#include "types.h"
-#include "usb_conf.h"
+/* Was in usb_regs.h */
+#define USB_OTG_MAX_TX_FIFOS                 7
+#define USB_OTG_MAX_EP0_SIZE                 64
 
+// See below, we need USB_OTG_core_regs XXX
 #include "driver/usb_regs.h"
+
+// We need a variety of things from here XXX
 #include "driver/usb_defines.h"
 
-/* Thus used to be in usbd_core.h, but it really belongs here */
+/* Standard USB, belongs is usb_std.h someday */
+typedef  struct  usb_setup_req {
+    uint8_t   bmRequest;                      
+    uint8_t   bRequest;                           
+    uint16_t  wValue;                             
+    uint16_t  wIndex;                             
+    uint16_t  wLength;                            
+} USB_SETUP_REQ;
+
 typedef enum {
   USBD_OK   = 0,
   USBD_BUSY,
@@ -60,11 +72,10 @@ typedef enum {
 
 #define   MAX_DATA_LENGTH                        0x100
 
-
 typedef enum {
   USB_OTG_OK = 0,
   USB_OTG_FAIL
-}USB_OTG_STS;
+} USB_OTG_STS;
 
 typedef enum {
   HC_IDLE = 0,
@@ -76,7 +87,7 @@ typedef enum {
   HC_XACTERR,  
   HC_BBLERR,   
   HC_DATATGLERR,  
-}HC_STATUS;
+} HC_STATUS;
 
 typedef enum {
   URB_IDLE = 0,
@@ -84,7 +95,7 @@ typedef enum {
   URB_NOTREADY,
   URB_ERROR,
   URB_STALL
-}URB_STATE;
+} URB_STATE;
 
 typedef enum {
   CTRL_START = 0,
@@ -96,8 +107,7 @@ typedef enum {
   CTRL_BBLERR,   
   CTRL_DATATGLERR,  
   CTRL_FAIL
-}CTRL_STATUS;
-
+} CTRL_STATUS;
 
 typedef struct USB_OTG_hc
 {
@@ -158,30 +168,7 @@ typedef struct USB_OTG_core_cfg
 }
 USB_OTG_CORE_CFGS, *PUSB_OTG_CORE_CFGS;
 
-
-typedef  struct  usb_setup_req {
-    uint8_t   bmRequest;                      
-    uint8_t   bRequest;                           
-    uint16_t  wValue;                             
-    uint16_t  wIndex;                             
-    uint16_t  wLength;                            
-} USB_SETUP_REQ;
-
-typedef struct _Device_TypeDef
-{
-  uint8_t  *(*GetDeviceDescriptor)( uint8_t speed , uint16_t *length);  
-  uint8_t  *(*GetLangIDStrDescriptor)( uint8_t speed , uint16_t *length); 
-  uint8_t  *(*GetManufacturerStrDescriptor)( uint8_t speed , uint16_t *length);  
-  uint8_t  *(*GetProductStrDescriptor)( uint8_t speed , uint16_t *length);  
-  uint8_t  *(*GetSerialStrDescriptor)( uint8_t speed , uint16_t *length);  
-  uint8_t  *(*GetConfigurationStrDescriptor)( uint8_t speed , uint16_t *length);  
-  uint8_t  *(*GetInterfaceStrDescriptor)( uint8_t speed , uint16_t *length);
-
-#if (USBD_LPM_ENABLED == 1)
-  uint8_t  *(*GetBOSDescriptor)( uint8_t speed , uint16_t *length); 
-#endif   
-} USBD_DEVICE, *pUSBD_DEVICE;
-
+#ifdef notdef
 typedef struct USB_OTG_hPort
 {
   void (*Disconnect) (void *phost);
@@ -191,24 +178,9 @@ typedef struct USB_OTG_hPort
   uint8_t ConnHandled;
   uint8_t DisconnHandled;
 } USB_OTG_hPort_TypeDef;
-
-#ifdef long_gone
-typedef struct _USBD_USR_PROP
-{
-  void (*Init)(void);   
-  void (*DeviceReset)(uint8_t speed); 
-  void (*DeviceConfigured)(void);
-  void (*DeviceSuspended)(void);
-  void (*DeviceResumed)(void);  
-  
-  void (*DeviceConnected)(void);  
-  void (*DeviceDisconnected)(void);    
-  
-}
-USBD_Usr_cb_TypeDef;
 #endif
 
-typedef struct _DCD
+struct _DCD
 {
   uint8_t        device_config;
   uint8_t        device_state;
@@ -225,11 +197,31 @@ typedef struct _DCD
   // USBD_Usr_cb_TypeDef           *usr_cb;
   // USBD_DEVICE                   *usr_device;  
   uint8_t        *pConfig_descriptor;		/* used by VCP */
- }
-DCD_DEV , *DCD_PDEV;
+};
 
+typedef struct _DCD DCD_DEV;
+// typedef struct _DCD *DCD_PDEV;
+
+struct USB_OTG_handle
+{
+  // struct pickle *pptr;
+  USB_OTG_CORE_CFGS    cfg;
+  // USB_OTG_CORE_REGS    regs;
+  struct core_regs *hw;
+#ifdef USE_DEVICE_MODE
+  DCD_DEV     dev;
+#endif
+#ifdef USE_HOST_MODE
+..   HCD_DEV     host;
+#endif
+#ifdef USE_OTG_MODE
+  /* tjt - we don't define this */
+  OTG_DEV     otg;
+#endif
+};
 
 #ifdef notdef
+/* Not used */
 typedef struct _HCD
 {
   uint8_t                  Rx_Buffer [MAX_DATA_LENGTH];  
@@ -246,6 +238,8 @@ typedef struct _HCD
 HCD_DEV , *USB_OTG_USBH_PDEV;
 #endif
 
+#ifdef USE_OTG_MODE
+/* Not used */
 typedef struct _OTG
 {
   uint8_t    OTG_State;
@@ -253,36 +247,17 @@ typedef struct _OTG
   uint8_t    OTG_Mode;    
 }
 OTG_DEV , *USB_OTG_USBO_PDEV;
+#endif
 
-typedef struct USB_OTG_handle
-{
-  USB_OTG_CORE_CFGS    cfg;
-  USB_OTG_CORE_REGS    regs;
-#ifdef USE_DEVICE_MODE
-  DCD_DEV     dev;
-#endif
-#ifdef USE_HOST_MODE
-..   HCD_DEV     host;
-#endif
-#ifdef USE_OTG_MODE
-  OTG_DEV     otg;
-#endif
-}
-USB_OTG_CORE_HANDLE , *PUSB_OTG_CORE_HANDLE;
-
+typedef struct USB_OTG_handle USB_OTG_CORE_HANDLE;
+// typedef struct USB_OTG_handle *PUSB_OTG_CORE_HANDLE;
 
 USB_OTG_STS  USB_OTG_CoreInit        (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_SelectCore      (USB_OTG_CORE_HANDLE *pdev, 
-                                      USB_OTG_CORE_ID_TypeDef coreID);
+USB_OTG_STS  USB_OTG_SelectCore      (USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID);
 USB_OTG_STS  USB_OTG_EnableGlobalInt (USB_OTG_CORE_HANDLE *pdev);
 USB_OTG_STS  USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev);
-void*           USB_OTG_ReadPacket   (USB_OTG_CORE_HANDLE *pdev ,
-    uint8_t *dest,
-    uint16_t len);
-USB_OTG_STS  USB_OTG_WritePacket     (USB_OTG_CORE_HANDLE *pdev ,
-    uint8_t *src,
-    uint8_t ch_ep_num,
-    uint16_t len);
+void*           USB_OTG_ReadPacket   (USB_OTG_CORE_HANDLE *pdev , uint8_t *dest, uint16_t len);
+USB_OTG_STS  USB_OTG_WritePacket     (USB_OTG_CORE_HANDLE *pdev , uint8_t *src, uint8_t ch_ep_num, uint16_t len);
 USB_OTG_STS  USB_OTG_FlushTxFifo     (USB_OTG_CORE_HANDLE *pdev , uint32_t num);
 USB_OTG_STS  USB_OTG_FlushRxFifo     (USB_OTG_CORE_HANDLE *pdev);
 

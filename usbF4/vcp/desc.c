@@ -9,13 +9,13 @@
 #include "types.h"
 #include "usb_conf.h"
 
+#include "usb_core.h"
+#include "protos.h"
+
 #include "usb_std.h"
 
 #include "usb_conf.h"
 #include "conf.h"
-
-#include "usb_core.h"
-#include "protos.h"
 
 #include "vcp.h"
 

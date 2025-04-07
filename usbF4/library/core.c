@@ -911,31 +911,14 @@ USBD_GetStatus(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
   }
 }
 
-/**
-* @brief  USBD_SetFeature
-*         Handle Set device feature request
-* @param  pdev: device instance
-* @param  req: usb request
-* @retval status
-* XXX - direct access to hardware here .. fix
-*/
-static void
-USBD_SetFeature(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
+#ifdef notdef
+void
+HW_SetFeature ( USB_OTG_CORE_HANDLE  *pdev, uint8_t test_mode )
 {
+    USB_OTG_DCTL_TypeDef     dctl;
 
-  USB_OTG_DCTL_TypeDef     dctl;
-  uint8_t test_mode = 0;
- 
-  if (req->wValue == USB_FEATURE_REMOTE_WAKEUP) {
-    pdev->dev.DevRemoteWakeup = 1;  
-    // pdev->dev.class_cb->Setup (pdev, req);   
-    CLASS_Setup (pdev, req);   
-    USBD_CtlSendStatus(pdev);
-  } else if ((req->wValue == USB_FEATURE_TEST_MODE) && 
-           ((req->wIndex & 0xFF) == 0)) {
-    dctl.d32 = USB_OTG_READ_REG32(&pdev->regs.DREGS->DCTL);
-    
-    test_mode = req->wIndex >> 8;
+    dctl.d32 = USB_OTG_READ_REG32(&pdev->hw->DREGS->DCTL);
+
     switch (test_mode) {
     case 1: // TEST_J
       dctl.b.tstctl = 1;
@@ -958,7 +941,30 @@ USBD_SetFeature(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
       break;
     }
 
-    USB_OTG_WRITE_REG32(&pdev->regs.DREGS->DCTL, dctl.d32);
+    USB_OTG_WRITE_REG32(&pdev->hw->DREGS->DCTL, dctl.d32);
+}
+#endif
+
+/**
+* @brief  USBD_SetFeature
+*         Handle Set device feature request
+* @param  pdev: device instance
+* @param  req: usb request
+* @retval status
+*
+* tjt - this used to directly access the Dctl register,
+*  but we moved that to the driver via the call to
+*    HW_SetFeature ()  4-6-2025
+*/
+static void
+USBD_SetFeature(USB_OTG_CORE_HANDLE  *pdev, USB_SETUP_REQ *req)
+{
+  if (req->wValue == USB_FEATURE_REMOTE_WAKEUP) {
+    pdev->dev.DevRemoteWakeup = 1;  
+    CLASS_Setup (pdev, req);   
+    USBD_CtlSendStatus(pdev);
+  } else if ((req->wValue == USB_FEATURE_TEST_MODE) && ((req->wIndex & 0xFF) == 0)) {
+	HW_SetFeature ( pdev, req->wIndex >> 8 );
     USBD_CtlSendStatus(pdev);
   }
 }
