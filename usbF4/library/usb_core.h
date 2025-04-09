@@ -276,10 +276,11 @@ OTG_DEV , *USB_OTG_USBO_PDEV;
 typedef struct USB_OTG_handle USB_OTG_CORE_HANDLE;
 // typedef struct USB_OTG_handle *PUSB_OTG_CORE_HANDLE;
 
+// XXX - The following should be static in "driver"
 USB_OTG_STS  USB_OTG_CoreInit        (USB_OTG_CORE_HANDLE *pdev);
 USB_OTG_STS  USB_OTG_SelectCore      (USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID);
-USB_OTG_STS  USB_OTG_EnableGlobalInt (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev);
+// USB_OTG_STS  USB_OTG_EnableGlobalInt (USB_OTG_CORE_HANDLE *pdev);
+// USB_OTG_STS  USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev);
 void*           USB_OTG_ReadPacket   (USB_OTG_CORE_HANDLE *pdev , uint8_t *dest, uint16_t len);
 USB_OTG_STS  USB_OTG_WritePacket     (USB_OTG_CORE_HANDLE *pdev , uint8_t *src, uint8_t ch_ep_num, uint16_t len);
 USB_OTG_STS  USB_OTG_FlushTxFifo     (USB_OTG_CORE_HANDLE *pdev , uint32_t num);
@@ -291,8 +292,7 @@ uint8_t      USB_OTG_IsHostMode      (USB_OTG_CORE_HANDLE *pdev);
 uint8_t      USB_OTG_IsDeviceMode    (USB_OTG_CORE_HANDLE *pdev);
 uint32_t     USB_OTG_GetMode         (USB_OTG_CORE_HANDLE *pdev);
 USB_OTG_STS  USB_OTG_PhyInit         (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_SetCurrentMode  (USB_OTG_CORE_HANDLE *pdev,
-    uint8_t mode);
+USB_OTG_STS  USB_OTG_SetCurrentMode  (USB_OTG_CORE_HANDLE *pdev, uint8_t mode);
 
 /*********************** HOST APIs ********************************************/
 #ifdef USE_HOST_MODE

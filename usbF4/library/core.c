@@ -465,7 +465,10 @@ USBD_Status
 USBD_CtlSendStatus (USB_OTG_CORE_HANDLE  *pdev)
 {
   USBD_Status ret = USBD_OK;
+
   pdev->dev.device_state = USB_OTG_EP0_STATUS_IN;
+
+  usb_debug ( DM_EVENT, "zero length status\n" );
   DCD_EP_Tx (pdev,
              0,
              NULL, 

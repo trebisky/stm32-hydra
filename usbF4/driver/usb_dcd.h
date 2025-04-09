@@ -13,15 +13,6 @@
 #ifndef __DCD_H__
 #define __DCD_H__
 
-#ifdef notdef
-/* XXX - should probable move to usb_core.h */
-#define USB_OTG_EP_CONTROL                       0
-#define USB_OTG_EP_ISOC                          1
-#define USB_OTG_EP_BULK                          2
-#define USB_OTG_EP_INT                           3
-#define USB_OTG_EP_MASK                          3
-#endif
-
 /********************************************************************************
 EXPORTED FUNCTION FROM THE USB-OTG LAYER
 ********************************************************************************/

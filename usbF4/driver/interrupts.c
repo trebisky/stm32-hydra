@@ -174,7 +174,8 @@ int tusb_xof_count = 0;
 * @param  pdev: device instance
 * @retval status
 */
-uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
+uint32_t
+USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_GINTSTS_TypeDef  gintr_status;
   uint32_t retval = 0;
@@ -492,7 +493,8 @@ static uint32_t DCD_HandleInEP_ISR(USB_OTG_CORE_HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t DCD_HandleOutEP_ISR(USB_OTG_CORE_HANDLE *pdev)
+static uint32_t
+DCD_HandleOutEP_ISR(USB_OTG_CORE_HANDLE *pdev)
 {
   uint32_t ep_intr;
   USB_OTG_DOEPINTn_TypeDef  doepint;
@@ -589,7 +591,8 @@ static uint32_t DCD_HandleSof_ISR(USB_OTG_CORE_HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t DCD_HandleRxStatusQueueLevel_ISR(USB_OTG_CORE_HANDLE *pdev)
+static uint32_t
+DCD_HandleRxStatusQueueLevel_ISR(USB_OTG_CORE_HANDLE *pdev)
 {
   USB_OTG_GINTMSK_TypeDef  int_mask;
   USB_OTG_DRXSTS_TypeDef   status;

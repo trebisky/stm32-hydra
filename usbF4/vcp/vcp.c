@@ -63,8 +63,8 @@ uint8_t UsbTXBlock = 1;
 uint8_t rxDisabled = 1;
 USB_OTG_CORE_HANDLE * usbDevice = NULL;
 
-volatile uint8_t VCP_DTRHIGH = 0;
-volatile uint8_t VCP_RTSHIGH = 0;
+static volatile uint8_t VCP_DTRHIGH = 0;
+static volatile uint8_t VCP_RTSHIGH = 0;
 uint8_t VCPGetDTR(void) { return VCP_DTRHIGH; }
 uint8_t VCPGetRTS(void) { return VCP_RTSHIGH; }
 
@@ -226,6 +226,7 @@ VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
 
   case SET_CONTROL_LINE_STATE:
 	linecoding.bitrate = (uint32_t)(Buf[0] | (Buf[1] << 8));
+	usb_debug ( DM_EVENT, "DTR/RTS set: %d\n", Buf[0] );
 	VCP_DTRHIGH = (Buf[0] & 0x1);
 	VCP_RTSHIGH = (Buf[0] & 0x2)>>1;
     /* Not  needed for this driver */

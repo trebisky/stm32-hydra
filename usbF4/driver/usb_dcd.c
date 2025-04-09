@@ -20,8 +20,8 @@
 
 #include "usb_dcd.h"
 
-void DCD_Init(USB_OTG_CORE_HANDLE *pdev , 
-              USB_OTG_CORE_ID_TypeDef coreID)
+void
+DCD_Init(USB_OTG_CORE_HANDLE *pdev , USB_OTG_CORE_ID_TypeDef coreID)
 {
   uint32_t i;
   USB_OTG_EP *ep;
@@ -105,14 +105,14 @@ void DCD_Init(USB_OTG_CORE_HANDLE *pdev ,
   usb_debug ( DM_EVENT, "Event - init F\n" );
 }
 
-
 /**
 * @brief  Configure an EP
 * @param pdev : Device instance
 * @param epdesc : Endpoint Descriptor
 * @retval : status
 */
-uint32_t DCD_EP_Open(USB_OTG_CORE_HANDLE *pdev , 
+uint32_t
+DCD_EP_Open(USB_OTG_CORE_HANDLE *pdev , 
                      uint8_t ep_addr,
                      uint16_t ep_mps,
                      uint8_t ep_type)
@@ -151,16 +151,14 @@ uint32_t DCD_EP_Open(USB_OTG_CORE_HANDLE *pdev ,
 * @param ep_addr: endpoint address
 * @retval : status
 */
-uint32_t DCD_EP_Close(USB_OTG_CORE_HANDLE *pdev , uint8_t  ep_addr)
+uint32_t
+DCD_EP_Close(USB_OTG_CORE_HANDLE *pdev , uint8_t  ep_addr)
 {
   USB_OTG_EP *ep;
   
-  if ((ep_addr&0x80) == 0x80)
-  {
+  if ((ep_addr&0x80) == 0x80) {
     ep = &pdev->dev.in_ep[ep_addr & 0x7F];
-  }
-  else
-  {
+  } else {
     ep = &pdev->dev.out_ep[ep_addr & 0x7F];
   }
   ep->num   = ep_addr & 0x7F;
@@ -178,7 +176,8 @@ uint32_t DCD_EP_Close(USB_OTG_CORE_HANDLE *pdev , uint8_t  ep_addr)
 * @param buf_len: data length
 * @retval : status
 */
-uint32_t   DCD_EP_PrepareRx( USB_OTG_CORE_HANDLE *pdev,
+uint32_t
+DCD_EP_PrepareRx( USB_OTG_CORE_HANDLE *pdev,
                             uint8_t   ep_addr,
                             uint8_t *pbuf,                        
                             uint16_t  buf_len)
@@ -194,19 +193,16 @@ uint32_t   DCD_EP_PrepareRx( USB_OTG_CORE_HANDLE *pdev,
   ep->is_in = 0;
   ep->num = ep_addr & 0x7F;
   
-  if (pdev->cfg.dma_enable == 1)
-  {
+  if (pdev->cfg.dma_enable == 1) {
     ep->dma_addr = (uint32_t)pbuf;  
   }
   
-  if ( ep->num == 0 )
-  {
+  if ( ep->num == 0 ) {
     USB_OTG_EP0StartXfer(pdev , ep);
-  }
-  else
-  {
+  } else {
     USB_OTG_EPStartXfer(pdev, ep );
   }
+
   return 0;
 }
 
@@ -218,7 +214,8 @@ uint32_t   DCD_EP_PrepareRx( USB_OTG_CORE_HANDLE *pdev,
 * @param buf_len: data length
 * @retval : status
 */
-uint32_t  DCD_EP_Tx ( USB_OTG_CORE_HANDLE *pdev,
+uint32_t
+DCD_EP_Tx ( USB_OTG_CORE_HANDLE *pdev,
                      uint8_t   ep_addr,
                      uint8_t   *pbuf,
                      uint32_t   buf_len)
@@ -250,7 +247,8 @@ uint32_t  DCD_EP_Tx ( USB_OTG_CORE_HANDLE *pdev,
 * @param epnum: endpoint address
 * @retval : status
 */
-uint32_t  DCD_EP_Stall (USB_OTG_CORE_HANDLE *pdev, uint8_t   epnum)
+uint32_t
+DCD_EP_Stall (USB_OTG_CORE_HANDLE *pdev, uint8_t   epnum)
 {
   USB_OTG_EP *ep;
 
@@ -275,15 +273,13 @@ uint32_t  DCD_EP_Stall (USB_OTG_CORE_HANDLE *pdev, uint8_t   epnum)
 * @param epnum: endpoint address
 * @retval : status
 */
-uint32_t  DCD_EP_ClrStall (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum)
+uint32_t
+DCD_EP_ClrStall (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum)
 {
   USB_OTG_EP *ep;
-  if ((0x80 & epnum) == 0x80)
-  {
+  if ((0x80 & epnum) == 0x80) {
     ep = &pdev->dev.in_ep[epnum & 0x7F];    
-  }
-  else
-  {
+  } else {
     ep = &pdev->dev.out_ep[epnum];
   }
   
@@ -302,7 +298,8 @@ uint32_t  DCD_EP_ClrStall (USB_OTG_CORE_HANDLE *pdev, uint8_t epnum)
 * @param epnum: endpoint address
 * @retval : status
 */
-uint32_t  DCD_EP_Flush (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
+uint32_t
+DCD_EP_Flush (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
 {
 
   if ((epnum & 0x80) == 0x80) {
@@ -321,7 +318,8 @@ uint32_t  DCD_EP_Flush (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum)
 * @param address: new device address
 * @retval : status
 */
-void  DCD_EP_SetAddress (USB_OTG_CORE_HANDLE *pdev, uint8_t address)
+void
+DCD_EP_SetAddress (USB_OTG_CORE_HANDLE *pdev, uint8_t address)
 {
   USB_OTG_DCFG_TypeDef  dcfg;
   dcfg.d32 = 0;
@@ -335,7 +333,8 @@ void  DCD_EP_SetAddress (USB_OTG_CORE_HANDLE *pdev, uint8_t address)
 * @param pdev: device instance
 * @retval : None
 */
-void  DCD_DevConnect (USB_OTG_CORE_HANDLE *pdev)
+void
+DCD_DevConnect (USB_OTG_CORE_HANDLE *pdev)
 {
 #ifndef USE_OTG_MODE
   USB_OTG_DCTL_TypeDef  dctl;
@@ -355,7 +354,8 @@ void  DCD_DevConnect (USB_OTG_CORE_HANDLE *pdev)
 * @param pdev: device instance
 * @retval : None
 */
-void  DCD_DevDisconnect (USB_OTG_CORE_HANDLE *pdev)
+void
+DCD_DevDisconnect (USB_OTG_CORE_HANDLE *pdev)
 {
 #ifndef USE_OTG_MODE
   USB_OTG_DCTL_TypeDef  dctl;
@@ -376,17 +376,15 @@ void  DCD_DevDisconnect (USB_OTG_CORE_HANDLE *pdev)
 * @retval : EP status
 */
 
-uint32_t DCD_GetEPStatus(USB_OTG_CORE_HANDLE *pdev ,uint8_t epnum)
+uint32_t
+DCD_GetEPStatus(USB_OTG_CORE_HANDLE *pdev ,uint8_t epnum)
 {
   USB_OTG_EP *ep;
   uint32_t Status = 0;  
   
-  if ((0x80 & epnum) == 0x80)
-  {
+  if ((0x80 & epnum) == 0x80) {
     ep = &pdev->dev.in_ep[epnum & 0x7F];    
-  }
-  else
-  {
+  } else {
     ep = &pdev->dev.out_ep[epnum];
   }
   
@@ -403,16 +401,14 @@ uint32_t DCD_GetEPStatus(USB_OTG_CORE_HANDLE *pdev ,uint8_t epnum)
 *         epnum : EP address
 * @retval : None
 */
-void DCD_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum , uint32_t Status)
+void
+DCD_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum , uint32_t Status)
 {
   USB_OTG_EP *ep;
   
-  if ((0x80 & epnum) == 0x80)
-  {
+  if ((0x80 & epnum) == 0x80) {
     ep = &pdev->dev.in_ep[epnum & 0x7F];    
-  }
-  else
-  {
+  } else {
     ep = &pdev->dev.out_ep[epnum];
   }
   

@@ -153,13 +153,11 @@ USB_OTG_WritePacket(USB_OTG_CORE_HANDLE *pdev,
   return status;
 }
 
-
 /**
 * @brief  USB_OTG_ReadPacket : Reads a packet from the Rx FIFO
 * @param  pdev : Selected device
 * @param  dest : Destination Pointer
 * @param  bytes : No. of bytes
-* @retval None
 */
 void *
 USB_OTG_ReadPacket(USB_OTG_CORE_HANDLE *pdev, 
@@ -180,6 +178,7 @@ USB_OTG_ReadPacket(USB_OTG_CORE_HANDLE *pdev,
   return ((void *)dest);
 }
 
+/* tjt */
 static struct core_regs core_info;
 static int core_count = 0;
 
@@ -190,8 +189,8 @@ static int core_count = 0;
 * @param  coreID : USB OTG Core ID
 * @retval USB_OTG_STS : status
 */
-USB_OTG_STS USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev, 
-                               USB_OTG_CORE_ID_TypeDef coreID)
+USB_OTG_STS
+USB_OTG_SelectCore(USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID)
 {
   uint32_t i , baseAddress = 0;
   USB_OTG_STS status = USB_OTG_OK;
@@ -355,17 +354,14 @@ USB_OTG_STS USB_OTG_CoreInit(USB_OTG_CORE_HANDLE *pdev)
     /* Reset after a PHY select  */
     USB_OTG_CoreReset(pdev);
     
-    if(pdev->cfg.dma_enable == 1)
-    {
+    if(pdev->cfg.dma_enable == 1) {
       
       ahbcfg.b.hburstlen = 5; /* 64 x 32-bits*/
       ahbcfg.b.dmaenable = 1;
       USB_OTG_WRITE_REG32(&pdev->hw->GREGS->GAHBCFG, ahbcfg.d32);
       
     }
-  }
-  else /* FS interface (embedded Phy) */
-  {
+  } else { /* FS interface (embedded Phy) */
     
     usbcfg.d32 = USB_OTG_READ_REG32(&pdev->hw->GREGS->GUSBCFG);;
     usbcfg.b.physel  = 1; /* FS Interface */
@@ -428,41 +424,44 @@ USB_OTG_STS USB_OTG_CoreInit(USB_OTG_CORE_HANDLE *pdev)
   
   return status;
 }
+
 /**
 * @brief  USB_OTG_EnableGlobalInt
 *         Enables the controller's Global Int in the AHB Config reg
-* @param  pdev : Selected device
-* @retval USB_OTG_STS : status
+*
+* Note the order of arguments to USB_OTG_MODIFY_REG32
 */
-USB_OTG_STS USB_OTG_EnableGlobalInt(USB_OTG_CORE_HANDLE *pdev)
+void
+USB_OTG_EnableGlobalInt (USB_OTG_CORE_HANDLE *pdev)
 {
-  USB_OTG_STS status = USB_OTG_OK;
-  USB_OTG_GAHBCFG_TypeDef  ahbcfg;
+  // USB_OTG_STS status = USB_OTG_OK;
+  USB_OTG_GAHBCFG_TypeDef  val;
   
-  ahbcfg.d32 = 0;
-  ahbcfg.b.glblintrmsk = 1; /* Enable interrupts */
-  USB_OTG_MODIFY_REG32(&pdev->hw->GREGS->GAHBCFG, 0, ahbcfg.d32);
-  return status;
+  val.d32 = 0;
+  val.b.glblintrmsk = 1; /* Enable interrupts */
+  USB_OTG_MODIFY_REG32(&pdev->hw->GREGS->GAHBCFG, 0, val.d32);
+  // return status;
 }
 
 
 /**
 * @brief  USB_OTG_DisableGlobalInt
 *         Enables the controller's Global Int in the AHB Config reg
-* @param  pdev : Selected device
-* @retval USB_OTG_STS : status
-* XXX tjt - this looks wrong, i.e. it enables not disables.
+*
+* Note the order of arguments to USB_OTG_MODIFY_REG32
 */
-USB_OTG_STS USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev)
+void
+USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev)
 {
-  USB_OTG_STS status = USB_OTG_OK;
-  USB_OTG_GAHBCFG_TypeDef  ahbcfg;
-  ahbcfg.d32 = 0;
-  ahbcfg.b.glblintrmsk = 1; /* Enable interrupts */
-  USB_OTG_MODIFY_REG32(&pdev->hw->GREGS->GAHBCFG, ahbcfg.d32, 0);
-  return status;
-}
+  // USB_OTG_STS status = USB_OTG_OK;
 
+  USB_OTG_GAHBCFG_TypeDef  val;
+  val.d32 = 0;
+  val.b.glblintrmsk = 1; /* Enable interrupts */
+
+  USB_OTG_MODIFY_REG32(&pdev->hw->GREGS->GAHBCFG, val.d32, 0);
+  // return status;
+}
 
 /**
 * @brief  USB_OTG_FlushTxFifo : Flush a Tx FIFO
