@@ -1,0 +1,41 @@
+#!/bin/ruby
+
+$sub1 = "s/USB_OTG_CORE_HANDLE/HANDLE/g"
+# $sub = "s/USB_OTG_CORE_//g"
+$sub2 = "s/USB_OTG_//g"
+
+files = %w(
+library/core.c
+library/protos.h
+library/public.c
+library/types.h
+library/usb_conf.h
+library/usb_core.h
+library/usb_std.h
+driver/driver.c
+driver/interrupts.c
+driver/usb_dcd.c
+driver/usb_dcd.h
+driver/usb_defines.h
+driver/usb_regs.h
+vcp/cdc.c
+vcp/class.c
+vcp/conf.h
+vcp/desc.c
+vcp/vcp.c
+vcp/vcp.h
+)
+
+def process ( f, sub )
+  #puts f
+  cmd = "sed -i -e #{sub} #{f}"
+  puts cmd
+  system cmd
+end
+
+files.each { |f|
+  process f, $sub1
+  process f, $sub2
+}
+
+# THE END
