@@ -42,13 +42,13 @@ typedef struct _GREGS  //000h
   __IO uint32_t GAHBCFG;      /* Core AHB Configuration Register    008h*/
   __IO uint32_t GUSBCFG;      /* Core USB Configuration Register    00Ch*/
   __IO uint32_t GRSTCTL;      /* Core Reset Register                010h*/
-  __IO uint32_t GINTSTS;      /* Core Interrupt Register            014h*/
+  __IO uint32_t GINTStatus;      /* Core Interrupt Register            014h*/
   __IO uint32_t GINTMSK;      /* Core Interrupt Mask Register       018h*/
-  __IO uint32_t GRXSTSR;      /* Receive Sts Q Read Register        01Ch*/
-  __IO uint32_t GRXSTSP;      /* Receive Sts Q Read & POP Register  020h*/
+  __IO uint32_t GRXStatusR;      /* Receive Sts Q Read Register        01Ch*/
+  __IO uint32_t GRXStatusP;      /* Receive Sts Q Read & POP Register  020h*/
   __IO uint32_t GRXFSIZ;      /* Receive FIFO Size Register         024h*/
   __IO uint32_t DIEPTXF0_HNPTXFSIZ;   /* EP0 / Non Periodic Tx FIFO Size Register 028h*/
-  __IO uint32_t HNPTXSTS;     /* Non Periodic Tx FIFO/Queue Sts reg 02Ch*/
+  __IO uint32_t HNPTXStatus;     /* Non Periodic Tx FIFO/Queue Sts reg 02Ch*/
   uint32_t Reserved30[2];     /* Reserved                           030h*/
   __IO uint32_t GCCFG;        /* General Purpose IO Register        038h*/
   __IO uint32_t CID;          /* User ID Register                   03Ch*/
@@ -62,7 +62,7 @@ typedef struct _DREGS // 800h
 {
   __IO uint32_t DCFG;         /* dev Configuration Register   800h*/
   __IO uint32_t DCTL;         /* dev Control Register         804h*/
-  __IO uint32_t DSTS;         /* dev Status Register (RO)     808h*/
+  __IO uint32_t DStatus;         /* dev Status Register (RO)     808h*/
   uint32_t Reserved0C;           /* Reserved                     80Ch*/
   __IO uint32_t DIEPMSK;   /* dev IN Endpoint Mask         810h*/
   __IO uint32_t DOEPMSK;  /* dev OUT Endpoint Mask        814h*/
@@ -91,7 +91,7 @@ typedef struct _INEPREGS
   uint32_t Reserved0C;             /* Reserved                       900h + (ep_num * 20h) + 0Ch*/
   __IO uint32_t DIEPTSIZ; /* IN Endpoint Txfer Size   900h + (ep_num * 20h) + 10h*/
   __IO uint32_t DIEPDMA; /* IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h*/
-  __IO uint32_t DTXFSTS;/*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
+  __IO uint32_t DTXFStatus;/*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
   uint32_t Reserved18;             /* Reserved  900h+(ep_num*20h)+1Ch-900h+ (ep_num * 20h) + 1Ch*/
 }
 INEPREGS;
@@ -367,7 +367,7 @@ uint32_t wkupintr :
   b;
 } GINTMSK_TypeDef ;
 
-typedef union _GINTSTS_TypeDef 
+typedef union _GINTStatus_TypeDef 
 {
   uint32_t d32;
   struct
@@ -432,9 +432,9 @@ uint32_t wkupintr :
     1;
   }
   b;
-} GINTSTS_TypeDef ;
+} GINTStatus_TypeDef ;
 
-typedef union _DRXSTS_TypeDef 
+typedef union _DRXStatus_TypeDef 
 {
   uint32_t d32;
   struct
@@ -453,9 +453,9 @@ uint32_t Reserved :
     7;
   }
   b;
-} DRXSTS_TypeDef ;
+} DRXStatus_TypeDef ;
 
-typedef union _GRXSTS_TypeDef 
+typedef union _GRXStatus_TypeDef 
 {
   uint32_t d32;
   struct
@@ -472,7 +472,7 @@ uint32_t Reserved :
     11;
   }
   b;
-} GRXFSTS_TypeDef ;
+} GRXFStatus_TypeDef ;
 
 typedef union _FSIZ_TypeDef 
 {
@@ -487,7 +487,7 @@ uint32_t depth :
   b;
 } FSIZ_TypeDef ;
 
-typedef union _HNPTXSTS_TypeDef 
+typedef union _HNPTXStatus_TypeDef 
 {
   uint32_t d32;
   struct
@@ -509,9 +509,9 @@ uint32_t Reserved :
     1;
   }
   b;
-} HNPTXSTS_TypeDef ;
+} HNPTXStatus_TypeDef ;
 
-typedef union _DTXFSTSn_TypeDef 
+typedef union _DTXFStatusn_TypeDef 
 {
   uint32_t d32;
   struct
@@ -522,7 +522,7 @@ uint32_t Reserved :
     16;
   }
   b;
-} DTXFSTSn_TypeDef ;
+} DTXFStatusn_TypeDef ;
 
 typedef union _GCCFG_TypeDef 
 {
@@ -601,7 +601,7 @@ uint32_t Reserved :
   b;
 } DCTL_TypeDef ;
 
-typedef union _DSTS_TypeDef 
+typedef union _DStatus_TypeDef 
 {
   uint32_t d32;
   struct
@@ -620,7 +620,7 @@ uint32_t Reserved22_31 :
     10;
   }
   b;
-} DSTS_TypeDef ;
+} DStatus_TypeDef ;
 
 typedef union _DIEPINTn_TypeDef 
 {
@@ -830,7 +830,7 @@ uint32_t frrem :
   b;
 } HFNUM_TypeDef ;
 
-typedef union _HPTXSTS_TypeDef 
+typedef union _HPTXStatus_TypeDef 
 {
   uint32_t d32;
   struct
@@ -852,7 +852,7 @@ uint32_t ptxqspcavail :
     } ptxqtop;    
   }
   b;
-} HPTXSTS_TypeDef ;
+} HPTXStatus_TypeDef ;
 
 #ifdef USE_HOST_MODE
 typedef union _HPRT0_TypeDef 

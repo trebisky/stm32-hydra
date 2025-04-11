@@ -197,7 +197,7 @@ CLASS_Init (void  *pdev, uint8_t cfgidx)
                    (uint8_t*)(USB_Rx_Buffer),
                    CDC_DATA_OUT_PACKET_SIZE);
   
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -228,7 +228,7 @@ CLASS_DeInit (void  *pdev, uint8_t cfgidx)
   // APP_FOPS.pIf_DeInit();
   VCP_DeInit();
   
-  return UU_OK;
+  return OK;
 }
 
 void
@@ -301,11 +301,11 @@ CLASS_Setup (void  *pdev, USB_SETUP_REQ *req)
         VCP_Ctrl(req->bRequest, (uint8_t*)&req->wValue, sizeof(req->wValue));
       }
       
-      return UU_OK;
+      return OK;
       
     default:
       CtlError (pdev, req);
-      return UU_FAIL;
+      return FAIL;
     
     /* Standard Requests -------------------------------*/
   case USB_REQ_TYPE_STANDARD:
@@ -350,7 +350,7 @@ CLASS_Setup (void  *pdev, USB_SETUP_REQ *req)
       break;
     }
   }
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -373,7 +373,7 @@ CLASS_EP0_RxReady ( void  *pdev)
     cdcCmd = NO_CMD;
   }
   
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -393,7 +393,7 @@ CLASS_EP0_RxReady ( void  *pdev)
 uint8_t
 CLASS_DataIn (void *pdev, uint8_t epnum)
 {
-	if (USB_Tx_State == 0) return UU_OK;
+	if (USB_Tx_State == 0) return OK;
 
     uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
     uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
@@ -406,7 +406,7 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
         if (((HANDLE*)pdev)->dev.in_ep[epnum].xfer_len != CDC_DATA_IN_PACKET_SIZE)
         {
             USB_Tx_State = 0;
-            return UU_OK;
+            return OK;
         }
         /* Transmit zero sized packet in case the last one has maximum allowed size. Otherwise
          * the recipient may expect more data coming soon and not return buffered data to app.
@@ -436,7 +436,7 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
                  (uint8_t*)&APP_Tx_Buffer[USB_Tx_ptr],
                  USB_Tx_length);
 
-  return UU_OK;
+  return OK;
 }
 
 void usbd_cdc_PrepareRx (void *pdev)
@@ -460,12 +460,12 @@ CLASS_DataOut(void *pdev, uint8_t epnum)
   
   /* USB data will be immediately processed, this allow next USB traffic being 
      NAKed till the end of the application Xfer */
-  // if ( APP_FOPS.pIf_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==UU_OK ) {
-  if ( VCP_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==UU_OK ) {
+  // if ( APP_FOPS.pIf_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==OK ) {
+  if ( VCP_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==OK ) {
     /* Prepare Out endpoint to receive next packet */
     EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
   }
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -489,7 +489,7 @@ CLASS_SOF(void *pdev)
     Handle_USBAsynchXfer(pdev);
   }
   
-  return UU_OK;
+  return OK;
 }
 
 /**

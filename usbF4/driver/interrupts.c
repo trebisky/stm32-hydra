@@ -177,7 +177,7 @@ int tusb_xof_count = 0;
 uint32_t
 OTG_ISR_Handler (HANDLE *pdev)
 {
-  GINTSTS_TypeDef  gintr_status;
+  GINTStatus_TypeDef  gintr_status;
   uint32_t retval = 0;
 
 #ifdef notdef
@@ -186,7 +186,7 @@ OTG_ISR_Handler (HANDLE *pdev)
    * it is only SOF interrupts, but rather than set this up so nicely
    * like this on every call, I just cheat.
    */
-  GINTSTS_TypeDef  sof_status;
+  GINTStatus_TypeDef  sof_status;
   sof_status.d32 = 0;
   sof_status.b.sofintr = 1;
 #endif
@@ -229,13 +229,13 @@ OTG_ISR_Handler (HANDLE *pdev)
     }
     
     if (gintr_status.b.modemismatch) {
-      GINTSTS_TypeDef  gintsts;
+      GINTStatus_TypeDef  gintsts;
       
       usb_debug ( DM_ORIG, "USBint - mode MM\n" );
       /* Clear interrupt */
       gintsts.d32 = 0;
       gintsts.b.modemismatch = 1;
-      WRITE_REG32(&pdev->hw->GREGS->GINTSTS, gintsts.d32);
+      WRITE_REG32(&pdev->hw->GREGS->GINTStatus, gintsts.d32);
     }
     
     if (gintr_status.b.wkupintr) {
@@ -305,7 +305,7 @@ OTG_ISR_Handler (HANDLE *pdev)
 */
 static uint32_t SessionRequest_ISR(HANDLE *pdev)
 {
-  GINTSTS_TypeDef  gintsts;  
+  GINTStatus_TypeDef  gintsts;  
   // INT_fops->DevConnected (pdev);
   CORE_DevConnected (pdev);
   usb_debug ( DM_ORIG, "Event - connected\n" );
@@ -313,7 +313,7 @@ static uint32_t SessionRequest_ISR(HANDLE *pdev)
   /* Clear interrupt */
   gintsts.d32 = 0;
   gintsts.b.sessreqintr = 1;
-  WRITE_REG32 (&pdev->hw->GREGS->GINTSTS, gintsts.d32);   
+  WRITE_REG32 (&pdev->hw->GREGS->GINTStatus, gintsts.d32);   
   return 1;
 }
 
@@ -350,7 +350,7 @@ static uint32_t OTG_ISR(HANDLE *pdev)
 */
 static uint32_t HandleResume_ISR(HANDLE *pdev)
 {
-  GINTSTS_TypeDef  gintsts;
+  GINTStatus_TypeDef  gintsts;
   DCTL_TypeDef     devctl;
   PCGCCTL_TypeDef  power;
   
@@ -375,7 +375,7 @@ static uint32_t HandleResume_ISR(HANDLE *pdev)
   /* Clear interrupt */
   gintsts.d32 = 0;
   gintsts.b.wkupintr = 1;
-  WRITE_REG32 (&pdev->hw->GREGS->GINTSTS, gintsts.d32);
+  WRITE_REG32 (&pdev->hw->GREGS->GINTStatus, gintsts.d32);
   return 1;
 }
 
@@ -387,19 +387,19 @@ static uint32_t HandleResume_ISR(HANDLE *pdev)
 */
 static uint32_t HandleUSBSuspend_ISR(HANDLE *pdev)
 {
-  GINTSTS_TypeDef  gintsts;
+  GINTStatus_TypeDef  gintsts;
   PCGCCTL_TypeDef  power;
-  DSTS_TypeDef     dsts;
+  DStatus_TypeDef     dsts;
   
   // INT_fops->Suspend (pdev);      
   CORE_Suspend (pdev);      
   
-  dsts.d32 = READ_REG32(&pdev->hw->DREGS->DSTS);
+  dsts.d32 = READ_REG32(&pdev->hw->DREGS->DStatus);
     
   /* Clear interrupt */
   gintsts.d32 = 0;
   gintsts.b.usbsuspend = 1;
-  WRITE_REG32(&pdev->hw->GREGS->GINTSTS, gintsts.d32);
+  WRITE_REG32(&pdev->hw->GREGS->GINTStatus, gintsts.d32);
   
 #ifndef HYDRA
   if((pdev->cfg.low_power) && (dsts.b.suspsts == 1))
@@ -572,15 +572,15 @@ HandleOutEP_ISR(HANDLE *pdev)
 */
 static uint32_t HandleSof_ISR(HANDLE *pdev)
 {
-  GINTSTS_TypeDef  GINTSTS;
+  GINTStatus_TypeDef  GINTStatus;
   
   // INT_fops->SOF(pdev);
   CORE_SOF(pdev);
   
   /* Clear interrupt */
-  GINTSTS.d32 = 0;
-  GINTSTS.b.sofintr = 1;
-  WRITE_REG32 (&pdev->hw->GREGS->GINTSTS, GINTSTS.d32);
+  GINTStatus.d32 = 0;
+  GINTStatus.b.sofintr = 1;
+  WRITE_REG32 (&pdev->hw->GREGS->GINTStatus, GINTStatus.d32);
   
   return 1;
 }
@@ -595,7 +595,7 @@ static uint32_t
 HandleRxStatusQueueLevel_ISR(HANDLE *pdev)
 {
   GINTMSK_TypeDef  int_mask;
-  DRXSTS_TypeDef   status;
+  DRXStatus_TypeDef   status;
   EP *ep;
   
   /* Disable the Rx Status Queue Level interrupt */
@@ -604,15 +604,15 @@ HandleRxStatusQueueLevel_ISR(HANDLE *pdev)
   MODIFY_REG32( &pdev->hw->GREGS->GINTMSK, int_mask.d32, 0);
   
   /* Get the Status from the top of the FIFO */
-  status.d32 = READ_REG32( &pdev->hw->GREGS->GRXSTSP );
+  status.d32 = READ_REG32( &pdev->hw->GREGS->GRXStatusP );
   
   ep = &pdev->dev.out_ep[status.b.epnum];
   
   switch (status.b.pktsts)
   {
-  case STS_GOUT_NAK:
+  case Status_GOUT_NAK:
     break;
-  case STS_DATA_UPDT:
+  case Status_DATA_UPDT:
     if (status.b.bcnt)
     {
 	  usb_debug ( DM_ORIG, "Endpoint %d read DATA packet %d bytes from FIFO\n", status.b.epnum, status.b.bcnt );
@@ -621,11 +621,11 @@ HandleRxStatusQueueLevel_ISR(HANDLE *pdev)
       ep->xfer_count += status.b.bcnt;
     }
     break;
-  case STS_XFER_COMP:
+  case Status_XFER_COMP:
     break;
-  case STS_SETUP_COMP:
+  case Status_SETUP_COMP:
     break;
-  case STS_SETUP_UPDT:
+  case Status_SETUP_UPDT:
     /* Copy the setup packet received in FIFO into the setup buffer in RAM */
 	usb_debug ( DM_ORIG, "Endpoint %d read SETUP packet %d bytes from FIFO\n", status.b.epnum, status.b.bcnt );
     ReadPacket(pdev , pdev->dev.setup_packet, 8);
@@ -651,7 +651,7 @@ HandleRxStatusQueueLevel_ISR(HANDLE *pdev)
 static uint32_t 
 WriteEmptyTxFifo(HANDLE *pdev, uint32_t epnum)
 {
-  DTXFSTSn_TypeDef  txstatus;
+  DTXFStatusn_TypeDef  txstatus;
   EP *ep;
   uint32_t len = 0;
   uint32_t len32b;
@@ -665,7 +665,7 @@ WriteEmptyTxFifo(HANDLE *pdev, uint32_t epnum)
     len = ep->maxpacket;
   
   len32b = (len + 3) / 4;
-  txstatus.d32 = READ_REG32( &pdev->hw->INEP_REGS[epnum]->DTXFSTS);
+  txstatus.d32 = READ_REG32( &pdev->hw->INEP_REGS[epnum]->DTXFStatus);
   
   while  (txstatus.b.txfspcavail > len32b &&
           ep->xfer_count < ep->xfer_len &&
@@ -689,7 +689,7 @@ WriteEmptyTxFifo(HANDLE *pdev, uint32_t epnum)
       break;
     }
 
-    txstatus.d32 = READ_REG32(&pdev->hw->INEP_REGS[epnum]->DTXFSTS);
+    txstatus.d32 = READ_REG32(&pdev->hw->INEP_REGS[epnum]->DTXFStatus);
   }
   
   return 1;
@@ -708,7 +708,7 @@ static uint32_t HandleUsbReset_ISR(HANDLE *pdev)
   DIEPMSK_TypeDef  diepmsk;
   DCFG_TypeDef     dcfg;
   DCTL_TypeDef     dctl;
-  GINTSTS_TypeDef  gintsts;
+  GINTStatus_TypeDef  gintsts;
   uint32_t i;
   
   dctl.d32 = 0;
@@ -763,7 +763,7 @@ static uint32_t HandleUsbReset_ISR(HANDLE *pdev)
   /* Clear interrupt */
   gintsts.d32 = 0;
   gintsts.b.usbreset = 1;
-  WRITE_REG32 (&pdev->hw->GREGS->GINTSTS, gintsts.d32);
+  WRITE_REG32 (&pdev->hw->GREGS->GINTStatus, gintsts.d32);
   
   /*Reset internal state machine */
   // INT_fops->Reset(pdev);
@@ -781,7 +781,7 @@ static uint32_t HandleUsbReset_ISR(HANDLE *pdev)
 static uint32_t
 HandleEnumDone_ISR(HANDLE *pdev)
 {
-  GINTSTS_TypeDef  gintsts;
+  GINTStatus_TypeDef  gintsts;
   GUSBCFG_TypeDef  gusbcfg;
   
   EP0Activate(pdev);
@@ -805,7 +805,7 @@ HandleEnumDone_ISR(HANDLE *pdev)
   /* Clear interrupt */
   gintsts.d32 = 0;
   gintsts.b.enumdone = 1;
-  WRITE_REG32( &pdev->hw->GREGS->GINTSTS, gintsts.d32 );
+  WRITE_REG32( &pdev->hw->GREGS->GINTStatus, gintsts.d32 );
 
   return 1;
 }
@@ -819,7 +819,7 @@ HandleEnumDone_ISR(HANDLE *pdev)
 */
 static uint32_t IsoINIncomplete_ISR(HANDLE *pdev)
 {
-  GINTSTS_TypeDef gintsts;  
+  GINTStatus_TypeDef gintsts;  
   
   gintsts.d32 = 0;
 
@@ -828,7 +828,7 @@ static uint32_t IsoINIncomplete_ISR(HANDLE *pdev)
   
   /* Clear interrupt */
   gintsts.b.incomplisoin = 1;
-  WRITE_REG32(&pdev->hw->GREGS->GINTSTS, gintsts.d32);
+  WRITE_REG32(&pdev->hw->GREGS->GINTStatus, gintsts.d32);
   
   return 1;
 }
@@ -841,7 +841,7 @@ static uint32_t IsoINIncomplete_ISR(HANDLE *pdev)
 */
 static uint32_t IsoOUTIncomplete_ISR(HANDLE *pdev)
 {
-  GINTSTS_TypeDef gintsts;  
+  GINTStatus_TypeDef gintsts;  
   
   gintsts.d32 = 0;
 
@@ -850,7 +850,7 @@ static uint32_t IsoOUTIncomplete_ISR(HANDLE *pdev)
   
   /* Clear interrupt */
   gintsts.b.incomplisoout = 1;
-  WRITE_REG32(&pdev->hw->GREGS->GINTSTS, gintsts.d32);
+  WRITE_REG32(&pdev->hw->GREGS->GINTStatus, gintsts.d32);
   return 1;
 }
 /**

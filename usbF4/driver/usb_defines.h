@@ -58,10 +58,10 @@ enum SPEED {
 #define GAHBCFG_DMAENABLE                      1
 #define GAHBCFG_TXFEMPTYLVL_EMPTY              1
 #define GAHBCFG_TXFEMPTYLVL_HALFEMPTY          0
-#define GRXSTS_PKTSTS_IN                       2
-#define GRXSTS_PKTSTS_IN_XFER_COMP             3
-#define GRXSTS_PKTSTS_DATA_TOGGLE_ERR          5
-#define GRXSTS_PKTSTS_CH_HALTED                7
+#define GRXStatus_PKTStatus_IN                       2
+#define GRXStatus_PKTStatus_IN_XFER_COMP             3
+#define GRXStatus_PKTStatus_DATA_TOGGLE_ERR          5
+#define GRXStatus_PKTStatus_CH_HALTED                7
 
 #define MODE_HNP_SRP_CAPABLE                   0
 #define MODE_SRP_ONLY_CAPABLE                  1
@@ -79,10 +79,10 @@ enum SPEED {
 #define HOST_MODE                              1
 #define OTG_MODE                               2
 
-#define DSTS_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ     0
-#define DSTS_ENUMSPD_FS_PHY_30MHZ_OR_60MHZ     1
-#define DSTS_ENUMSPD_LS_PHY_6MHZ               2
-#define DSTS_ENUMSPD_FS_PHY_48MHZ              3
+#define DStatus_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ     0
+#define DStatus_ENUMSPD_FS_PHY_30MHZ_OR_60MHZ     1
+#define DStatus_ENUMSPD_LS_PHY_6MHZ               2
+#define DStatus_ENUMSPD_FS_PHY_48MHZ              3
 
 #define DCFG_FRAME_INTERVAL_80                 0
 #define DCFG_FRAME_INTERVAL_85                 1
@@ -98,11 +98,11 @@ enum SPEED {
 #define EP_SPEED_FULL                          1
 #define EP_SPEED_HIGH                          2
 
-#define STS_GOUT_NAK                           1
-#define STS_DATA_UPDT                          2
-#define STS_XFER_COMP                          3
-#define STS_SETUP_COMP                         4
-#define STS_SETUP_UPDT                         6
+#define Status_GOUT_NAK                           1
+#define Status_DATA_UPDT                          2
+#define Status_XFER_COMP                          3
+#define Status_SETUP_COMP                         4
+#define Status_SETUP_UPDT                         6
 
 #define HC_PID_DATA0                           0
 #define HC_PID_DATA2                           1

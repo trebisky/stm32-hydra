@@ -135,28 +135,28 @@ CDC_IF_Prop_TypeDef VCP_fops =
   * @brief  VCP_Init
   *         Initializes the Media on the STM32
   * @param  None
-  * @retval Result of the opeartion (UU_OK in all cases)
+  * @retval Result of the opeartion (OK in all cases)
   */
 uint16_t
 VCP_Init(void *pdev)
 {
   usbDevice = pdev;
   rxDisabled = 0;
-  return UU_OK;
+  return OK;
 }
 
 /**
   * @brief  VCP_DeInit
   *         DeInitializes the Media on the STM32
   * @param  None
-  * @retval Result of the opeartion (UU_OK in all cases)
+  * @retval Result of the opeartion (OK in all cases)
   */
 uint16_t
 VCP_DeInit(void)
 {
   usbDevice = NULL;
   rxDisabled = 1;
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -177,7 +177,7 @@ void VCP_SetUSBTxBlocking(uint8_t Mode)
   * @param  Cmd: Command code
   * @param  Buf: Buffer containing command data (request parameters)
   * @param  Len: Number of data to be sent (in bytes)
-  * @retval Result of the opeartion (UU_OK in all cases)
+  * @retval Result of the opeartion (OK in all cases)
   */
 uint16_t
 VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
@@ -240,7 +240,7 @@ VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
     break;
   }
 
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -308,12 +308,12 @@ VCP_hookup ( bfptr f )
   *
   * @param  Buf: Buffer of data to be received
   * @param  Len: Number of data received (in bytes)
-  * @retval Result of the opeartion: UU_OK if all operations are OK else VCP_FAIL
+  * @retval Result of the opeartion: OK if all operations are OK else VCP_FAIL
   */
 uint16_t
 VCP_DataRx(uint8_t* Buf, uint32_t Len)
 {
-	if (!VCP_DTRHIGH) return UU_BUSY;
+	if (!VCP_DTRHIGH) return BUSY;
 
 #ifndef HYDRA
 	if (Len >= 4) {
@@ -335,7 +335,7 @@ VCP_DataRx(uint8_t* Buf, uint32_t Len)
 
 	if ( usb_read_hook ) {
 	    ( *usb_read_hook ) ( Buf, Len );
-	    return UU_OK;
+	    return OK;
 	}
 
 	uint32_t rxWr = UsbRecWrite; // get volatile
@@ -349,10 +349,10 @@ VCP_DataRx(uint8_t* Buf, uint32_t Len)
 	uint32_t free_rx_space = (UsbRecRead-rxWr-1) & UsbRecBufferSizeMask;
 	if ( free_rx_space<CDC_DATA_MAX_PACKET_SIZE ) {
 		rxDisabled = 1; // disable OUT endpoint
-		return UU_BUSY;
+		return BUSY;
 	}
 
-	return UU_OK;
+	return OK;
 }
 
 #ifdef notdef
@@ -407,7 +407,7 @@ VCP_COMConfig(uint8_t Conf)
       break;
     default :
       VCP_COMConfig(DEFAULT_CONFIG);
-      return (UU_FAIL);
+      return (FAIL);
     }
 
     /* set the parity bit*/
@@ -424,7 +424,7 @@ VCP_COMConfig(uint8_t Conf)
       break;
     default :
       VCP_COMConfig(DEFAULT_CONFIG);
-      return (UU_FAIL);
+      return (FAIL);
     }
 
     /*set the data type : only 8bits and 9bits is supported */
@@ -447,7 +447,7 @@ VCP_COMConfig(uint8_t Conf)
       break;
     default :
       VCP_COMConfig(DEFAULT_CONFIG);
-      return (UU_FAIL);
+      return (FAIL);
     }
 
     USART_InitStructure.USART_BaudRate = linecoding.bitrate;
@@ -458,7 +458,7 @@ VCP_COMConfig(uint8_t Conf)
     STM_EVAL_COMInit(COM1, &USART_InitStructure);
   }
 #endif
-  return UU_OK;
+  return OK;
 }
 #endif
 

@@ -49,12 +49,6 @@ enum SPEED {
 #define ULPI_PHY      1
 #define EMBEDDED_PHY  2
 
-typedef enum {
-  UU_OK   = 0,
-  UU_BUSY,
-  UU_FAIL,
-} UU_Status;
-
 /* Endpoint types */
 #define EP_CONTROL                       0
 #define EP_ISOC                          1
@@ -98,20 +92,9 @@ typedef enum {
 
 typedef enum {
   OK = 0,
-  FAIL
-} STS;
-
-typedef enum {
-  HC_IDLE = 0,
-  HC_XFRC,
-  HC_HALTED,
-  HC_NAK,
-  HC_NYET,
-  HC_STALL,
-  HC_XACTERR,  
-  HC_BBLERR,   
-  HC_DATATGLERR,  
-} HC_STATUS;
+  FAIL,
+  BUSY
+} Status;
 
 typedef enum {
   URB_IDLE = 0,
@@ -152,10 +135,7 @@ typedef struct ep
   uint32_t       rem_data_len;
   uint32_t       total_data_len;
   uint32_t       ctl_data_len;  
-}
-
-EP , *PEP;
-
+} EP , *PEP;
 
 typedef struct core_cfg
 {
@@ -169,9 +149,7 @@ typedef struct core_cfg
   uint8_t       Sof_output;
   uint8_t       low_power;
   uint8_t       coreID;
- 
-}
-CORE_CFGS, *PCORE_CFGS;
+} CORE_CFGS, *PCORE_CFGS;
 
 struct _DCD
 {
@@ -215,7 +193,6 @@ struct handle
 };
 
 typedef struct handle HANDLE;
-// typedef struct handle *PHANDLE;
 
 #ifdef USE_OTG_MODE
 /* Not used */

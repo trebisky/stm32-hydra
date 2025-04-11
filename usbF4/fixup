@@ -5,11 +5,17 @@
 #$sub2 = "s/USB_OTG_//g"
 #$sub2 = "s/DCD_//g"
 
-sub1 = "s/USBD_OK/UU_OK/g"
-sub2 = "s/USBD_BUSY/UU_BUSY/g"
-sub3 = "s/USBD_FAIL/UU_FAIL/g"
-sub4 = "s/USBD_Status/UU_Status/g"
-sub5 = "s/USBD_//g"
+#sub1 = "s/USBD_OK/UU_OK/g"
+#sub2 = "s/USBD_BUSY/UU_BUSY/g"
+#sub3 = "s/USBD_FAIL/UU_FAIL/g"
+#sub4 = "s/USBD_Status/UU_Status/g"
+#sub5 = "s/USBD_//g"
+
+sub1 = "s/STS/Status/g"
+sub2 = "s/UU_Status/Status/g"
+sub3 = "s/UU_FAIL/FAIL/g"
+sub4 = "s/UU_OK/OK/g"
+sub5 = "s/UU_BUSY/BUSY/g"
 
 files = %w(
 library/core.c

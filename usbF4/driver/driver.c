@@ -72,7 +72,7 @@ EnableCommonInt(HANDLE *pdev)
   WRITE_REG32( &pdev->hw->GREGS->GOTGINT, 0xFFFFFFFF);
 #endif
   /* Clear any pending interrupts */
-  WRITE_REG32( &pdev->hw->GREGS->GINTSTS, 0xFFFFFFFF);
+  WRITE_REG32( &pdev->hw->GREGS->GINTStatus, 0xFFFFFFFF);
 
   /* Enable the interrupts in the INTMSK */
   int_mask.b.wkupintr = 1;
@@ -89,11 +89,11 @@ EnableCommonInt(HANDLE *pdev)
 /**
 * @brief  CoreReset : Soft reset of the core
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-static STS CoreReset(HANDLE *pdev)
+static Status CoreReset(HANDLE *pdev)
 {
-  STS status = OK;
+  Status status = OK;
   __IO GRSTCTL_TypeDef  greset;
   uint32_t count = 0;
   
@@ -132,15 +132,15 @@ static STS CoreReset(HANDLE *pdev)
 * @param  src : source pointer
 * @param  ch_ep_num : end point number
 * @param  bytes : No. of bytes
-* @retval STS : status
+* @retval Status : status
 */
-STS
+Status
 WritePacket(HANDLE *pdev, 
                                 uint8_t             *src, 
                                 uint8_t             ch_ep_num, 
                                 uint16_t            len)
 {
-  STS status = OK;
+  Status status = OK;
 
   usb_debug ( DM_ORIG, "Endpoint %d, write packet %d bytes to FIFO: %c%c%c\n", ch_ep_num, len, src[0], src[1], src[2] );
 
@@ -189,13 +189,13 @@ static int core_count = 0;
 *         Initialize core registers address.
 * @param  pdev : Selected device
 * @param  coreID : USB OTG Core ID
-* @retval STS : status
+* @retval Status : status
 */
-STS
+Status
 SelectCore(HANDLE *pdev, CORE_ID_TypeDef coreID)
 {
   uint32_t i , baseAddress = 0;
-  STS status = OK;
+  Status status = OK;
   
   pdev->cfg.dma_enable       = 0;
   
@@ -309,11 +309,11 @@ SelectCore(HANDLE *pdev, CORE_ID_TypeDef coreID)
 *         Initializes the USB_OTG controller registers and prepares the core
 *         device mode or host mode operation.
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS CoreInit(HANDLE *pdev)
+Status CoreInit(HANDLE *pdev)
 {
-  STS status = OK;
+  Status status = OK;
   GUSBCFG_TypeDef  usbcfg;
   GCCFG_TypeDef    gccfg;
   GAHBCFG_TypeDef  ahbcfg;
@@ -436,7 +436,7 @@ STS CoreInit(HANDLE *pdev)
 void
 EnableGlobalInt (HANDLE *pdev)
 {
-  // STS status = OK;
+  // Status status = OK;
   GAHBCFG_TypeDef  val;
   
   val.d32 = 0;
@@ -455,7 +455,7 @@ EnableGlobalInt (HANDLE *pdev)
 void
 DisableGlobalInt(HANDLE *pdev)
 {
-  // STS status = OK;
+  // Status status = OK;
 
   GAHBCFG_TypeDef  val;
   val.d32 = 0;
@@ -469,11 +469,11 @@ DisableGlobalInt(HANDLE *pdev)
 * @brief  FlushTxFifo : Flush a Tx FIFO
 * @param  pdev : Selected device
 * @param  num : FO num
-* @retval STS : status
+* @retval Status : status
 */
-STS FlushTxFifo (HANDLE *pdev , uint32_t num )
+Status FlushTxFifo (HANDLE *pdev , uint32_t num )
 {
-  STS status = OK;
+  Status status = OK;
   __IO GRSTCTL_TypeDef  greset;
   
   uint32_t count = 0;
@@ -503,11 +503,11 @@ STS FlushTxFifo (HANDLE *pdev , uint32_t num )
 /**
 * @brief  FlushRxFifo : Flush a Rx FIFO
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS FlushRxFifo( HANDLE *pdev )
+Status FlushRxFifo( HANDLE *pdev )
 {
-  STS status = OK;
+  Status status = OK;
   __IO GRSTCTL_TypeDef  greset;
   uint32_t count = 0;
 
@@ -536,12 +536,12 @@ STS FlushRxFifo( HANDLE *pdev )
 * @brief  SetCurrentMode : Set ID line
 * @param  pdev : Selected device
 * @param  mode :  (Host/device)
-* @retval STS : status
+* @retval Status : status
 */
-STS
+Status
 SetCurrentMode(HANDLE *pdev , uint8_t mode)
 {
-  STS status = OK;
+  Status status = OK;
   GUSBCFG_TypeDef  usbcfg;
   
   usbcfg.d32 = READ_REG32(&pdev->hw->GREGS->GUSBCFG);
@@ -570,7 +570,7 @@ SetCurrentMode(HANDLE *pdev , uint8_t mode)
 */
 uint32_t GetMode(HANDLE *pdev)
 {
-  return (READ_REG32(&pdev->hw->GREGS->GINTSTS ) & 0x1);
+  return (READ_REG32(&pdev->hw->GREGS->GINTStatus ) & 0x1);
 }
 
 
@@ -604,7 +604,7 @@ uint8_t IsHostMode(HANDLE *pdev)
 uint32_t ReadCoreItr(HANDLE *pdev)
 {
   uint32_t v = 0;
-  v = READ_REG32(&pdev->hw->GREGS->GINTSTS);
+  v = READ_REG32(&pdev->hw->GREGS->GINTStatus);
   v &= READ_REG32(&pdev->hw->GREGS->GINTMSK);
   return v;
 }
@@ -643,11 +643,11 @@ void InitDevSpeed(HANDLE *pdev , uint8_t speed)
 * @brief  CoreInitDev : Initializes the USB_OTG controller registers 
 *         for device mode
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS CoreInitDev (HANDLE *pdev)
+Status CoreInitDev (HANDLE *pdev)
 {
-  STS             status       = OK;
+  Status             status       = OK;
   DEPCTL_TypeDef  depctl;
   uint32_t i;
   DCFG_TypeDef    dcfg;
@@ -806,11 +806,11 @@ STS CoreInitDev (HANDLE *pdev)
 /**
 * @brief  EnableDevInt : Enables the Device mode interrupts
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS EnableDevInt(HANDLE *pdev)
+Status EnableDevInt(HANDLE *pdev)
 {
-  STS status = OK;
+  Status status = OK;
   GINTMSK_TypeDef  intmsk;
   
   intmsk.d32 = 0;
@@ -818,7 +818,7 @@ STS EnableDevInt(HANDLE *pdev)
   /* Disable all interrupts. */
   WRITE_REG32( &pdev->hw->GREGS->GINTMSK, 0);
   /* Clear any pending interrupts */
-  WRITE_REG32( &pdev->hw->GREGS->GINTSTS, 0xFFFFFFFF);
+  WRITE_REG32( &pdev->hw->GREGS->GINTStatus, 0xFFFFFFFF);
   /* Enable the common interrupts */
   EnableCommonInt(pdev);
   
@@ -854,24 +854,24 @@ STS EnableDevInt(HANDLE *pdev)
 enum SPEED
 GetDeviceSpeed (HANDLE *pdev)
 {
-  DSTS_TypeDef  dsts;
+  DStatus_TypeDef  dsts;
   enum SPEED speed = USB_SPEED_UNKNOWN;
   
   
-  dsts.d32 = READ_REG32(&pdev->hw->DREGS->DSTS);
+  dsts.d32 = READ_REG32(&pdev->hw->DREGS->DStatus);
   
   switch (dsts.b.enumspd)
   {
-  case DSTS_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ:
+  case DStatus_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ:
     speed = USB_SPEED_HIGH;
     break;
 
-  case DSTS_ENUMSPD_FS_PHY_30MHZ_OR_60MHZ:
-  case DSTS_ENUMSPD_FS_PHY_48MHZ:
+  case DStatus_ENUMSPD_FS_PHY_30MHZ_OR_60MHZ:
+  case DStatus_ENUMSPD_FS_PHY_48MHZ:
     speed = USB_SPEED_FULL;
     break;
     
-  case DSTS_ENUMSPD_LS_PHY_6MHZ:
+  case DStatus_ENUMSPD_LS_PHY_6MHZ:
     speed = USB_SPEED_LOW;
     break;
 
@@ -887,28 +887,28 @@ GetDeviceSpeed (HANDLE *pdev)
 * @brief  enables EP0 OUT to receive SETUP packets and configures EP0
 *   for transmitting packets
 * @param  None
-* @retval STS : status
+* @retval Status : status
 */
-STS  EP0Activate(HANDLE *pdev)
+Status  EP0Activate(HANDLE *pdev)
 {
-  STS             status = OK;
-  DSTS_TypeDef    dsts;
+  Status             status = OK;
+  DStatus_TypeDef    dsts;
   DEPCTL_TypeDef  diepctl;
   DCTL_TypeDef    dctl;
   
   dctl.d32 = 0;
   /* Read the Device Status and Endpoint 0 Control registers */
-  dsts.d32 = READ_REG32(&pdev->hw->DREGS->DSTS);
+  dsts.d32 = READ_REG32(&pdev->hw->DREGS->DStatus);
   diepctl.d32 = READ_REG32(&pdev->hw->INEP_REGS[0]->DIEPCTL);
   /* Set the MPS of the IN EP based on the enumeration speed */
   switch (dsts.b.enumspd)
   {
-  case DSTS_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ:
-  case DSTS_ENUMSPD_FS_PHY_30MHZ_OR_60MHZ:
-  case DSTS_ENUMSPD_FS_PHY_48MHZ:
+  case DStatus_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ:
+  case DStatus_ENUMSPD_FS_PHY_30MHZ_OR_60MHZ:
+  case DStatus_ENUMSPD_FS_PHY_48MHZ:
     diepctl.b.mps = DEP0CTL_MPS_64;
     break;
-  case DSTS_ENUMSPD_LS_PHY_6MHZ:
+  case DStatus_ENUMSPD_LS_PHY_6MHZ:
     diepctl.b.mps = DEP0CTL_MPS_8;
     break;
   default:
@@ -925,11 +925,11 @@ STS  EP0Activate(HANDLE *pdev)
 /**
 * @brief  EPActivate : Activates an EP
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS EPActivate(HANDLE *pdev , EP *ep)
+Status EPActivate(HANDLE *pdev , EP *ep)
 {
-  STS status = OK;
+  Status status = OK;
   DEPCTL_TypeDef  depctl;
   DAINT_TypeDef  daintmsk;
   __IO uint32_t *addr;
@@ -973,11 +973,11 @@ STS EPActivate(HANDLE *pdev , EP *ep)
 /**
 * @brief  EPDeactivate : Deactivates an EP
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS EPDeactivate(HANDLE *pdev , EP *ep)
+Status EPDeactivate(HANDLE *pdev , EP *ep)
 {
-  STS status = OK;
+  Status status = OK;
   DEPCTL_TypeDef  depctl;
   DAINT_TypeDef  daintmsk;
   __IO uint32_t *addr;
@@ -1012,14 +1012,14 @@ STS EPDeactivate(HANDLE *pdev , EP *ep)
 * @brief  EPStartXfer : Handle the setup for data xfer for an EP and 
 *         starts the xfer
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS EPStartXfer(HANDLE *pdev , EP *ep)
+Status EPStartXfer(HANDLE *pdev , EP *ep)
 {
-  STS status = OK;
+  Status status = OK;
   DEPCTL_TypeDef     depctl;
   DEPXFRSIZ_TypeDef  deptsiz;
-  DSTS_TypeDef       dsts;    
+  DStatus_TypeDef       dsts;    
   uint32_t fifoemptymsk = 0;  
   
   depctl.d32 = 0;
@@ -1066,7 +1066,7 @@ STS EPStartXfer(HANDLE *pdev , EP *ep)
     
     
     if (ep->type == EP_TYPE_ISOC) {
-      dsts.d32 = READ_REG32(&pdev->hw->DREGS->DSTS);
+      dsts.d32 = READ_REG32(&pdev->hw->DREGS->DStatus);
       
       if (((dsts.b.soffn)&0x1) == 0) {
         depctl.b.setd1pid = 1;
@@ -1129,11 +1129,11 @@ STS EPStartXfer(HANDLE *pdev , EP *ep)
 * @brief  EP0StartXfer : Handle the setup for a data xfer for EP0 and 
 *         starts the xfer
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS EP0StartXfer(HANDLE *pdev , EP *ep)
+Status EP0StartXfer(HANDLE *pdev , EP *ep)
 {
-  STS                 status = OK;
+  Status                 status = OK;
   DEPCTL_TypeDef      depctl;
   DEP0XFRSIZ_TypeDef  deptsiz;
   INEPREGS          *in_regs;
@@ -1224,11 +1224,11 @@ STS EP0StartXfer(HANDLE *pdev , EP *ep)
 /**
 * @brief  EPSetStall : Set the EP STALL
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS EPSetStall(HANDLE *pdev , EP *ep)
+Status EPSetStall(HANDLE *pdev , EP *ep)
 {
-  STS status = OK;
+  Status status = OK;
   DEPCTL_TypeDef  depctl;
   __IO uint32_t *depctl_addr;
   
@@ -1255,12 +1255,12 @@ STS EPSetStall(HANDLE *pdev , EP *ep)
 /**
 * @brief  Clear the EP STALL
 * @param  pdev : Selected device
-* @retval STS : status
+* @retval Status : status
 */
-STS
+Status
 EPClearStall(HANDLE *pdev , EP *ep)
 {
-  STS status = OK;
+  Status status = OK;
   DEPCTL_TypeDef  depctl;
   __IO uint32_t *depctl_addr;
   
@@ -1362,11 +1362,11 @@ void
 ActiveRemoteWakeup(HANDLE *pdev)
 {
   DCTL_TypeDef     dctl;
-  DSTS_TypeDef     dsts;
+  DStatus_TypeDef     dsts;
   PCGCCTL_TypeDef  power;  
   
   if (pdev->dev.DevRemoteWakeup) {
-    dsts.d32 = READ_REG32(&pdev->hw->DREGS->DSTS);
+    dsts.d32 = READ_REG32(&pdev->hw->DREGS->DStatus);
     if(dsts.b.suspsts == 1) {
       if(pdev->cfg.low_power) {
         /* un-gate USB Core clock */
@@ -1397,10 +1397,10 @@ void UngateClock(HANDLE *pdev)
   if(pdev->cfg.low_power)
   {
     
-    DSTS_TypeDef     dsts;
+    DStatus_TypeDef     dsts;
     PCGCCTL_TypeDef  power; 
     
-    dsts.d32 = READ_REG32(&pdev->hw->DREGS->DSTS);
+    dsts.d32 = READ_REG32(&pdev->hw->DREGS->DStatus);
     
     if(dsts.b.suspsts == 1) {
       /* un-gate USB Core clock */

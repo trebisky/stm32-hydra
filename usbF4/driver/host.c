@@ -54,6 +54,19 @@ void         USB_OTG_StopHost        (USB_OTG_CORE_HANDLE *pdev);
 #endif
 
 /* These were in usb_core.h */
+typedef enum {
+  HC_IDLE = 0,
+  HC_XFRC,
+  HC_HALTED,
+  HC_NAK,
+  HC_NYET,
+  HC_STALL,
+  HC_XACTERR,  
+  HC_BBLERR,   
+  HC_DATATGLERR,  
+} HC_STATUS;
+
+/* These were in usb_core.h */
 #ifdef USE_HOST_MODE
 typedef struct USB_OTG_hc
 {

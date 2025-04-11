@@ -68,17 +68,17 @@ BOGUS_Init ( HANDLE *pdev, CORE_ID_TypeDef coreID )
   STATUS_Reset();
 }
 
-UU_Status
+Status
 BOGUS_DeInit ( HANDLE *pdev )
 {
-  return UU_OK;
+  return OK;
 }
 
-UU_Status
+Status
 DeInitFull ( HANDLE *pdev )
 {
   /* Software Init */
-  return UU_OK;
+  return OK;
 }
 
 /* ################################################################## */
@@ -120,7 +120,7 @@ CORE_SetupStage(HANDLE *pdev)
     EP_Stall(pdev , req.bmRequest & 0x80);
     break;
   }  
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -139,18 +139,14 @@ CORE_DataOutStage(HANDLE *pdev , uint8_t epnum)
   
   // printf ( "DataOutStage, epnum = %d\n", epnum );
 
-  if(epnum == 0) 
-  {
+  if(epnum == 0) {
     ep = &pdev->dev.out_ep[0];
-    if ( pdev->dev.device_state == EP0_DATA_OUT)
-    {
-      if(ep->rem_data_len > ep->maxpacket)
-      {
+    if ( pdev->dev.device_state == EP0_DATA_OUT) {
+      if(ep->rem_data_len > ep->maxpacket) {
         ep->rem_data_len -=  ep->maxpacket;
         
-        if(pdev->cfg.dma_enable == 1)
-        {
-          /* in slave mode this, is handled by the RxSTSQLvl ISR */
+        if(pdev->cfg.dma_enable == 1) {
+          /* in slave mode this, is handled by the RxStatusQLvl ISR */
           ep->xfer_buff += ep->maxpacket; 
         }        
         CtlContinueRx (pdev, 
@@ -173,7 +169,7 @@ CORE_DataOutStage(HANDLE *pdev , uint8_t epnum)
     // pdev->dev.class_cb->DataOut(pdev, epnum); 
     CLASS_DataOut(pdev, epnum); 
   }
-  return UU_OK;
+  return OK;
 }
 
 /**
@@ -231,7 +227,7 @@ CORE_DataInStage(HANDLE *pdev , uint8_t epnum)
     // pdev->dev.class_cb->DataIn(pdev, epnum); 
     CLASS_DataIn(pdev, epnum); 
   }
-  return UU_OK;
+  return OK;
 }
 
 uint8_t
@@ -255,7 +251,7 @@ CORE_Reset(HANDLE  *pdev)
   STATUS_Reset();
   usb_debug ( DM_EVENT, "Reset\n" );
   
-  return UU_OK;
+  return OK;
 }
 
 uint8_t
@@ -266,7 +262,7 @@ CORE_Resume(HANDLE  *pdev)
   STATUS_Set ( ST_RESUMED );
   usb_debug ( DM_EVENT, "Resumed\n" );
   pdev->dev.device_status = CONFIGURED;  
-  return UU_OK;
+  return OK;
 }
 
 uint8_t
@@ -277,7 +273,7 @@ CORE_Suspend(HANDLE  *pdev)
   STATUS_Clear ( ST_RESUMED );
   usb_debug ( DM_EVENT, "Suspended\n" );
   pdev->dev.device_status  = SUSPENDED;
-  return UU_OK;
+  return OK;
 }
 
 uint8_t
@@ -287,10 +283,10 @@ CORE_SOF(HANDLE  *pdev)
   //   pdev->dev.class_cb->SOF(pdev); 
   // }
   CLASS_SOF(pdev); 
-  return UU_OK;
+  return OK;
 }
 
-UU_Status
+Status
 SetCfg(HANDLE  *pdev, uint8_t cfgidx)
 {
   // pdev->dev.class_cb->Init(pdev, cfgidx); 
@@ -300,15 +296,15 @@ SetCfg(HANDLE  *pdev, uint8_t cfgidx)
   // pdev->dev.usr_cb->DeviceConfigured();
   STATUS_Set ( ST_CONFIGURED );
   usb_debug ( DM_EVENT, "Configured\n" );
-  return UU_OK; 
+  return OK; 
 }
 
-UU_Status
+Status
 ClrCfg(HANDLE  *pdev, uint8_t cfgidx)
 {
   // pdev->dev.class_cb->DeInit(pdev, cfgidx);   
   CLASS_DeInit(pdev, cfgidx);   
-  return UU_OK;
+  return OK;
 }
 
  uint8_t
@@ -316,7 +312,7 @@ CORE_IsoINIncomplete(HANDLE  *pdev)
 {
   // pdev->dev.class_cb->IsoINIncomplete(pdev);   
   CLASS_IsoINIncomplete ( pdev );   
-  return UU_OK;
+  return OK;
 }
 
 uint8_t
@@ -324,7 +320,7 @@ CORE_IsoOUTIncomplete(HANDLE  *pdev)
 {
   // pdev->dev.class_cb->IsoOUTIncomplete(pdev);   
   CLASS_IsoOUTIncomplete ( pdev );   
-  return UU_OK;
+  return OK;
 }
 
 #ifdef VBUS_SENSING_ENABLED
@@ -334,7 +330,7 @@ CORE_DevConnected(HANDLE  *pdev)
   // pdev->dev.usr_cb->DeviceConnected();
   STATUS_Set ( ST_CONNECTED );
   usb_debug ( DM_EVENT, "Connected\n" );
-  return UU_OK;
+  return OK;
 }
 
 uint8_t
@@ -345,7 +341,7 @@ CORE_DevDisconnected(HANDLE  *pdev)
   usb_debug ( DM_EVENT, "Disconnected\n" );
   // pdev->dev.class_cb->DeInit(pdev, 0);
   CLASS_DeInit(pdev, 0);
-  return UU_OK;
+  return OK;
 }
 #endif
 
@@ -366,12 +362,12 @@ CORE_DevDisconnected(HANDLE  *pdev)
 * @param  len: length of data to be sent
 * @retval status
 */
-UU_Status
+Status
 CtlSendData (HANDLE  *pdev, 
                                uint8_t *pbuf,
                                uint16_t len)
 {
-  UU_Status ret = UU_OK;
+  Status ret = OK;
   
   pdev->dev.in_ep[0].total_data_len = len;
   pdev->dev.in_ep[0].rem_data_len   = len;
@@ -392,12 +388,12 @@ CtlSendData (HANDLE  *pdev,
 * @param  len: length of data to be sent
 * @retval status
 */
-UU_Status
+Status
 CtlContinueSendData (HANDLE  *pdev, 
                                        uint8_t *pbuf,
                                        uint16_t len)
 {
-  UU_Status ret = UU_OK;
+  Status ret = OK;
   
   EP_Tx (pdev, 0, pbuf, len);
   
@@ -413,12 +409,12 @@ CtlContinueSendData (HANDLE  *pdev,
 * @param  len: length of data to be received
 * @retval status
 */
-UU_Status
+Status
 CtlPrepareRx (HANDLE  *pdev,
                                   uint8_t *pbuf,                                  
                                   uint16_t len)
 {
-  UU_Status ret = UU_OK;
+  Status ret = OK;
   
   pdev->dev.out_ep[0].total_data_len = len;
   pdev->dev.out_ep[0].rem_data_len   = len;
@@ -441,12 +437,12 @@ CtlPrepareRx (HANDLE  *pdev,
 * @param  len: length of data to be received
 * @retval status
 */
-UU_Status
+Status
 CtlContinueRx (HANDLE  *pdev, 
                                           uint8_t *pbuf,                                          
                                           uint16_t len)
 {
-  UU_Status ret = UU_OK;
+  Status ret = OK;
   
   EP_PrepareRx (pdev,
                     0,                     
@@ -461,10 +457,10 @@ CtlContinueRx (HANDLE  *pdev,
 * @param  pdev: USB OTG device instance
 * @retval status
 */
-UU_Status
+Status
 CtlSendStatus (HANDLE  *pdev)
 {
-  UU_Status ret = UU_OK;
+  Status ret = OK;
 
   pdev->dev.device_state = EP0_STATUS_IN;
 
@@ -485,10 +481,10 @@ CtlSendStatus (HANDLE  *pdev)
 * @param  pdev: USB OTG device instance
 * @retval status
 */
-UU_Status
+Status
 CtlReceiveStatus (HANDLE  *pdev)
 {
-  UU_Status ret = UU_OK;
+  Status ret = OK;
   pdev->dev.device_state = EP0_STATUS_OUT;  
   EP_PrepareRx ( pdev,
                     0,
@@ -537,10 +533,10 @@ static void ClrFeature(HANDLE  *pdev, USB_SETUP_REQ *req);
 * @retval status
 */
 /* EXT */
-UU_Status
+Status
 StdDevReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
 {
-  UU_Status ret = UU_OK;  
+  Status ret = OK;  
   
   switch (req->bRequest) {
   case USB_REQ_GET_DESCRIPTOR: 
@@ -589,10 +585,10 @@ StdDevReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
 * @retval status
 */
 /* EXT */
-UU_Status
+Status
 StdItfReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
 {
-  UU_Status ret = UU_OK; 
+  Status ret = OK; 
   
   switch (pdev->dev.device_status) {
   case CONFIGURED:
@@ -601,7 +597,7 @@ StdItfReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
       // pdev->dev.class_cb->Setup (pdev, req); 
       CLASS_Setup (pdev, req); 
       
-      if((req->wLength == 0)&& (ret == UU_OK)) {
+      if((req->wLength == 0)&& (ret == OK)) {
          CtlSendStatus(pdev);
       }
     } else {                                               
@@ -624,12 +620,12 @@ StdItfReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
 * @retval status
 */
 /* EXT */
-UU_Status
+Status
 StdEPReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
 {
   
   uint8_t   ep_addr;
-  UU_Status ret = UU_OK; 
+  Status ret = OK; 
   
   ep_addr  = LOBYTE(req->wIndex);   
   
