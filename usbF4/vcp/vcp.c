@@ -10,7 +10,7 @@
   ******************************************************************************
   */
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+#ifdef HS_INTERNAL_DMA_ENABLED
 #pragma     data_alignment = 4
 #endif
 
@@ -61,7 +61,7 @@ volatile int UsbRecWrite = 0;
 uint8_t UsbTXBlock = 1;
 
 uint8_t rxDisabled = 1;
-USB_OTG_CORE_HANDLE * usbDevice = NULL;
+HANDLE * usbDevice = NULL;
 
 static volatile uint8_t VCP_DTRHIGH = 0;
 static volatile uint8_t VCP_RTSHIGH = 0;

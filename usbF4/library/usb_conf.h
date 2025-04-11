@@ -48,26 +48,26 @@ void usb_dump ( int, char *, char *, int );
 
 // tjt 3-8-2025
 #define USE_EMBEDDED_PHY
-#define USB_OTG_EMBEDDED_PHY_ENABLED
+#define EMBEDDED_PHY_ENABLED
 
-// #define USE_USB_OTG_FS
-#define USE_USB_OTG_HS
+// #define USE_FS
+#define USE_HS
 
 #define USE_DEVICE_MODE
 //#define USE_HOST_MODE
 //#define USE_OTG_MODE
 
-#ifdef USE_USB_OTG_FS
- #define USB_OTG_FS_CORE
+#ifdef USE_FS
+ #define FS_CORE
 #else
- #define USB_OTG_HS_CORE
+ #define HS_CORE
 #endif
 
 /* ---------------------------------------------------------------------------- */
 
-#ifndef USB_OTG_FS_CORE
- #ifndef USB_OTG_HS_CORE
-    #error  "USB_OTG_HS_CORE or USB_OTG_FS_CORE should be defined"
+#ifndef FS_CORE
+ #ifndef HS_CORE
+    #error  "HS_CORE or FS_CORE should be defined"
  #endif
 #endif
 
@@ -78,13 +78,13 @@ void usb_dump ( int, char *, char *, int );
  #endif
 #endif
 
-#ifndef USE_USB_OTG_HS
- #ifndef USE_USB_OTG_FS
-    #error  "USE_USB_OTG_HS or USE_USB_OTG_FS should be defined"
+#ifndef USE_HS
+ #ifndef USE_FS
+    #error  "USE_HS or USE_FS should be defined"
  #endif
 #endif
 
-#ifdef USE_USB_OTG_HS
+#ifdef USE_HS
  #ifndef USE_ULPI_PHY
   #ifndef USE_EMBEDDED_PHY
    #ifndef USE_I2C_PHY
@@ -131,19 +131,19 @@ void usb_dump ( int, char *, char *, int );
 
 
 /****************** USB OTG FS CONFIGURATION **********************************/
-#ifdef USB_OTG_FS_CORE
+#ifdef FS_CORE
  #define RX_FIFO_FS_SIZE                          128
  #define TX0_FIFO_FS_SIZE                          64
  #define TX1_FIFO_FS_SIZE                         128
  #define TX2_FIFO_FS_SIZE                          0
  #define TX3_FIFO_FS_SIZE                          0
 
- //#define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
- //#define USB_OTG_FS_SOF_OUTPUT_ENABLED
+ //#define FS_LOW_PWR_MGMT_SUPPORT
+ //#define FS_SOF_OUTPUT_ENABLED
 #endif
 
 /****************** USB OTG HS CONFIGURATION **********************************/
-#ifdef USB_OTG_HS_CORE
+#ifdef HS_CORE
  #define RX_FIFO_HS_SIZE                          512
  #define TX0_FIFO_HS_SIZE                         512
  #define TX1_FIFO_HS_SIZE                         512
@@ -154,32 +154,32 @@ void usb_dump ( int, char *, char *, int );
  #define TXH_NP_HS_FIFOSIZ                         96
  #define TXH_P_HS_FIFOSIZ                          96
 
-//#define USB_OTG_HS_LOW_PWR_MGMT_SUPPORT
-//#define USB_OTG_HS_SOF_OUTPUT_ENABLED
+//#define HS_LOW_PWR_MGMT_SUPPORT
+//#define HS_SOF_OUTPUT_ENABLED
 
-//#define USB_OTG_INTERNAL_VBUS_ENABLED
-#define USB_OTG_EXTERNAL_VBUS_ENABLED
+//#define INTERNAL_VBUS_ENABLED
+#define EXTERNAL_VBUS_ENABLED
 
  #ifdef USE_ULPI_PHY
-  #define USB_OTG_ULPI_PHY_ENABLED
+  #define ULPI_PHY_ENABLED
  #endif
  #ifdef USE_EMBEDDED_PHY
-   #define USB_OTG_EMBEDDED_PHY_ENABLED
+   #define EMBEDDED_PHY_ENABLED
  #endif
- // #define USB_OTG_HS_INTERNAL_DMA_ENABLED
- #define USB_OTG_HS_DEDICATED_EP1_ENABLED
+ // #define HS_INTERNAL_DMA_ENABLED
+ #define HS_DEDICATED_EP1_ENABLED
 #endif
 
 /* In HS mode and when the DMA is used, all variables and data structures dealing
    with the DMA during the transaction process should be 4-bytes aligned */
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+#ifdef HS_INTERNAL_DMA_ENABLED
   #define __ALIGN_BEGIN
   #define __ALIGN_END    __attribute__ ((aligned (4)))
 #else
   #define __ALIGN_BEGIN
   #define __ALIGN_END    __attribute__ ((aligned (4)))
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
+#endif /* HS_INTERNAL_DMA_ENABLED */
 
 /* I only expect to ever use gcc */
 #ifndef __packed

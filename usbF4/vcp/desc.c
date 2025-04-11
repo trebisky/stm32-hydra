@@ -114,7 +114,7 @@ __ALIGN_BEGIN static uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC] __ALIGN_END =
     DEVICE_CLASS_CDC,           /*bDeviceClass*/
     DEVICE_SUBCLASS_CDC,        /*bDeviceSubClass*/
     0x00,                       /*bDeviceProtocol*/
-    USB_OTG_MAX_EP0_SIZE,       /*bMaxPacketSize*/
+    MAX_EP0_SIZE,       /*bMaxPacketSize*/
     LOBYTE(USBD_VID),           /*idVendor*/
     HIBYTE(USBD_VID),           /*idVendor*/
     LOBYTE(USBD_PID),           /*idVendor*/
@@ -213,11 +213,11 @@ __ALIGN_BEGIN static uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_
   0x03,                           /* bmAttributes: Interrupt */
   LOBYTE(CDC_CMD_PACKET_SZE),     /* wMaxPacketSize: */
   HIBYTE(CDC_CMD_PACKET_SZE),
-#ifdef USE_USB_OTG_HS
+#ifdef USE_HS
   0x10,                           /* bInterval: */
 #else
   0xFF,                           /* bInterval: */
-#endif /* USE_USB_OTG_HS */
+#endif /* USE_HS */
   
   /*---------------------------------------------------------------------------*/
   
@@ -254,7 +254,7 @@ __ALIGN_BEGIN static uint8_t usbd_cdc_CfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_
 /* This only would be used if we are actually in full speed mode
  * with an external full speed Phy.
  */
-#ifdef USE_USB_OTG_HS
+#ifdef USE_HS
 __ALIGN_BEGIN static uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __ALIGN_END =
 { 
   0x09,   /* bLength: Configuration Descriptor size */
@@ -346,7 +346,7 @@ __ALIGN_BEGIN static uint8_t usbd_cdc_OtherCfgDesc[USB_CDC_CONFIG_DESC_SIZ]  __A
   0x00,
   0x00                              /* bInterval */
 };
-#endif /* USE_USB_OTG_HS  */
+#endif /* USE_HS  */
 
 /* =========================================================================== */
 /* =========================================================================== */
@@ -376,7 +376,7 @@ MakeString(uint8_t *desc, uint8_t *unicode )
   return len;
 }
 int
-class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *req,
+class_get_descriptor ( uint8_t type, HANDLE *pdev, USB_SETUP_REQ *req,
 		uint8_t **apbuf, uint16_t *alen )
 {
   uint16_t len;
@@ -390,7 +390,7 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 		  // pbuf = pdev->dev.usr_device->GetDeviceDescriptor(pdev->cfg.speed, &len);
 		  pbuf = USBD_DeviceDesc;
 		  len = sizeof(USBD_DeviceDesc);
-		  if ((req->wLength == 64) ||( pdev->dev.device_status == USB_OTG_DEFAULT))
+		  if ((req->wLength == 64) ||( pdev->dev.device_status == DEFAULT))
 			  len = 8;
 		  break;
     
@@ -402,8 +402,8 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 /* This only would be used if we are actually in full speed mode
  * with an external full speed Phy.
  */
-#ifdef USB_OTG_HS_CORE
-		  if ( (pdev->cfg.speed == USB_OTG_SPEED_FULL) && (pdev->cfg.phy_itface  == USB_OTG_ULPI_PHY) ) {
+#ifdef HS_CORE
+		  if ( (pdev->cfg.speed == SPEED_FULL) && (pdev->cfg.phy_itface  == ULPI_PHY) ) {
 			  // pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
 			  len = sizeof (usbd_cdc_OtherCfgDesc);
 			  pbuf = usbd_cdc_OtherCfgDesc;
@@ -428,7 +428,7 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 				  break;
 			  case USBD_IDX_PRODUCT_STR:
 				  // pbuf = pdev->dev.usr_device->GetProductStrDescriptor(pdev->cfg.speed, &len);
-				  if ( speed == USB_OTG_SPEED_HIGH )
+				  if ( speed == SPEED_HIGH )
 					  len = MakeString ( USBD_PRODUCT_HS_STRING, unibuf );
 				  else
 					  len = MakeString ( USBD_PRODUCT_FS_STRING, unibuf );
@@ -436,7 +436,7 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 				  break;
 			  case USBD_IDX_SERIAL_STR:
 				  // pbuf = pdev->dev.usr_device->GetSerialStrDescriptor(pdev->cfg.speed, &len);
-				  if ( speed == USB_OTG_SPEED_HIGH )
+				  if ( speed == SPEED_HIGH )
 					  len = MakeString ( USBD_SERIALNUMBER_HS_STRING, unibuf );
 				  else
 					  len = MakeString ( USBD_SERIALNUMBER_FS_STRING, unibuf );
@@ -444,7 +444,7 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 				  break;
 			  case USBD_IDX_CONFIG_STR:
 				  // pbuf = pdev->dev.usr_device->GetConfigurationStrDescriptor(pdev->cfg.speed, &len);
-				  if ( speed == USB_OTG_SPEED_HIGH )
+				  if ( speed == SPEED_HIGH )
 					  len = MakeString ( USBD_CONFIGURATION_HS_STRING, unibuf );
 				  else
 					  len = MakeString ( USBD_CONFIGURATION_FS_STRING, unibuf );
@@ -452,7 +452,7 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 				  break;
 			  case USBD_IDX_INTERFACE_STR:
 				  // pbuf = pdev->dev.usr_device->GetInterfaceStrDescriptor(pdev->cfg.speed, &len);
-				  if ( speed == USB_OTG_SPEED_HIGH )
+				  if ( speed == SPEED_HIGH )
 					  len = MakeString ( USBD_INTERFACE_HS_STRING, unibuf );
 				  else
 					  len = MakeString ( USBD_INTERFACE_FS_STRING, unibuf );
@@ -470,8 +470,8 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 		  break;
 
 	  case USB_DESC_TYPE_DEVICE_QUALIFIER:                   
-#ifdef USB_OTG_HS_CORE
-		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
+#ifdef HS_CORE
+		  if ( pdev->cfg.speed == SPEED_HIGH )   {
 	  		  panic ( "type device qualifier" );
 			  // pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
             
@@ -490,8 +490,8 @@ class_get_descriptor ( uint8_t type, USB_OTG_CORE_HANDLE *pdev, USB_SETUP_REQ *r
 #endif    
 
 	  case USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION:
-#ifdef USB_OTG_HS_CORE   
-		  if ( pdev->cfg.speed == USB_OTG_SPEED_HIGH )   {
+#ifdef HS_CORE   
+		  if ( pdev->cfg.speed == SPEED_HIGH )   {
 	  		panic ( "other speed config" );
 			  // pbuf   = (uint8_t *)pdev->dev.class_cb->GetOtherConfigDescriptor(pdev->cfg.speed, &len);
 			  // pbuf[1] = USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION;

@@ -70,7 +70,7 @@ usb_hookup ( bfptr fn )
 * private routines in the USB code.
 */
 
-USB_OTG_CORE_HANDLE  USB_OTG_dev;
+HANDLE  dev;
 
 /* For now, this can only initialize one interface.
  * someday we want to be able to call this twice,
@@ -115,14 +115,14 @@ fusb_init (void)
 
 /* Change this choice in usb_conf.h */
 
-#ifdef USE_USB_OTG_HS
+#ifdef USE_HS
 	  printf ( "Initialize HS usb core with IRQ %d\n", IRQ_USB_HS );
-      // USBD_Init(&USB_OTG_dev, USB_OTG_HS_CORE_ID, &USR_cb );
-      USBD_Init(&USB_OTG_dev, USB_OTG_HS_CORE_ID );
+      // USBD_Init(&dev, HS_CORE_ID, &USR_cb );
+      USBD_Init(&dev, HS_CORE_ID );
 #else
 	  printf ( "Initialize FS usb core with IRQ %d\n", IRQ_USB_FS );
-      // USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID, &USR_cb );
-      USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID );
+      // USBD_Init(&dev, FS_CORE_ID, &USR_cb );
+      USBD_Init(&dev, FS_CORE_ID );
 #endif
 
 		/* XXX someday will be 0 or 1 */
@@ -133,7 +133,7 @@ fusb_init (void)
 void
 usbPowerOff ( void )
 {
-	USBD_DeInitFull(&USB_OTG_dev);
+	USBD_DeInitFull(&dev);
 }
 #endif
 
@@ -267,7 +267,7 @@ void
 usb_irq_handler ( void )
 {
 	// printf ( "FS interrupt\n" );
-	USBD_OTG_ISR_Handler ( &USB_OTG_dev );
+	USBD_OTG_ISR_Handler ( &dev );
 }
 
 void
@@ -280,23 +280,23 @@ void
 usb_hs_irq_handler ( void )
 {
 	// printf ( "HS interrupt\n" );
-	USBD_OTG_ISR_Handler (&USB_OTG_dev);
+	USBD_OTG_ISR_Handler (&dev);
 }
 
 void
 usb_hs_ep1_out ( void )
 { 
-#ifdef USE_USB_OTG_HS
+#ifdef USE_HS
 	// printf ( "USB HS ep1 out interrupt\n" );
-	(void) USBD_OTG_EP1OUT_ISR_Handler ( &USB_OTG_dev );
+	(void) USBD_OTG_EP1OUT_ISR_Handler ( &dev );
 #endif
 }
 void
 usb_hs_ep1_in ( void )
 {
-#ifdef USE_USB_OTG_HS
+#ifdef USE_HS
 	// printf ( "USB HS ep1 in interrupt\n" );
-	(void) USBD_OTG_EP1IN_ISR_Handler ( &USB_OTG_dev );
+	(void) USBD_OTG_EP1IN_ISR_Handler ( &dev );
 #endif
 }
 

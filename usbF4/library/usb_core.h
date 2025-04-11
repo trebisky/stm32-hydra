@@ -16,8 +16,8 @@
 #define  MIN(a, b)      (((a) < (b)) ? (a) : (b))
 
 /* Also in usb_regs.h */
-#define USB_OTG_MAX_TX_FIFOS                 7
-#define USB_OTG_MAX_EP0_SIZE                 64
+#define MAX_TX_FIFOS                 7
+#define MAX_EP0_SIZE                 64
 
 /* Standard USB, belongs is usb_std.h someday */
 typedef  struct  usb_setup_req {
@@ -30,11 +30,11 @@ typedef  struct  usb_setup_req {
 
 typedef enum
 {
-  USB_OTG_HS_CORE_ID = 0,
-  USB_OTG_FS_CORE_ID = 1
-} USB_OTG_CORE_ID_TypeDef;
+  HS_CORE_ID = 0,
+  FS_CORE_ID = 1
+} CORE_ID_TypeDef;
 
-enum USB_OTG_SPEED {
+enum SPEED {
   USB_SPEED_UNKNOWN = 0,
   USB_SPEED_LOW,
   USB_SPEED_FULL,
@@ -42,12 +42,12 @@ enum USB_OTG_SPEED {
 };
 
 /* Why both this and the above XXX ?*/
-#define USB_OTG_SPEED_HIGH      0
-#define USB_OTG_SPEED_FULL      1
+#define SPEED_HIGH      0
+#define SPEED_FULL      1
 
 /* Which PHY we are using */
-#define USB_OTG_ULPI_PHY      1
-#define USB_OTG_EMBEDDED_PHY  2
+#define ULPI_PHY      1
+#define EMBEDDED_PHY  2
 
 typedef enum {
   USBD_OK   = 0,
@@ -56,11 +56,11 @@ typedef enum {
 } USBD_Status;
 
 /* Endpoint types */
-#define USB_OTG_EP_CONTROL                       0
-#define USB_OTG_EP_ISOC                          1
-#define USB_OTG_EP_BULK                          2
-#define USB_OTG_EP_INT                           3
-#define USB_OTG_EP_MASK                          3
+#define EP_CONTROL                       0
+#define EP_ISOC                          1
+#define EP_BULK                          2
+#define EP_INT                           3
+#define EP_MASK                          3
 
 /* More silly redundandy to clean up XXX */
 #define EP_TYPE_CTRL                           0
@@ -71,35 +71,35 @@ typedef enum {
 
 /* Thus used to be in device/usb_cdc.h, but it really belongs here */
 /*  Device Status */
-#define USB_OTG_DEFAULT                          1
-#define USB_OTG_ADDRESSED                        2
-#define USB_OTG_CONFIGURED                       3
-#define USB_OTG_SUSPENDED                        4
+#define DEFAULT                          1
+#define ADDRESSED                        2
+#define CONFIGURED                       3
+#define SUSPENDED                        4
 
-#define USB_OTG_EP0_IDLE                          0
-#define USB_OTG_EP0_SETUP                         1
-#define USB_OTG_EP0_DATA_IN                       2
-#define USB_OTG_EP0_DATA_OUT                      3
-#define USB_OTG_EP0_STATUS_IN                     4
-#define USB_OTG_EP0_STATUS_OUT                    5
-#define USB_OTG_EP0_STALL                         6
+#define EP0_IDLE                          0
+#define EP0_SETUP                         1
+#define EP0_DATA_IN                       2
+#define EP0_DATA_OUT                      3
+#define EP0_STATUS_IN                     4
+#define EP0_STATUS_OUT                    5
+#define EP0_STALL                         6
 
-#define USB_OTG_EP_TX_DIS       0x0000
-#define USB_OTG_EP_TX_STALL     0x0010
-#define USB_OTG_EP_TX_NAK       0x0020
-#define USB_OTG_EP_TX_VALID     0x0030
+#define EP_TX_DIS       0x0000
+#define EP_TX_STALL     0x0010
+#define EP_TX_NAK       0x0020
+#define EP_TX_VALID     0x0030
  
-#define USB_OTG_EP_RX_DIS       0x0000
-#define USB_OTG_EP_RX_STALL     0x1000
-#define USB_OTG_EP_RX_NAK       0x2000
-#define USB_OTG_EP_RX_VALID     0x3000
+#define EP_RX_DIS       0x0000
+#define EP_RX_STALL     0x1000
+#define EP_RX_NAK       0x2000
+#define EP_RX_VALID     0x3000
 
 #define   MAX_DATA_LENGTH                        0x100
 
 typedef enum {
-  USB_OTG_OK = 0,
-  USB_OTG_FAIL
-} USB_OTG_STS;
+  OK = 0,
+  FAIL
+} STS;
 
 typedef enum {
   HC_IDLE = 0,
@@ -133,7 +133,7 @@ typedef enum {
   CTRL_FAIL
 } CTRL_STATUS;
 
-typedef struct USB_OTG_ep
+typedef struct ep
 {
   uint8_t        num;
   uint8_t        is_in;
@@ -154,10 +154,10 @@ typedef struct USB_OTG_ep
   uint32_t       ctl_data_len;  
 }
 
-USB_OTG_EP , *PUSB_OTG_EP;
+EP , *PEP;
 
 
-typedef struct USB_OTG_core_cfg
+typedef struct core_cfg
 {
   uint8_t       host_channels;
   uint8_t       dev_endpoints;
@@ -171,7 +171,7 @@ typedef struct USB_OTG_core_cfg
   uint8_t       coreID;
  
 }
-USB_OTG_CORE_CFGS, *PUSB_OTG_CORE_CFGS;
+CORE_CFGS, *PCORE_CFGS;
 
 struct _DCD
 {
@@ -183,8 +183,8 @@ struct _DCD
   uint8_t        connection_status;  
   uint8_t        test_mode;
   uint32_t       DevRemoteWakeup;
-  USB_OTG_EP     in_ep   [USB_OTG_MAX_TX_FIFOS];
-  USB_OTG_EP     out_ep  [USB_OTG_MAX_TX_FIFOS];
+  EP     in_ep   [MAX_TX_FIFOS];
+  EP     out_ep  [MAX_TX_FIFOS];
   uint8_t        setup_packet [8*3];
   // USBD_Class_cb_TypeDef         *class_cb;
   // USBD_Usr_cb_TypeDef           *usr_cb;
@@ -195,11 +195,11 @@ struct _DCD
 typedef struct _DCD DCD_DEV;
 // typedef struct _DCD *DCD_PDEV;
 
-struct USB_OTG_handle
+struct handle
 {
   // struct pickle *pptr;
-  USB_OTG_CORE_CFGS    cfg;
-  // USB_OTG_CORE_REGS    regs;
+  CORE_CFGS    cfg;
+  // CORE_REGS    regs;
   struct core_regs *hw;
 #ifdef USE_DEVICE_MODE
   DCD_DEV     dev;
@@ -214,8 +214,8 @@ struct USB_OTG_handle
 #endif
 };
 
-typedef struct USB_OTG_handle USB_OTG_CORE_HANDLE;
-// typedef struct USB_OTG_handle *PUSB_OTG_CORE_HANDLE;
+typedef struct handle HANDLE;
+// typedef struct handle *PHANDLE;
 
 #ifdef USE_OTG_MODE
 /* Not used */
@@ -225,51 +225,51 @@ typedef struct _OTG
   uint8_t    OTG_PrevState;  
   uint8_t    OTG_Mode;    
 }
-OTG_DEV , *USB_OTG_USBO_PDEV;
+OTG_DEV , *USBO_PDEV;
 #endif
 
 // XXX - The following should be static in "driver"
-USB_OTG_STS  USB_OTG_CoreInit        (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_SelectCore      (USB_OTG_CORE_HANDLE *pdev, USB_OTG_CORE_ID_TypeDef coreID);
-// USB_OTG_STS  USB_OTG_EnableGlobalInt (USB_OTG_CORE_HANDLE *pdev);
-// USB_OTG_STS  USB_OTG_DisableGlobalInt(USB_OTG_CORE_HANDLE *pdev);
-void*           USB_OTG_ReadPacket   (USB_OTG_CORE_HANDLE *pdev , uint8_t *dest, uint16_t len);
-USB_OTG_STS  USB_OTG_WritePacket     (USB_OTG_CORE_HANDLE *pdev , uint8_t *src, uint8_t ch_ep_num, uint16_t len);
-USB_OTG_STS  USB_OTG_FlushTxFifo     (USB_OTG_CORE_HANDLE *pdev , uint32_t num);
-USB_OTG_STS  USB_OTG_FlushRxFifo     (USB_OTG_CORE_HANDLE *pdev);
+STS  CoreInit        (HANDLE *pdev);
+STS  SelectCore      (HANDLE *pdev, CORE_ID_TypeDef coreID);
+// STS  EnableGlobalInt (HANDLE *pdev);
+// STS  DisableGlobalInt(HANDLE *pdev);
+void*           ReadPacket   (HANDLE *pdev , uint8_t *dest, uint16_t len);
+STS  WritePacket     (HANDLE *pdev , uint8_t *src, uint8_t ch_ep_num, uint16_t len);
+STS  FlushTxFifo     (HANDLE *pdev , uint32_t num);
+STS  FlushRxFifo     (HANDLE *pdev);
 
-uint32_t     USB_OTG_ReadCoreItr     (USB_OTG_CORE_HANDLE *pdev);
-uint32_t     USB_OTG_ReadOtgItr      (USB_OTG_CORE_HANDLE *pdev);
-uint8_t      USB_OTG_IsHostMode      (USB_OTG_CORE_HANDLE *pdev);
-uint8_t      USB_OTG_IsDeviceMode    (USB_OTG_CORE_HANDLE *pdev);
-uint32_t     USB_OTG_GetMode         (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_PhyInit         (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_SetCurrentMode  (USB_OTG_CORE_HANDLE *pdev, uint8_t mode);
+uint32_t     ReadCoreItr     (HANDLE *pdev);
+uint32_t     ReadOtgItr      (HANDLE *pdev);
+uint8_t      IsHostMode      (HANDLE *pdev);
+uint8_t      IsDeviceMode    (HANDLE *pdev);
+uint32_t     GetMode         (HANDLE *pdev);
+STS  PhyInit         (HANDLE *pdev);
+STS  SetCurrentMode  (HANDLE *pdev, uint8_t mode);
 
 /********************* DEVICE APIs ********************************************/
 #ifdef USE_DEVICE_MODE
-USB_OTG_STS  USB_OTG_CoreInitDev         (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_EnableDevInt        (USB_OTG_CORE_HANDLE *pdev);
-uint32_t     USB_OTG_ReadDevAllInEPItr           (USB_OTG_CORE_HANDLE *pdev);
-enum USB_OTG_SPEED USB_OTG_GetDeviceSpeed (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_EP0Activate (USB_OTG_CORE_HANDLE *pdev);
-USB_OTG_STS  USB_OTG_EPActivate  (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep);
-USB_OTG_STS  USB_OTG_EPDeactivate(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep);
-USB_OTG_STS  USB_OTG_EPStartXfer (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep);
-USB_OTG_STS  USB_OTG_EP0StartXfer(USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep);
-USB_OTG_STS  USB_OTG_EPSetStall          (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep);
-USB_OTG_STS  USB_OTG_EPClearStall        (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep);
-uint32_t     USB_OTG_ReadDevAllOutEp_itr (USB_OTG_CORE_HANDLE *pdev);
-uint32_t     USB_OTG_ReadDevOutEP_itr    (USB_OTG_CORE_HANDLE *pdev , uint8_t epnum);
-uint32_t     USB_OTG_ReadDevAllInEPItr   (USB_OTG_CORE_HANDLE *pdev);
-void         USB_OTG_InitDevSpeed        (USB_OTG_CORE_HANDLE *pdev , uint8_t speed);
-uint8_t      USBH_IsEvenFrame (USB_OTG_CORE_HANDLE *pdev);
-void         USB_OTG_EP0_OutStart(USB_OTG_CORE_HANDLE *pdev);
-void         USB_OTG_ActiveRemoteWakeup(USB_OTG_CORE_HANDLE *pdev);
-void         USB_OTG_UngateClock(USB_OTG_CORE_HANDLE *pdev);
-void         USB_OTG_StopDevice(USB_OTG_CORE_HANDLE *pdev);
-void         USB_OTG_SetEPStatus (USB_OTG_CORE_HANDLE *pdev , USB_OTG_EP *ep , uint32_t Status);
-uint32_t     USB_OTG_GetEPStatus(USB_OTG_CORE_HANDLE *pdev ,USB_OTG_EP *ep);
+STS  CoreInitDev         (HANDLE *pdev);
+STS  EnableDevInt        (HANDLE *pdev);
+uint32_t     ReadDevAllInEPItr           (HANDLE *pdev);
+enum SPEED GetDeviceSpeed (HANDLE *pdev);
+STS  EP0Activate (HANDLE *pdev);
+STS  EPActivate  (HANDLE *pdev , EP *ep);
+STS  EPDeactivate(HANDLE *pdev , EP *ep);
+STS  EPStartXfer (HANDLE *pdev , EP *ep);
+STS  EP0StartXfer(HANDLE *pdev , EP *ep);
+STS  EPSetStall          (HANDLE *pdev , EP *ep);
+STS  EPClearStall        (HANDLE *pdev , EP *ep);
+uint32_t     ReadDevAllOutEp_itr (HANDLE *pdev);
+uint32_t     ReadDevOutEP_itr    (HANDLE *pdev , uint8_t epnum);
+uint32_t     ReadDevAllInEPItr   (HANDLE *pdev);
+void         InitDevSpeed        (HANDLE *pdev , uint8_t speed);
+uint8_t      USBH_IsEvenFrame (HANDLE *pdev);
+void         EP0_OutStart(HANDLE *pdev);
+void         ActiveRemoteWakeup(HANDLE *pdev);
+void         UngateClock(HANDLE *pdev);
+void         StopDevice(HANDLE *pdev);
+void         SetEPStatus (HANDLE *pdev , EP *ep , uint32_t Status);
+uint32_t     GetEPStatus(HANDLE *pdev ,EP *ep);
 #endif
 
 #endif  /* __USB_CORE_H__ */

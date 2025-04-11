@@ -88,11 +88,11 @@ __ALIGN_BEGIN uint8_t __CCMRAM__ USB_Rx_Buffer[CDC_DATA_MAX_PACKET_SIZE] __ALIGN
  * "put it ih CCMRAM if possible" -- however CCMRAM is supposed to
  * not work with DMA, so there could be trouble waiting here.
  */
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+#ifdef HS_INTERNAL_DMA_ENABLED
 __ALIGN_BEGIN uint8_t APP_Tx_Buffer   [APP_TX_DATA_SIZE] __ALIGN_END ;
 #else 
 __ALIGN_BEGIN uint8_t __CCMRAM__ APP_Tx_Buffer[APP_TX_DATA_SIZE] __ALIGN_END ;
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
+#endif /* HS_INTERNAL_DMA_ENABLED */
  
 __ALIGN_BEGIN uint8_t CmdBuff[CDC_CMD_PACKET_SZE] __ALIGN_END ;
 
@@ -126,9 +126,9 @@ USBD_Class_cb_TypeDef  USBD_CDC_cb =
   NULL,     
 #ifdef notdef
   bogusDesc,
-#ifdef USE_USB_OTG_HS   
+#ifdef USE_HS   
   bogusDesc
-#endif /* USE_USB_OTG_HS  */
+#endif /* USE_HS  */
 #endif
 };
 #endif
@@ -167,19 +167,19 @@ CLASS_Init (void  *pdev, uint8_t cfgidx)
   DCD_EP_Open(pdev,
               CDC_IN_EP,
               CDC_DATA_IN_PACKET_SIZE,
-              USB_OTG_EP_BULK);
+              EP_BULK);
   
   /* Open EP OUT */
   DCD_EP_Open(pdev,
               CDC_OUT_EP,
               CDC_DATA_OUT_PACKET_SIZE,
-              USB_OTG_EP_BULK);
+              EP_BULK);
   
   /* Open Command IN EP */
   DCD_EP_Open(pdev,
               CDC_CMD_EP,
               CDC_CMD_PACKET_SZE,
-              USB_OTG_EP_INT);
+              EP_INT);
  
 #ifdef notdef
   pbuf = (uint8_t *) USBD_DeviceDesc;
@@ -315,7 +315,7 @@ CLASS_Setup (void  *pdev, USB_SETUP_REQ *req)
       if( (req->wValue >> 8) == CDC_DESCRIPTOR_TYPE) {
         uint8_t  *pbuf;
 
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+#ifdef HS_INTERNAL_DMA_ENABLED
 		/* XXX - trouble here, where is this? */
         pbuf = usbd_cdc_Desc;   
 #else
@@ -403,7 +403,7 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
     if (USB_Tx_length == 0)
     {
         //USB_Tx_State = 0;
-        if (((USB_OTG_CORE_HANDLE*)pdev)->dev.in_ep[epnum].xfer_len != CDC_DATA_IN_PACKET_SIZE)
+        if (((HANDLE*)pdev)->dev.in_ep[epnum].xfer_len != CDC_DATA_IN_PACKET_SIZE)
         {
             USB_Tx_State = 0;
             return USBD_OK;
@@ -456,7 +456,7 @@ uint8_t
 CLASS_DataOut(void *pdev, uint8_t epnum)
 {      
   /* Get the received data buffer and update the counter */
-  uint16_t USB_Rx_Cnt = ((USB_OTG_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
+  uint16_t USB_Rx_Cnt = ((HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
   
   /* USB data will be immediately processed, this allow next USB traffic being 
      NAKed till the end of the application Xfer */
