@@ -3,7 +3,13 @@
 #$sub1 = "s/USB_OTG_CORE_HANDLE/HANDLE/g"
 # $sub = "s/USB_OTG_CORE_//g"
 #$sub2 = "s/USB_OTG_//g"
-$sub2 = "s/DCD_//g"
+#$sub2 = "s/DCD_//g"
+
+sub1 = "s/USBD_OK/UU_OK/g"
+sub2 = "s/USBD_BUSY/UU_BUSY/g"
+sub3 = "s/USBD_FAIL/UU_FAIL/g"
+sub4 = "s/USBD_Status/UU_Status/g"
+sub5 = "s/USBD_//g"
 
 files = %w(
 library/core.c
@@ -36,7 +42,11 @@ end
 
 files.each { |f|
 #  process f, $sub1
-  process f, $sub2
+  process f, sub1
+  process f, sub2
+  process f, sub3
+  process f, sub4
+  process f, sub5
 }
 
 # THE END

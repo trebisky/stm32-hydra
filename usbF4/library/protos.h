@@ -6,31 +6,31 @@
  */
 
 /* Defined in usbd_req.c */
-USBD_Status  USBD_StdDevReq (HANDLE  *pdev, USB_SETUP_REQ  *req);
-USBD_Status  USBD_StdItfReq (HANDLE  *pdev, USB_SETUP_REQ  *req);
-USBD_Status  USBD_StdEPReq (HANDLE  *pdev, USB_SETUP_REQ  *req);
-void		USBD_ParseSetupRequest (HANDLE  *pdev, USB_SETUP_REQ *req);
-void		USBD_CtlError (HANDLE  *pdev, USB_SETUP_REQ *req);
+UU_Status  StdDevReq (HANDLE  *pdev, USB_SETUP_REQ  *req);
+UU_Status  StdItfReq (HANDLE  *pdev, USB_SETUP_REQ  *req);
+UU_Status  StdEPReq (HANDLE  *pdev, USB_SETUP_REQ  *req);
+void		ParseSetupRequest (HANDLE  *pdev, USB_SETUP_REQ *req);
+void		CtlError (HANDLE  *pdev, USB_SETUP_REQ *req);
 
 
 // #include  "usbd_def.h"
 // #include  "usbd_core.h"
 
 /* Defined in usbd_ioreq.c */
-USBD_Status  USBD_CtlSendData (HANDLE  *pdev, uint8_t *buf, uint16_t len);
-USBD_Status  USBD_CtlContinueSendData (HANDLE  *pdev, uint8_t *pbuf, uint16_t len);
-USBD_Status  USBD_CtlPrepareRx (HANDLE  *pdev, uint8_t *pbuf, uint16_t len);
-USBD_Status  USBD_CtlContinueRx (HANDLE  *pdev, uint8_t *pbuf, uint16_t len);
-USBD_Status  USBD_CtlSendStatus (HANDLE  *pdev);
-USBD_Status  USBD_CtlReceiveStatus (HANDLE  *pdev);
-// uint16_t  USBD_GetRxCount (HANDLE  *pdev , uint8_t epnum);
+UU_Status  CtlSendData (HANDLE  *pdev, uint8_t *buf, uint16_t len);
+UU_Status  CtlContinueSendData (HANDLE  *pdev, uint8_t *pbuf, uint16_t len);
+UU_Status  CtlPrepareRx (HANDLE  *pdev, uint8_t *pbuf, uint16_t len);
+UU_Status  CtlContinueRx (HANDLE  *pdev, uint8_t *pbuf, uint16_t len);
+UU_Status  CtlSendStatus (HANDLE  *pdev);
+UU_Status  CtlReceiveStatus (HANDLE  *pdev);
+// uint16_t  GetRxCount (HANDLE  *pdev , uint8_t epnum);
 
 /* Defined in core.c */
-void USBD_Init(HANDLE *pdev, CORE_ID_TypeDef coreID );
-USBD_Status USBD_DeInit(HANDLE *pdev);
-USBD_Status USBD_DeInitFull(HANDLE *pdev);
-USBD_Status USBD_ClrCfg(HANDLE  *pdev, uint8_t cfgidx);
-USBD_Status USBD_SetCfg(HANDLE  *pdev, uint8_t cfgidx);
+void Init(HANDLE *pdev, CORE_ID_TypeDef coreID );
+UU_Status DeInit(HANDLE *pdev);
+UU_Status DeInitFull(HANDLE *pdev);
+UU_Status ClrCfg(HANDLE  *pdev, uint8_t cfgidx);
+UU_Status SetCfg(HANDLE  *pdev, uint8_t cfgidx);
 
 /********************* General Driver APIs ********************************************/
 /* Defined in driver/driver.c */

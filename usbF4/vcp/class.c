@@ -17,8 +17,8 @@ void
 class_init ( void )
 {
 		// This is now obsolete since we no longer have these callbacks.
-		// usb_register ( &USR_desc, &USBD_CDC_cb );
-		// usb_register ( NULL, &USBD_CDC_cb );
+		// usb_register ( &USR_desc, &CDC_cb );
+		// usb_register ( NULL, &CDC_cb );
 }
 
 void

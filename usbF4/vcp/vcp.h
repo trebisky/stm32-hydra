@@ -7,8 +7,8 @@
   ******************************************************************************
   */
 
-#ifndef __USBD_CDC_VCP_H
-#define __USBD_CDC_VCP_H
+#ifndef __CDC_VCP_H
+#define __CDC_VCP_H
 
 /* The following structures groups all needed parameters to be configured for the
    ComPort. These parameters can modified on the fly by the host through CDC class
@@ -70,6 +70,6 @@ typedef struct _CDC_IF_PROP
 CDC_IF_Prop_TypeDef;
 #endif
 
-#endif /* __USBD_CDC_VCP_H */
+#endif /* __CDC_VCP_H */
 
 /* THE END */

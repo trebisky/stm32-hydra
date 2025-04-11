@@ -10,8 +10,8 @@
   ******************************************************************************
   */ 
 
-#ifndef __USBD_DEF_H
-#define __USBD_DEF_H
+#ifndef __DEF_H
+#define __DEF_H
 
 /* These are all "official" parts of USB.
  * (except some odds and ends at the start).
@@ -35,12 +35,12 @@
 #define  USB_LEN_EP_DESC                                0x07
 #define  USB_LEN_OTG_DESC                               0x03
 
-#define  USBD_IDX_LANGID_STR                            0x00 
-#define  USBD_IDX_MFC_STR                               0x01 
-#define  USBD_IDX_PRODUCT_STR                           0x02
-#define  USBD_IDX_SERIAL_STR                            0x03 
-#define  USBD_IDX_CONFIG_STR                            0x04 
-#define  USBD_IDX_INTERFACE_STR                         0x05 
+#define  IDX_LANGID_STR                            0x00 
+#define  IDX_MFC_STR                               0x01 
+#define  IDX_PRODUCT_STR                           0x02
+#define  IDX_SERIAL_STR                            0x03 
+#define  IDX_CONFIG_STR                            0x04 
+#define  IDX_INTERFACE_STR                         0x05 
 
 #define  USB_REQ_TYPE_STANDARD                          0x00
 #define  USB_REQ_TYPE_CLASS                             0x20
@@ -90,6 +90,6 @@ typedef  struct  usb_setup_req {
 } USB_SETUP_REQ;
 #endif
 
-#endif /* __USBD_DEF_H */
+#endif /* __DEF_H */
 
 /* THE END */

@@ -10,12 +10,12 @@
   ******************************************************************************
   */
 
-#ifndef __USBD_CONF__H__
-#define __USBD_CONF__H__
+#ifndef __CONF__H__
+#define __CONF__H__
 
 // Moved to main conf file
-// #define USBD_CFG_MAX_NUM                1
-// #define USBD_ITF_MAX_NUM                1
+// #define CFG_MAX_NUM                1
+// #define ITF_MAX_NUM                1
 
 #define CDC_IN_EP                       0x81  /* EP1 for data IN */
 #define CDC_OUT_EP                      0x01  /* EP1 for data OUT */
@@ -42,6 +42,6 @@
 
 #define APP_FOPS                        VCP_fops
 
-#endif //__USBD_CONF__H__
+#endif //__CONF__H__
 
 /* THE END */

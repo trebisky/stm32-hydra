@@ -31,9 +31,9 @@
   doepint.b.intr = 1; \
   WRITE_REG32(&pdev->hw->OUTEP_REGS[(epnum)]->DOEPINT,doepint.d32);
 
-uint32_t USBD_OTG_ISR_Handler (HANDLE *pdev);
-uint32_t USBD_OTG_EP1OUT_ISR_Handler (HANDLE *pdev);
-uint32_t USBD_OTG_EP1IN_ISR_Handler (HANDLE *pdev);
+uint32_t OTG_ISR_Handler (HANDLE *pdev);
+uint32_t OTG_EP1OUT_ISR_Handler (HANDLE *pdev);
+uint32_t OTG_EP1IN_ISR_Handler (HANDLE *pdev);
 
 /* END - From usb_dcd_int.h */
 
@@ -68,12 +68,12 @@ static uint32_t OTG_ISR(HANDLE *pdev);
 
 #ifdef HS_DEDICATED_EP1_ENABLED  
 /**
-* @brief  USBD_OTG_EP1OUT_ISR_Handler
+* @brief  OTG_EP1OUT_ISR_Handler
 *         handles all USB Interrupts
 * @param  pdev: device instance
 * @retval status
 */
-uint32_t USBD_OTG_EP1OUT_ISR_Handler (HANDLE *pdev)
+uint32_t OTG_EP1OUT_ISR_Handler (HANDLE *pdev)
 {
   
   DOEPINTn_TypeDef  doepint;
@@ -97,7 +97,7 @@ uint32_t USBD_OTG_EP1OUT_ISR_Handler (HANDLE *pdev)
     }    
     /* Inform upper layer: data ready */
     /* RX COMPLETE */
-    // USBD_INT_fops->DataOutStage(pdev , 1);
+    // INT_fops->DataOutStage(pdev , 1);
     CORE_DataOutStage(pdev , 1);
   }
   
@@ -111,12 +111,12 @@ uint32_t USBD_OTG_EP1OUT_ISR_Handler (HANDLE *pdev)
 }
 
 /**
-* @brief  USBD_OTG_EP1IN_ISR_Handler
+* @brief  OTG_EP1IN_ISR_Handler
 *         handles all USB Interrupts
 * @param  pdev: device instance
 * @retval status
 */
-uint32_t USBD_OTG_EP1IN_ISR_Handler (HANDLE *pdev)
+uint32_t OTG_EP1IN_ISR_Handler (HANDLE *pdev)
 {
   
   DIEPINTn_TypeDef  diepint;
@@ -136,7 +136,7 @@ uint32_t USBD_OTG_EP1IN_ISR_Handler (HANDLE *pdev)
     MODIFY_REG32(&pdev->hw->DREGS->DIEPEMPMSK, fifoemptymsk, 0);
     CLEAR_IN_EP_INTR(1, xfercompl);
     /* TX COMPLETE */
-    // USBD_INT_fops->DataInStage(pdev , 1);
+    // INT_fops->DataInStage(pdev , 1);
     CORE_DataInStage(pdev , 1);
   }
   if ( diepint.b.epdisabled )
@@ -175,7 +175,7 @@ int tusb_xof_count = 0;
 * @retval status
 */
 uint32_t
-USBD_OTG_ISR_Handler (HANDLE *pdev)
+OTG_ISR_Handler (HANDLE *pdev)
 {
   GINTSTS_TypeDef  gintr_status;
   uint32_t retval = 0;
@@ -306,7 +306,7 @@ USBD_OTG_ISR_Handler (HANDLE *pdev)
 static uint32_t SessionRequest_ISR(HANDLE *pdev)
 {
   GINTSTS_TypeDef  gintsts;  
-  // USBD_INT_fops->DevConnected (pdev);
+  // INT_fops->DevConnected (pdev);
   CORE_DevConnected (pdev);
   usb_debug ( DM_ORIG, "Event - connected\n" );
 
@@ -332,7 +332,7 @@ static uint32_t OTG_ISR(HANDLE *pdev)
   gotgint.d32 = READ_REG32(&pdev->hw->GREGS->GOTGINT);
   
   if (gotgint.b.sesenddet) {
-    // USBD_INT_fops->DevDisconnected (pdev);
+    // INT_fops->DevDisconnected (pdev);
     CORE_DevDisconnected (pdev);
     usb_debug ( DM_ORIG, "Event - disconnected\n" );
   }
@@ -369,7 +369,7 @@ static uint32_t HandleResume_ISR(HANDLE *pdev)
   MODIFY_REG32(&pdev->hw->DREGS->DCTL, devctl.d32, 0);
   
   /* Inform upper layer by the Resume Event */
-  // USBD_INT_fops->Resume (pdev);
+  // INT_fops->Resume (pdev);
   CORE_Resume (pdev);
   
   /* Clear interrupt */
@@ -391,7 +391,7 @@ static uint32_t HandleUSBSuspend_ISR(HANDLE *pdev)
   PCGCCTL_TypeDef  power;
   DSTS_TypeDef     dsts;
   
-  // USBD_INT_fops->Suspend (pdev);      
+  // INT_fops->Suspend (pdev);      
   CORE_Suspend (pdev);      
   
   dsts.d32 = READ_REG32(&pdev->hw->DREGS->DSTS);
@@ -449,7 +449,7 @@ static uint32_t HandleInEP_ISR(HANDLE *pdev)
         MODIFY_REG32(&pdev->hw->DREGS->DIEPEMPMSK, fifoemptymsk, 0);
         CLEAR_IN_EP_INTR(epnum, xfercompl);
         /* TX COMPLETE */
-        // USBD_INT_fops->DataInStage(pdev , epnum);
+        // INT_fops->DataInStage(pdev , epnum);
         CORE_DataInStage(pdev , epnum);
         
         if (pdev->cfg.dma_enable == 1) {
@@ -528,7 +528,7 @@ HandleOutEP_ISR(HANDLE *pdev)
 
         /* Inform upper layer: data ready */
         /* RX COMPLETE */
-        // USBD_INT_fops->DataOutStage(pdev , epnum);
+        // INT_fops->DataOutStage(pdev , epnum);
         CORE_DataOutStage(pdev , epnum);
         
         if (pdev->cfg.dma_enable == 1) {
@@ -552,7 +552,7 @@ HandleOutEP_ISR(HANDLE *pdev)
         
         /* inform the upper layer that a setup packet is available */
         /* SETUP COMPLETE */
-        // USBD_INT_fops->SetupStage(pdev);
+        // INT_fops->SetupStage(pdev);
         CORE_SetupStage(pdev);
         CLEAR_OUT_EP_INTR(epnum, setup);
       }
@@ -574,7 +574,7 @@ static uint32_t HandleSof_ISR(HANDLE *pdev)
 {
   GINTSTS_TypeDef  GINTSTS;
   
-  // USBD_INT_fops->SOF(pdev);
+  // INT_fops->SOF(pdev);
   CORE_SOF(pdev);
   
   /* Clear interrupt */
@@ -766,7 +766,7 @@ static uint32_t HandleUsbReset_ISR(HANDLE *pdev)
   WRITE_REG32 (&pdev->hw->GREGS->GINTSTS, gintsts.d32);
   
   /*Reset internal state machine */
-  // USBD_INT_fops->Reset(pdev);
+  // INT_fops->Reset(pdev);
   CORE_Reset(pdev);
   return 1;
 }
@@ -823,7 +823,7 @@ static uint32_t IsoINIncomplete_ISR(HANDLE *pdev)
   
   gintsts.d32 = 0;
 
-  // USBD_INT_fops->IsoINIncomplete (pdev); 
+  // INT_fops->IsoINIncomplete (pdev); 
   CORE_IsoINIncomplete (pdev); 
   
   /* Clear interrupt */
@@ -845,7 +845,7 @@ static uint32_t IsoOUTIncomplete_ISR(HANDLE *pdev)
   
   gintsts.d32 = 0;
 
-  // USBD_INT_fops->IsoOUTIncomplete (pdev); 
+  // INT_fops->IsoOUTIncomplete (pdev); 
   CORE_IsoOUTIncomplete (pdev); 
   
   /* Clear interrupt */

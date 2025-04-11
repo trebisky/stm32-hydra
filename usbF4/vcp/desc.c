@@ -58,25 +58,25 @@ desc: (26) 1A03300030003000300030003000300030003000350030004300
 
 /* =========================================================================== */
 
-#define USBD_VID                        0x0483
-#define USBD_PID                        0x5740
+#define VID                        0x0483
+#define PID                        0x5740
 
-#define USBD_LANGID_STRING              0x409
+#define LANGID_STRING              0x409
 
-// #define USBD_MANUFACTURER_STRING        (uint8_t*)"STMicroelectronics"
-#define USBD_MANUFACTURER_STRING        (uint8_t*)"ACME bar and grill"
+// #define MANUFACTURER_STRING        (uint8_t*)"STMicroelectronics"
+#define MANUFACTURER_STRING        (uint8_t*)"ACME bar and grill"
 
-#define USBD_PRODUCT_HS_STRING          (uint8_t*)"STM32 Virtual ComPort in HS Mode"
-#define USBD_SERIALNUMBER_HS_STRING     (uint8_t*)"00000000050B"
+#define PRODUCT_HS_STRING          (uint8_t*)"STM32 Virtual ComPort in HS Mode"
+#define SERIALNUMBER_HS_STRING     (uint8_t*)"00000000050B"
 
-#define USBD_PRODUCT_FS_STRING          (uint8_t*)"STM32 Virtual ComPort in FS Mode"
-#define USBD_SERIALNUMBER_FS_STRING     (uint8_t*)"00000000050C"
+#define PRODUCT_FS_STRING          (uint8_t*)"STM32 Virtual ComPort in FS Mode"
+#define SERIALNUMBER_FS_STRING     (uint8_t*)"00000000050C"
 
-#define USBD_CONFIGURATION_HS_STRING    (uint8_t*)"VCP Config"
-#define USBD_INTERFACE_HS_STRING        (uint8_t*)"VCP Interface"
+#define CONFIGURATION_HS_STRING    (uint8_t*)"VCP Config"
+#define INTERFACE_HS_STRING        (uint8_t*)"VCP Interface"
 
-#define USBD_CONFIGURATION_FS_STRING    (uint8_t*)"VCP Config"
-#define USBD_INTERFACE_FS_STRING        (uint8_t*)"VCP Interface"
+#define CONFIGURATION_FS_STRING    (uint8_t*)"VCP Config"
+#define INTERFACE_FS_STRING        (uint8_t*)"VCP Interface"
 
 #define USB_SIZ_DEVICE_DESC                     18
 #define USB_SIZ_STRING_LANGID                   4
@@ -95,13 +95,13 @@ __ALIGN_BEGIN uint8_t unibuf[USB_MAX_STR_DESC_SIZ] __ALIGN_END ;
   /* This used to be "hacked in" by code in usbd_cdc_core.c
    * Now I just "make it so" in the data below.
    */
-  pbuf = (uint8_t *) USBD_DeviceDesc;
+  pbuf = (uint8_t *) DeviceDesc;
   pbuf[4] = DEVICE_CLASS_CDC;
   pbuf[5] = DEVICE_SUBCLASS_CDC;
 #endif
 
 /* USB Standard Device Descriptor */
-__ALIGN_BEGIN static uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC] __ALIGN_END =
+__ALIGN_BEGIN static uint8_t DeviceDesc[USB_SIZ_DEVICE_DESC] __ALIGN_END =
   {
     0x12,                       /*bLength */
     USB_DEVICE_DESCRIPTOR_TYPE, /*bDescriptorType*/
@@ -115,20 +115,20 @@ __ALIGN_BEGIN static uint8_t USBD_DeviceDesc[USB_SIZ_DEVICE_DESC] __ALIGN_END =
     DEVICE_SUBCLASS_CDC,        /*bDeviceSubClass*/
     0x00,                       /*bDeviceProtocol*/
     MAX_EP0_SIZE,       /*bMaxPacketSize*/
-    LOBYTE(USBD_VID),           /*idVendor*/
-    HIBYTE(USBD_VID),           /*idVendor*/
-    LOBYTE(USBD_PID),           /*idVendor*/
-    HIBYTE(USBD_PID),           /*idVendor*/
+    LOBYTE(VID),           /*idVendor*/
+    HIBYTE(VID),           /*idVendor*/
+    LOBYTE(PID),           /*idVendor*/
+    HIBYTE(PID),           /*idVendor*/
     0x00,                       /*bcdDevice rel. 2.00*/
     0x02,
-    USBD_IDX_MFC_STR,           /*Index of manufacturer  string*/
-    USBD_IDX_PRODUCT_STR,       /*Index of product string*/
-    USBD_IDX_SERIAL_STR,        /*Index of serial number string*/
-    USBD_CFG_MAX_NUM            /*bNumConfigurations*/
+    IDX_MFC_STR,           /*Index of manufacturer  string*/
+    IDX_PRODUCT_STR,       /*Index of product string*/
+    IDX_SERIAL_STR,        /*Index of serial number string*/
+    CFG_MAX_NUM            /*bNumConfigurations*/
   } ; /* USB_DeviceDescriptor */
 
 /* USB Standard Device Descriptor */
-__ALIGN_BEGIN static uint8_t USBD_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END =
+__ALIGN_BEGIN static uint8_t DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END =
 {
   USB_LEN_DEV_QUALIFIER_DESC,
   USB_DESC_TYPE_DEVICE_QUALIFIER,
@@ -143,12 +143,12 @@ __ALIGN_BEGIN static uint8_t USBD_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC
 };
 
 /* USB Standard Device Descriptor */
-__ALIGN_BEGIN static uint8_t USBD_LangIDDesc[USB_SIZ_STRING_LANGID] __ALIGN_END =
+__ALIGN_BEGIN static uint8_t LangIDDesc[USB_SIZ_STRING_LANGID] __ALIGN_END =
 {
      USB_SIZ_STRING_LANGID,         
      USB_DESC_TYPE_STRING,       
-     LOBYTE(USBD_LANGID_STRING),
-     HIBYTE(USBD_LANGID_STRING), 
+     LOBYTE(LANGID_STRING),
+     HIBYTE(LANGID_STRING), 
 };
 
 /* USB CDC device Configuration Descriptor */
@@ -362,7 +362,7 @@ MakeString(uint8_t *desc, uint8_t *unicode )
     if ( desc == NULL )
 		return 0;
 
-    // len =  USBD_GetLen(desc) * 2 + 2;
+    // len =  GetLen(desc) * 2 + 2;
     len =  strlen(desc) * 2 + 2;
 
     unicode[idx++] = len;
@@ -388,8 +388,8 @@ class_get_descriptor ( uint8_t type, HANDLE *pdev, USB_SETUP_REQ *req,
   switch ( type ) {
 	  case USB_DESC_TYPE_DEVICE:
 		  // pbuf = pdev->dev.usr_device->GetDeviceDescriptor(pdev->cfg.speed, &len);
-		  pbuf = USBD_DeviceDesc;
-		  len = sizeof(USBD_DeviceDesc);
+		  pbuf = DeviceDesc;
+		  len = sizeof(DeviceDesc);
 		  if ((req->wLength == 64) ||( pdev->dev.device_status == DEFAULT))
 			  len = 8;
 		  break;
@@ -416,46 +416,46 @@ class_get_descriptor ( uint8_t type, HANDLE *pdev, USB_SETUP_REQ *req,
     
 	  case USB_DESC_TYPE_STRING:
 		  switch ((uint8_t)(req->wValue)) {
-			  case USBD_IDX_LANGID_STR:
+			  case IDX_LANGID_STR:
 				  // pbuf = pdev->dev.usr_device->GetLangIDStrDescriptor(pdev->cfg.speed, &len);        
-				  pbuf = USBD_LangIDDesc;
-				  len =  sizeof(USBD_LangIDDesc);  
+				  pbuf = LangIDDesc;
+				  len =  sizeof(LangIDDesc);  
 				  break;
-			  case USBD_IDX_MFC_STR:
+			  case IDX_MFC_STR:
 				  // pbuf = pdev->dev.usr_device->GetManufacturerStrDescriptor(pdev->cfg.speed, &len);
-				  len = MakeString ( USBD_MANUFACTURER_STRING, unibuf );
+				  len = MakeString ( MANUFACTURER_STRING, unibuf );
 				  pbuf = unibuf;
 				  break;
-			  case USBD_IDX_PRODUCT_STR:
+			  case IDX_PRODUCT_STR:
 				  // pbuf = pdev->dev.usr_device->GetProductStrDescriptor(pdev->cfg.speed, &len);
 				  if ( speed == SPEED_HIGH )
-					  len = MakeString ( USBD_PRODUCT_HS_STRING, unibuf );
+					  len = MakeString ( PRODUCT_HS_STRING, unibuf );
 				  else
-					  len = MakeString ( USBD_PRODUCT_FS_STRING, unibuf );
+					  len = MakeString ( PRODUCT_FS_STRING, unibuf );
 				  pbuf = unibuf;
 				  break;
-			  case USBD_IDX_SERIAL_STR:
+			  case IDX_SERIAL_STR:
 				  // pbuf = pdev->dev.usr_device->GetSerialStrDescriptor(pdev->cfg.speed, &len);
 				  if ( speed == SPEED_HIGH )
-					  len = MakeString ( USBD_SERIALNUMBER_HS_STRING, unibuf );
+					  len = MakeString ( SERIALNUMBER_HS_STRING, unibuf );
 				  else
-					  len = MakeString ( USBD_SERIALNUMBER_FS_STRING, unibuf );
+					  len = MakeString ( SERIALNUMBER_FS_STRING, unibuf );
 				  pbuf = unibuf;
 				  break;
-			  case USBD_IDX_CONFIG_STR:
+			  case IDX_CONFIG_STR:
 				  // pbuf = pdev->dev.usr_device->GetConfigurationStrDescriptor(pdev->cfg.speed, &len);
 				  if ( speed == SPEED_HIGH )
-					  len = MakeString ( USBD_CONFIGURATION_HS_STRING, unibuf );
+					  len = MakeString ( CONFIGURATION_HS_STRING, unibuf );
 				  else
-					  len = MakeString ( USBD_CONFIGURATION_FS_STRING, unibuf );
+					  len = MakeString ( CONFIGURATION_FS_STRING, unibuf );
 				  pbuf = unibuf;
 				  break;
-			  case USBD_IDX_INTERFACE_STR:
+			  case IDX_INTERFACE_STR:
 				  // pbuf = pdev->dev.usr_device->GetInterfaceStrDescriptor(pdev->cfg.speed, &len);
 				  if ( speed == SPEED_HIGH )
-					  len = MakeString ( USBD_INTERFACE_HS_STRING, unibuf );
+					  len = MakeString ( INTERFACE_HS_STRING, unibuf );
 				  else
-					  len = MakeString ( USBD_INTERFACE_FS_STRING, unibuf );
+					  len = MakeString ( INTERFACE_FS_STRING, unibuf );
 				  pbuf = unibuf;
 				  break;
 			  default:
@@ -475,11 +475,11 @@ class_get_descriptor ( uint8_t type, HANDLE *pdev, USB_SETUP_REQ *req,
 	  		  panic ( "type device qualifier" );
 			  // pbuf   = (uint8_t *)pdev->dev.class_cb->GetConfigDescriptor(pdev->cfg.speed, &len);
             
-			  // USBD_DeviceQualifierDesc[4]= pbuf[14];
-			  // USBD_DeviceQualifierDesc[5]= pbuf[15];
-			  // USBD_DeviceQualifierDesc[6]= pbuf[16];
+			  // DeviceQualifierDesc[4]= pbuf[14];
+			  // DeviceQualifierDesc[5]= pbuf[15];
+			  // DeviceQualifierDesc[6]= pbuf[16];
       
-			  // pbuf = USBD_DeviceQualifierDesc;
+			  // pbuf = DeviceQualifierDesc;
 			  // len  = USB_LEN_DEV_QUALIFIER_DESC;
 			  // break;
 		  } else {

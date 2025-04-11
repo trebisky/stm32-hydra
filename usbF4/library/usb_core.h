@@ -50,10 +50,10 @@ enum SPEED {
 #define EMBEDDED_PHY  2
 
 typedef enum {
-  USBD_OK   = 0,
-  USBD_BUSY,
-  USBD_FAIL,
-} USBD_Status;
+  UU_OK   = 0,
+  UU_BUSY,
+  UU_FAIL,
+} UU_Status;
 
 /* Endpoint types */
 #define EP_CONTROL                       0
@@ -186,9 +186,9 @@ struct _DCD
   EP     in_ep   [MAX_TX_FIFOS];
   EP     out_ep  [MAX_TX_FIFOS];
   uint8_t        setup_packet [8*3];
-  // USBD_Class_cb_TypeDef         *class_cb;
-  // USBD_Usr_cb_TypeDef           *usr_cb;
-  // USBD_DEVICE                   *usr_device;  
+  // Class_cb_TypeDef         *class_cb;
+  // Usr_cb_TypeDef           *usr_cb;
+  // DEVICE                   *usr_device;  
   uint8_t        *pConfig_descriptor;		/* used by VCP */
 };
 

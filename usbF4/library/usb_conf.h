@@ -35,8 +35,8 @@ void usb_dump ( int, char *, char *, int );
 
 /* These may change with a different class, this is correct for VCP */
 
-#define USBD_CFG_MAX_NUM                1
-#define USBD_ITF_MAX_NUM                1
+#define CFG_MAX_NUM                1
+#define ITF_MAX_NUM                1
 
 /* ---------------------------------------------------------------------------- */
 
