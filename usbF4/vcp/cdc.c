@@ -164,19 +164,19 @@ CLASS_Init (void  *pdev, uint8_t cfgidx)
   uint8_t *pbuf;
 
   /* Open EP IN */
-  DCD_EP_Open(pdev,
+  EP_Open(pdev,
               CDC_IN_EP,
               CDC_DATA_IN_PACKET_SIZE,
               EP_BULK);
   
   /* Open EP OUT */
-  DCD_EP_Open(pdev,
+  EP_Open(pdev,
               CDC_OUT_EP,
               CDC_DATA_OUT_PACKET_SIZE,
               EP_BULK);
   
   /* Open Command IN EP */
-  DCD_EP_Open(pdev,
+  EP_Open(pdev,
               CDC_CMD_EP,
               CDC_CMD_PACKET_SZE,
               EP_INT);
@@ -192,7 +192,7 @@ CLASS_Init (void  *pdev, uint8_t cfgidx)
   VCP_Init(pdev);
 
   /* Prepare Out endpoint to receive next packet */
-  DCD_EP_PrepareRx(pdev,
+  EP_PrepareRx(pdev,
                    CDC_OUT_EP,
                    (uint8_t*)(USB_Rx_Buffer),
                    CDC_DATA_OUT_PACKET_SIZE);
@@ -213,15 +213,15 @@ uint8_t
 CLASS_DeInit (void  *pdev, uint8_t cfgidx)
 {
   /* Open EP IN */
-  DCD_EP_Close(pdev,
+  EP_Close(pdev,
               CDC_IN_EP);
   
   /* Open EP OUT */
-  DCD_EP_Close(pdev,
+  EP_Close(pdev,
               CDC_OUT_EP);
   
   /* Open Command IN EP */
-  DCD_EP_Close(pdev,
+  EP_Close(pdev,
               CDC_CMD_EP);
 
   /* Restore default state of the Interface physical components */
@@ -431,7 +431,7 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
 	usb_debug ( DM_WRITE1, "USB Tx datain send: %d\n", USB_Tx_length );
 
     /* Prepare the available data buffer to be sent on IN endpoint */
-    DCD_EP_Tx (pdev,
+    EP_Tx (pdev,
                  CDC_IN_EP,
                  (uint8_t*)&APP_Tx_Buffer[USB_Tx_ptr],
                  USB_Tx_length);
@@ -441,7 +441,7 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
 
 void usbd_cdc_PrepareRx (void *pdev)
 {
-    DCD_EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
+    EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
 }
 
 /**
@@ -463,7 +463,7 @@ CLASS_DataOut(void *pdev, uint8_t epnum)
   // if ( APP_FOPS.pIf_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==USBD_OK ) {
   if ( VCP_DataRx(USB_Rx_Buffer, USB_Rx_Cnt)==USBD_OK ) {
     /* Prepare Out endpoint to receive next packet */
-    DCD_EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
+    EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
   }
   return USBD_OK;
 }
@@ -524,7 +524,7 @@ Handle_USBAsynchXfer(void *pdev)
 
 	usb_debug ( DM_WRITE1, "USB Tx asynch send: %d\n", USB_Tx_length );
 
-    DCD_EP_Tx (pdev,
+    EP_Tx (pdev,
                CDC_IN_EP,
                (uint8_t*)&APP_Tx_Buffer[USB_Tx_ptr],
                USB_Tx_length);

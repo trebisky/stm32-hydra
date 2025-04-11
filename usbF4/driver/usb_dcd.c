@@ -21,7 +21,7 @@
 #include "usb_dcd.h"
 
 void
-DCD_Init(HANDLE *pdev , CORE_ID_TypeDef coreID)
+Init(HANDLE *pdev , CORE_ID_TypeDef coreID)
 {
   uint32_t i;
   EP *ep;
@@ -112,7 +112,7 @@ DCD_Init(HANDLE *pdev , CORE_ID_TypeDef coreID)
 * @retval : status
 */
 uint32_t
-DCD_EP_Open(HANDLE *pdev , 
+EP_Open(HANDLE *pdev , 
                      uint8_t ep_addr,
                      uint16_t ep_mps,
                      uint8_t ep_type)
@@ -152,7 +152,7 @@ DCD_EP_Open(HANDLE *pdev ,
 * @retval : status
 */
 uint32_t
-DCD_EP_Close(HANDLE *pdev , uint8_t  ep_addr)
+EP_Close(HANDLE *pdev , uint8_t  ep_addr)
 {
   EP *ep;
   
@@ -169,7 +169,7 @@ DCD_EP_Close(HANDLE *pdev , uint8_t  ep_addr)
 
 
 /**
-* @brief  DCD_EP_PrepareRx
+* @brief  EP_PrepareRx
 * @param pdev: device instance
 * @param ep_addr: endpoint address
 * @param pbuf: pointer to Rx buffer
@@ -177,7 +177,7 @@ DCD_EP_Close(HANDLE *pdev , uint8_t  ep_addr)
 * @retval : status
 */
 uint32_t
-DCD_EP_PrepareRx( HANDLE *pdev,
+EP_PrepareRx( HANDLE *pdev,
                             uint8_t   ep_addr,
                             uint8_t *pbuf,                        
                             uint16_t  buf_len)
@@ -215,7 +215,7 @@ DCD_EP_PrepareRx( HANDLE *pdev,
 * @retval : status
 */
 uint32_t
-DCD_EP_Tx ( HANDLE *pdev,
+EP_Tx ( HANDLE *pdev,
                      uint8_t   ep_addr,
                      uint8_t   *pbuf,
                      uint32_t   buf_len)
@@ -248,7 +248,7 @@ DCD_EP_Tx ( HANDLE *pdev,
 * @retval : status
 */
 uint32_t
-DCD_EP_Stall (HANDLE *pdev, uint8_t   epnum)
+EP_Stall (HANDLE *pdev, uint8_t   epnum)
 {
   EP *ep;
 
@@ -274,7 +274,7 @@ DCD_EP_Stall (HANDLE *pdev, uint8_t   epnum)
 * @retval : status
 */
 uint32_t
-DCD_EP_ClrStall (HANDLE *pdev, uint8_t epnum)
+EP_ClrStall (HANDLE *pdev, uint8_t epnum)
 {
   EP *ep;
   if ((0x80 & epnum) == 0x80) {
@@ -299,7 +299,7 @@ DCD_EP_ClrStall (HANDLE *pdev, uint8_t epnum)
 * @retval : status
 */
 uint32_t
-DCD_EP_Flush (HANDLE *pdev , uint8_t epnum)
+EP_Flush (HANDLE *pdev , uint8_t epnum)
 {
 
   if ((epnum & 0x80) == 0x80) {
@@ -319,7 +319,7 @@ DCD_EP_Flush (HANDLE *pdev , uint8_t epnum)
 * @retval : status
 */
 void
-DCD_EP_SetAddress (HANDLE *pdev, uint8_t address)
+EP_SetAddress (HANDLE *pdev, uint8_t address)
 {
   DCFG_TypeDef  dcfg;
   dcfg.d32 = 0;
@@ -334,7 +334,7 @@ DCD_EP_SetAddress (HANDLE *pdev, uint8_t address)
 * @retval : None
 */
 void
-DCD_DevConnect (HANDLE *pdev)
+DevConnect (HANDLE *pdev)
 {
 #ifndef USE_OTG_MODE
   DCTL_TypeDef  dctl;
@@ -355,7 +355,7 @@ DCD_DevConnect (HANDLE *pdev)
 * @retval : None
 */
 void
-DCD_DevDisconnect (HANDLE *pdev)
+DevDisconnect (HANDLE *pdev)
 {
 #ifndef USE_OTG_MODE
   DCTL_TypeDef  dctl;
@@ -377,7 +377,7 @@ DCD_DevDisconnect (HANDLE *pdev)
 */
 
 uint32_t
-DCD_GetEPStatus(HANDLE *pdev ,uint8_t epnum)
+GetEPStatus(HANDLE *pdev ,uint8_t epnum)
 {
   EP *ep;
   uint32_t Status = 0;  
@@ -388,7 +388,7 @@ DCD_GetEPStatus(HANDLE *pdev ,uint8_t epnum)
     ep = &pdev->dev.out_ep[epnum];
   }
   
-  Status = GetEPStatus(pdev ,ep);
+  Status = DRV_GetEPStatus(pdev ,ep);
 
   /* Return the current status */
   return Status;
@@ -402,7 +402,7 @@ DCD_GetEPStatus(HANDLE *pdev ,uint8_t epnum)
 * @retval : None
 */
 void
-DCD_SetEPStatus (HANDLE *pdev , uint8_t epnum , uint32_t Status)
+SetEPStatus (HANDLE *pdev , uint8_t epnum , uint32_t Status)
 {
   EP *ep;
   
@@ -412,7 +412,7 @@ DCD_SetEPStatus (HANDLE *pdev , uint8_t epnum , uint32_t Status)
     ep = &pdev->dev.out_ep[epnum];
   }
   
-   SetEPStatus(pdev ,ep , Status);
+   DRV_SetEPStatus(pdev ,ep , Status);
 }
 
 /* THE END */

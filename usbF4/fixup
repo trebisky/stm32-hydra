@@ -1,8 +1,9 @@
 #!/bin/ruby
 
-$sub1 = "s/USB_OTG_CORE_HANDLE/HANDLE/g"
+#$sub1 = "s/USB_OTG_CORE_HANDLE/HANDLE/g"
 # $sub = "s/USB_OTG_CORE_//g"
-$sub2 = "s/USB_OTG_//g"
+#$sub2 = "s/USB_OTG_//g"
+$sub2 = "s/DCD_//g"
 
 files = %w(
 library/core.c
@@ -34,7 +35,7 @@ def process ( f, sub )
 end
 
 files.each { |f|
-  process f, $sub1
+#  process f, $sub1
   process f, $sub2
 }
 

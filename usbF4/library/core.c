@@ -61,7 +61,7 @@ USBD_Init ( HANDLE *pdev, CORE_ID_TypeDef coreID )
   // USBD_DeInit(pdev);
   
   /* set USB OTG core params */
-  DCD_Init(pdev , coreID);
+  Init(pdev , coreID);
   
   /* Upon Init call usr callback */
   /* XXX should clean this up */
@@ -117,7 +117,7 @@ CORE_SetupStage(HANDLE *pdev)
     
   default:           
 	usb_debug ( DM_ENUM, "Setup stall\n" );
-    DCD_EP_Stall(pdev , req.bmRequest & 0x80);
+    EP_Stall(pdev , req.bmRequest & 0x80);
     break;
   }  
   return USBD_OK;
@@ -238,13 +238,13 @@ uint8_t
 CORE_Reset(HANDLE  *pdev)
 {
   /* Open EP0 OUT */
-  DCD_EP_Open(pdev,
+  EP_Open(pdev,
               0x00,
               MAX_EP0_SIZE,
               EP_TYPE_CTRL);
   
   /* Open EP0 IN */
-  DCD_EP_Open(pdev,
+  EP_Open(pdev,
               0x80,
               MAX_EP0_SIZE,
               EP_TYPE_CTRL);
@@ -379,7 +379,7 @@ USBD_CtlSendData (HANDLE  *pdev,
 
   usb_dump ( DM_ENUM, "Tx ctrl", pbuf, len );
 
-  DCD_EP_Tx (pdev, 0, pbuf, len);
+  EP_Tx (pdev, 0, pbuf, len);
  
   return ret;
 }
@@ -399,7 +399,7 @@ USBD_CtlContinueSendData (HANDLE  *pdev,
 {
   USBD_Status ret = USBD_OK;
   
-  DCD_EP_Tx (pdev, 0, pbuf, len);
+  EP_Tx (pdev, 0, pbuf, len);
   
   
   return ret;
@@ -424,7 +424,7 @@ USBD_CtlPrepareRx (HANDLE  *pdev,
   pdev->dev.out_ep[0].rem_data_len   = len;
   pdev->dev.device_state = EP0_DATA_OUT;
   
-  DCD_EP_PrepareRx (pdev,
+  EP_PrepareRx (pdev,
                     0,
                     pbuf,
                     len);
@@ -448,7 +448,7 @@ USBD_CtlContinueRx (HANDLE  *pdev,
 {
   USBD_Status ret = USBD_OK;
   
-  DCD_EP_PrepareRx (pdev,
+  EP_PrepareRx (pdev,
                     0,                     
                     pbuf,                         
                     len);
@@ -469,7 +469,7 @@ USBD_CtlSendStatus (HANDLE  *pdev)
   pdev->dev.device_state = EP0_STATUS_IN;
 
   usb_debug ( DM_EVENT, "zero length status\n" );
-  DCD_EP_Tx (pdev,
+  EP_Tx (pdev,
              0,
              NULL, 
              0); 
@@ -490,7 +490,7 @@ USBD_CtlReceiveStatus (HANDLE  *pdev)
 {
   USBD_Status ret = USBD_OK;
   pdev->dev.device_state = EP0_STATUS_OUT;  
-  DCD_EP_PrepareRx ( pdev,
+  EP_PrepareRx ( pdev,
                     0,
                     NULL,
                     0);  
@@ -640,14 +640,14 @@ USBD_StdEPReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
     switch (pdev->dev.device_status) {
     case ADDRESSED:          
       if ((ep_addr != 0x00) && (ep_addr != 0x80)) {
-        DCD_EP_Stall(pdev , ep_addr);
+        EP_Stall(pdev , ep_addr);
       }
       break;	
       
     case CONFIGURED:   
       if (req->wValue == USB_FEATURE_EP_HALT) {
         if ((ep_addr != 0x00) && (ep_addr != 0x80)) { 
-          DCD_EP_Stall(pdev , ep_addr);
+          EP_Stall(pdev , ep_addr);
         }
       }
 
@@ -668,14 +668,14 @@ USBD_StdEPReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
     switch (pdev->dev.device_status) {
     case ADDRESSED:          
       if ((ep_addr != 0x00) && (ep_addr != 0x80)) {
-        DCD_EP_Stall(pdev , ep_addr);
+        EP_Stall(pdev , ep_addr);
       }
       break;	
       
     case CONFIGURED:   
       if (req->wValue == USB_FEATURE_EP_HALT) {
         if ((ep_addr != 0x00) && (ep_addr != 0x80)) {        
-          DCD_EP_ClrStall(pdev , ep_addr);
+          EP_ClrStall(pdev , ep_addr);
           // pdev->dev.class_cb->Setup (pdev, req);
           CLASS_Setup (pdev, req);
         }
@@ -693,7 +693,7 @@ USBD_StdEPReq (HANDLE  *pdev, USB_SETUP_REQ  *req)
     switch (pdev->dev.device_status) {
     case ADDRESSED:          
       if ((ep_addr != 0x00) && (ep_addr != 0x80)) {
-        DCD_EP_Stall(pdev , ep_addr);
+        EP_Stall(pdev , ep_addr);
       }
       break;	
       
@@ -778,7 +778,7 @@ USBD_SetAddress(HANDLE  *pdev, USB_SETUP_REQ *req)
       USBD_CtlError(pdev , req);
     } else {
       pdev->dev.device_address = dev_addr;
-      DCD_EP_SetAddress(pdev, dev_addr);               
+      EP_SetAddress(pdev, dev_addr);               
       USBD_CtlSendStatus(pdev);                         
       
       if (dev_addr != 0) {
@@ -1033,12 +1033,12 @@ void
 USBD_CtlError( HANDLE  *pdev, USB_SETUP_REQ *req)
 {
   if((req->bmRequest & 0x80) == 0x80) {
-    DCD_EP_Stall(pdev , 0x80);
+    EP_Stall(pdev , 0x80);
   } else {
     if(req->wLength == 0) {
-       DCD_EP_Stall(pdev , 0x80);
+       EP_Stall(pdev , 0x80);
     } else {
-      DCD_EP_Stall(pdev , 0);
+      EP_Stall(pdev , 0);
     }
   }
   EP0_OutStart(pdev);  

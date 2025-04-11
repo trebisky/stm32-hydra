@@ -15,6 +15,8 @@
 
 #include "usb_core.h"
 
+#include "protos.h"
+
 #include "usb_regs.h"
 #include "usb_defines.h"
 
@@ -1440,10 +1442,13 @@ void StopDevice(HANDLE *pdev)
 * @brief  returns the EP Status
 * @param  pdev : Selected device
 *         ep : endpoint structure
-* @retval : EP status
+*
+* Called from "DCD" only, this should be static someday
+*  (or combined with the code in DCD)
 */
 
-uint32_t GetEPStatus(HANDLE *pdev ,EP *ep)
+uint32_t
+DRV_GetEPStatus(HANDLE *pdev ,EP *ep)
 {
   DEPCTL_TypeDef  depctl;
   __IO uint32_t *depctl_addr;
@@ -1482,9 +1487,12 @@ uint32_t GetEPStatus(HANDLE *pdev ,EP *ep)
 * @param  pdev : Selected device
 *         Status : new Status
 *         ep : EP structure
-* @retval : None
+*
+* Called from "DCD" only, this should be static someday
+*  (or combined with the code in DCD)
 */
-void SetEPStatus (HANDLE *pdev , EP *ep , uint32_t Status)
+void
+DRV_SetEPStatus (HANDLE *pdev , EP *ep , uint32_t Status)
 {
   DEPCTL_TypeDef  depctl;
   __IO uint32_t *depctl_addr;
