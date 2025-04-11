@@ -108,32 +108,6 @@ typedef struct _USB_OTG_OUTEPREGS
 }
 USB_OTG_OUTEPREGS;
 
-#ifdef USE_HOST_MODE
-typedef struct _USB_OTG_HREGS
-{
-  __IO uint32_t HCFG;             /* Host Configuration Register    400h*/
-  __IO uint32_t HFIR;      /* Host Frame Interval Register   404h*/
-  __IO uint32_t HFNUM;         /* Host Frame Nbr/Frame Remaining 408h*/
-  uint32_t Reserved40C;                   /* Reserved                       40Ch*/
-  __IO uint32_t HPTXSTS;   /* Host Periodic Tx FIFO/ Queue Status 410h*/
-  __IO uint32_t HAINT;   /* Host All Channels Interrupt Register 414h*/
-  __IO uint32_t HAINTMSK;   /* Host All Channels Interrupt Mask 418h*/
-}
-USB_OTG_HREGS;
-
-typedef struct _USB_OTG_HC_REGS
-{
-  __IO uint32_t HCCHAR;
-  __IO uint32_t HCSPLT;
-  __IO uint32_t HCINT;
-  __IO uint32_t HCINTMSK;
-  __IO uint32_t HCTSIZ;
-  __IO uint32_t HCDMA;
-  uint32_t Reserved[2];
-}
-USB_OTG_HC_REGS;
-#endif
-
 // typedef struct USB_OTG_core_regs //000h
 struct core_regs
 {

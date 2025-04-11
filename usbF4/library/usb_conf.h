@@ -53,8 +53,8 @@ void usb_dump ( int, char *, char *, int );
 // #define USE_USB_OTG_FS
 #define USE_USB_OTG_HS
 
-//#define USE_HOST_MODE
 #define USE_DEVICE_MODE
+//#define USE_HOST_MODE
 //#define USE_OTG_MODE
 
 #ifdef USE_USB_OTG_FS
