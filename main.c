@@ -418,6 +418,7 @@ void
 xfer_test ( void )
 {
 	int ii = 0;
+	int cc;
 
 	printf ( "xfer test!\n" );
 	usb_hookup ( gobbler );
@@ -432,6 +433,10 @@ xfer_test ( void )
 		red_off ();
 		green_off ();
 		delay_ms ( 500 );
+		if ( console_check () ) {
+			cc = getc ();
+			printf ( "Somebody typed: %X\n", cc );
+		}
 	}
 }
 

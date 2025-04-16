@@ -85,14 +85,14 @@ DREGS;
 
 typedef struct _INEPREGS
 {
-  __IO uint32_t DIEPCTL; /* dev IN Endpoint Control Reg 900h + (ep_num * 20h) + 00h*/
-  uint32_t Reserved04;             /* Reserved                       900h + (ep_num * 20h) + 04h*/
-  __IO uint32_t DIEPINT; /* dev IN Endpoint Itr Reg     900h + (ep_num * 20h) + 08h*/
-  uint32_t Reserved0C;             /* Reserved                       900h + (ep_num * 20h) + 0Ch*/
-  __IO uint32_t DIEPTSIZ; /* IN Endpoint Txfer Size   900h + (ep_num * 20h) + 10h*/
-  __IO uint32_t DIEPDMA; /* IN Endpoint DMA Address Reg    900h + (ep_num * 20h) + 14h*/
-  __IO uint32_t DTXFStatus;/*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
-  uint32_t Reserved18;             /* Reserved  900h+(ep_num*20h)+1Ch-900h+ (ep_num * 20h) + 1Ch*/
+  __IO uint32_t DIEPCTL; 		/* dev IN Endpoint Control Reg 900h + (ep_num * 20h) + 00h*/
+  uint32_t Reserved04;          /* Reserved                    900h + (ep_num * 20h) + 04h*/
+  __IO uint32_t DIEPINT; 		/* dev IN Endpoint Itr Reg     900h + (ep_num * 20h) + 08h*/
+  uint32_t Reserved0C;          /* Reserved                    900h + (ep_num * 20h) + 0Ch*/
+  __IO uint32_t DIEPTSIZ; 		/* IN Endpoint Txfer Size      900h + (ep_num * 20h) + 10h*/
+  __IO uint32_t DIEPDMA; 		/* IN Endpoint DMA Address Reg 900h + (ep_num * 20h) + 14h*/
+  __IO uint32_t DTXFStatus;		/*IN Endpoint Tx FIFO Status Reg 900h + (ep_num * 20h) + 18h*/
+  uint32_t Reserved18;          /* Reserved  900h+(ep_num*20h)+1Ch-900h+ (ep_num * 20h) + 1Ch*/
 }
 INEPREGS;
 
@@ -115,11 +115,13 @@ struct core_regs
   DREGS         *DREGS;
   INEPREGS      *INEP_REGS[MAX_TX_FIFOS];
   OUTEPREGS     *OUTEP_REGS[MAX_TX_FIFOS];
+
 #ifdef USE_HOST_MODE
   HREGS         *HREGS;
   HC_REGS       *HC_REGS[MAX_TX_FIFOS];
   __IO uint32_t         *HPRT0;
 #endif
+
   __IO uint32_t         *DFIFO[MAX_TX_FIFOS];
   __IO uint32_t         *PCGCCTL;
 };

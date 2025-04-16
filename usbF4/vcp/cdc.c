@@ -315,35 +315,40 @@ CLASS_Setup (void  *pdev, USB_SETUP_REQ *req)
       if( (req->wValue >> 8) == CDC_DESCRIPTOR_TYPE) {
         uint8_t  *pbuf;
 
+		panic ( "vcp/usbd_cdc_core CDC descriptor type requested" );
+
+/* We cannot compile with DMA enabled due to usbd_cdc_Desc being
+ * absent.  We have had the code for the "panic 1" in place for
+ * a long time and never seen this code tickled,
+ * so I replace the missing reference with "panic 2" and we will
+ * see what happens.  It just works.
+ * Then I added the panic call above.
+ * This code never gets called.
+ */
 #ifdef HS_INTERNAL_DMA_ENABLED
 		/* XXX - trouble here, where is this? */
-        pbuf = usbd_cdc_Desc;   
+		// tjt 4-13-2025
+        // pbuf = usbd_cdc_Desc;   
+		panic ( "vcp/usbd_cdc_core unhappy get descriptor 2" );
 #else
 		/* XXX */
-		panic ( "vcp/usbd_cdc_core unhappy get descriptor" );
+		panic ( "vcp/usbd_cdc_core unhappy get descriptor 1" );
         // pbuf = usbd_cdc_CfgDesc + 9 + (9 * ITF_MAX_NUM);
 #endif 
         uint16_t len = MIN(USB_CDC_DESC_SIZ , req->wLength);
       
-        CtlSendData (pdev, 
-                          pbuf,
-                          len);
+        CtlSendData (pdev, pbuf, len);
       }
       break;
       
     case USB_REQ_GET_INTERFACE :
-      CtlSendData (pdev,
-                        (uint8_t *)&usbd_cdc_AltSet,
-                        1);
+      CtlSendData (pdev, (uint8_t *)&usbd_cdc_AltSet, 1);
       break;
       
     case USB_REQ_SET_INTERFACE :
-      if ((uint8_t)(req->wValue) < ITF_MAX_NUM)
-      {
+      if ((uint8_t)(req->wValue) < ITF_MAX_NUM) {
         usbd_cdc_AltSet = (uint8_t)(req->wValue);
-      }
-      else
-      {
+      } else {
         /* Call the error management function (command will be nacked */
         CtlError (pdev, req);
       }
@@ -400,11 +405,9 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
 
     usb_debug ( DM_ORIG, "usbd_cdc_DataIn called with %d bytes waiting to send on endpoint %d\n", USB_Tx_length, epnum );
 
-    if (USB_Tx_length == 0)
-    {
+    if (USB_Tx_length == 0) {
         //USB_Tx_State = 0;
-        if (((HANDLE*)pdev)->dev.in_ep[epnum].xfer_len != CDC_DATA_IN_PACKET_SIZE)
-        {
+        if (((HANDLE*)pdev)->dev.in_ep[epnum].xfer_len != CDC_DATA_IN_PACKET_SIZE) {
             USB_Tx_State = 0;
             return OK;
         }
@@ -417,12 +420,11 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
 
 	usb_debug ( DM_WRITE1, "USB Tx datain start: %d\n", USB_Tx_length );
 
-    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE)
-    {
+    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE) {
        USB_Tx_length = CDC_DATA_IN_PACKET_SIZE;
     }
-    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) )
-    {
+
+    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) ) {
        USB_Tx_length = (APP_TX_DATA_SIZE - USB_Tx_ptr);
     }
 

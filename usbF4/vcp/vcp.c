@@ -261,7 +261,7 @@ VCP_DataTx (const uint8_t* Buf, uint32_t Len)
 
 	while ( cnt<Len ) {
 		while ( ((ptrIn+1)&APP_TX_DATA_SIZE_MASK)==APP_Tx_ptr_out ) {
-			if( !UsbTXBlock || !VCP_DTRHIGH ) {
+			if( ! UsbTXBlock || ! VCP_DTRHIGH ) {
 				goto tx_exit;
 			}
 		}

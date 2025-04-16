@@ -154,21 +154,24 @@ void usb_dump ( int, char *, char *, int );
  #define TXH_NP_HS_FIFOSIZ                         96
  #define TXH_P_HS_FIFOSIZ                          96
 
+#define HS_INTERNAL_DMA_ENABLED
+#define HS_DEDICATED_EP1_ENABLED
+
 //#define HS_LOW_PWR_MGMT_SUPPORT
 //#define HS_SOF_OUTPUT_ENABLED
 
 //#define INTERNAL_VBUS_ENABLED
 #define EXTERNAL_VBUS_ENABLED
 
- #ifdef USE_ULPI_PHY
+#ifdef USE_ULPI_PHY
   #define ULPI_PHY_ENABLED
- #endif
- #ifdef USE_EMBEDDED_PHY
-   #define EMBEDDED_PHY_ENABLED
- #endif
- // #define HS_INTERNAL_DMA_ENABLED
- #define HS_DEDICATED_EP1_ENABLED
 #endif
+
+#ifdef USE_EMBEDDED_PHY
+   #define EMBEDDED_PHY_ENABLED
+#endif
+
+#endif /* HS_CORE */
 
 /* In HS mode and when the DMA is used, all variables and data structures dealing
    with the DMA during the transaction process should be 4-bytes aligned */

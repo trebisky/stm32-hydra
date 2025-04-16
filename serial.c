@@ -220,6 +220,19 @@ serial_debug ( int uart )
 }
 #endif
 
+/* Check if something is waiting to be read.
+ * Used to avoid calling serial_read() and blocking.
+ */
+int
+serial_check ( int uart )
+{
+	struct uart *up = uart_bases[uart];
+
+	if ( up->status & ST_RXNE )
+		return 1;
+	return 0;
+}
+
 /* Polled read (blocks)
  * Not often called, we usually call
  * serial_getc (), but if a person really
@@ -243,6 +256,7 @@ serial_getc ( int uart )
 	c = serial_read ( uart );
 	if ( c == '\r' )
 	    c = '\n';
+	return c;
 }
 
 void
@@ -336,6 +350,12 @@ console_init ( void )
 	// set_std_serial ( console );
 }
 #endif
+
+int 
+console_check ( void )
+{
+	return serial_check ( std_serial );
+}
 
 int
 getc ( void )

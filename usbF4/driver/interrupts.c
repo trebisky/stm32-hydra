@@ -426,7 +426,8 @@ static uint32_t HandleUSBSuspend_ISR(HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t HandleInEP_ISR(HANDLE *pdev)
+static uint32_t
+HandleInEP_ISR(HANDLE *pdev)
 {
   DIEPINTn_TypeDef  diepint;
   
@@ -436,8 +437,7 @@ static uint32_t HandleInEP_ISR(HANDLE *pdev)
   diepint.d32 = 0;
   ep_intr = ReadDevAllInEPItr(pdev);
   
-  while ( ep_intr )
-  {
+  while ( ep_intr ) {
     if (ep_intr&0x1) {
       // usb_debug ( DM_ORIG, "USBint = IN Endpoint %d\n", epnum );
 

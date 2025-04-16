@@ -116,8 +116,7 @@ typedef enum {
   CTRL_FAIL
 } CTRL_STATUS;
 
-typedef struct ep
-{
+struct ep {
   uint8_t        num;
   uint8_t        is_in;
   uint8_t        is_stall;  
@@ -135,7 +134,9 @@ typedef struct ep
   uint32_t       rem_data_len;
   uint32_t       total_data_len;
   uint32_t       ctl_data_len;  
-} EP , *PEP;
+};
+
+typedef struct ep EP;
 
 typedef struct core_cfg
 {

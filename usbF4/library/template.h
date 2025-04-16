@@ -149,8 +149,8 @@
  #ifdef USE_EMBEDDED_PHY
    #define USB_OTG_EMBEDDED_PHY_ENABLED
  #endif
- #define USB_OTG_HS_INTERNAL_DMA_ENABLED
- #define USB_OTG_HS_DEDICATED_EP1_ENABLED
+ #define HS_INTERNAL_DMA_ENABLED
+ #define HS_DEDICATED_EP1_ENABLED
 #endif
 
 /****************** USB OTG FS CONFIGURATION **********************************/
@@ -202,7 +202,7 @@
 /****************** C Compilers dependant keywords ****************************/
 /* In HS mode and when the DMA is used, all variables and data structures dealing
    with the DMA during the transaction process should be 4-bytes aligned */    
-#ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+#ifdef HS_INTERNAL_DMA_ENABLED
   #if defined   (__GNUC__)        /* GNU Compiler */
     #define __ALIGN_END    __attribute__ ((aligned (4)))
     #define __ALIGN_BEGIN         
@@ -219,7 +219,7 @@
 #else
   #define __ALIGN_BEGIN
   #define __ALIGN_END   
-#endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */
+#endif /* HS_INTERNAL_DMA_ENABLED */
 
 /* __packed keyword used to decrease the data type alignment to 1-byte */
 #if defined (__CC_ARM)         /* ARM Compiler */

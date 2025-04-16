@@ -91,7 +91,8 @@ EnableCommonInt(HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval Status : status
 */
-static Status CoreReset(HANDLE *pdev)
+static Status
+CoreReset(HANDLE *pdev)
 {
   Status status = OK;
   __IO GRSTCTL_TypeDef  greset;
@@ -140,8 +141,6 @@ WritePacket(HANDLE *pdev,
                                 uint8_t             ch_ep_num, 
                                 uint16_t            len)
 {
-  Status status = OK;
-
   usb_debug ( DM_ORIG, "Endpoint %d, write packet %d bytes to FIFO: %c%c%c\n", ch_ep_num, len, src[0], src[1], src[2] );
 
   if (pdev->cfg.dma_enable == 0) {
@@ -152,7 +151,8 @@ WritePacket(HANDLE *pdev,
       WRITE_REG32( fifo, *((uint32_t *)src) );
     }
   }
-  return status;
+
+  return OK;
 }
 
 /**
@@ -168,7 +168,7 @@ ReadPacket(HANDLE *pdev,
 {
   uint32_t count32b = (len + 3) / 4;
 
-  // debug moved to calling routine where we know the endpoit.
+  // debug moved to calling routine where we know the endpoint.
   // usb_debug ( DM_ORIG, "Endpoint ??, read packet %d bytes from FIFO\n", len );
   
   __IO uint32_t *fifo = pdev->hw->DFIFO[0];
@@ -292,7 +292,7 @@ SelectCore(HANDLE *pdev, CORE_ID_TypeDef coreID)
 
   // 4-6-2025 fix bug. We were looping over 12 here,
   // but the DFIFO array was only size 6 (for endpoints).
-  // for (i = 0; i < pdev->cfg.host_channels; i++) {
+  // for (i = 0; i < pdev->cfg.host_channels; i++) {}
   for (i = 0; i < pdev->cfg.dev_endpoints; i++) {
     pdev->hw->DFIFO[i] = (uint32_t *)(baseAddress + DATA_FIFO_OFFSET +\
 			  (i * DATA_FIFO_SIZE));
@@ -311,7 +311,8 @@ SelectCore(HANDLE *pdev, CORE_ID_TypeDef coreID)
 * @param  pdev : Selected device
 * @retval Status : status
 */
-Status CoreInit(HANDLE *pdev)
+Status
+CoreInit(HANDLE *pdev)
 {
   Status status = OK;
   GUSBCFG_TypeDef  usbcfg;
@@ -471,7 +472,8 @@ DisableGlobalInt(HANDLE *pdev)
 * @param  num : FO num
 * @retval Status : status
 */
-Status FlushTxFifo (HANDLE *pdev , uint32_t num )
+Status
+FlushTxFifo (HANDLE *pdev , uint32_t num )
 {
   Status status = OK;
   __IO GRSTCTL_TypeDef  greset;
@@ -505,7 +507,8 @@ Status FlushTxFifo (HANDLE *pdev , uint32_t num )
 * @param  pdev : Selected device
 * @retval Status : status
 */
-Status FlushRxFifo( HANDLE *pdev )
+Status
+FlushRxFifo( HANDLE *pdev )
 {
   Status status = OK;
   __IO GRSTCTL_TypeDef  greset;
@@ -568,7 +571,8 @@ SetCurrentMode(HANDLE *pdev , uint8_t mode)
 * @param  pdev : Selected device
 * @retval current mode
 */
-uint32_t GetMode(HANDLE *pdev)
+uint32_t
+GetMode(HANDLE *pdev)
 {
   return (READ_REG32(&pdev->hw->GREGS->GINTStatus ) & 0x1);
 }
@@ -579,7 +583,8 @@ uint32_t GetMode(HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval num_in_ep
 */
-uint8_t IsDeviceMode(HANDLE *pdev)
+uint8_t
+IsDeviceMode(HANDLE *pdev)
 {
   return (GetMode(pdev) != HOST_MODE);
 }
@@ -590,7 +595,8 @@ uint8_t IsDeviceMode(HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval num_in_ep
 */
-uint8_t IsHostMode(HANDLE *pdev)
+uint8_t
+IsHostMode(HANDLE *pdev)
 {
   return (GetMode(pdev) == HOST_MODE);
 }
@@ -601,7 +607,8 @@ uint8_t IsHostMode(HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval Status
 */
-uint32_t ReadCoreItr(HANDLE *pdev)
+uint32_t
+ReadCoreItr(HANDLE *pdev)
 {
   uint32_t v = 0;
   v = READ_REG32(&pdev->hw->GREGS->GINTStatus);
@@ -615,7 +622,8 @@ uint32_t ReadCoreItr(HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval Status
 */
-uint32_t ReadOtgItr (HANDLE *pdev)
+uint32_t
+ReadOtgItr (HANDLE *pdev)
 {
   return (READ_REG32 (&pdev->hw->GREGS->GOTGINT));
 }
@@ -629,7 +637,8 @@ uint32_t ReadOtgItr (HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval : None
 */
-void InitDevSpeed(HANDLE *pdev , uint8_t speed)
+void
+InitDevSpeed(HANDLE *pdev , uint8_t speed)
 {
   DCFG_TypeDef   dcfg;
   
@@ -645,7 +654,8 @@ void InitDevSpeed(HANDLE *pdev , uint8_t speed)
 * @param  pdev : Selected device
 * @retval Status : status
 */
-Status CoreInitDev (HANDLE *pdev)
+Status
+CoreInitDev (HANDLE *pdev)
 {
   Status             status       = OK;
   DEPCTL_TypeDef  depctl;
@@ -808,7 +818,8 @@ Status CoreInitDev (HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval Status : status
 */
-Status EnableDevInt(HANDLE *pdev)
+Status
+EnableDevInt(HANDLE *pdev)
 {
   Status status = OK;
   GINTMSK_TypeDef  intmsk;
@@ -860,8 +871,7 @@ GetDeviceSpeed (HANDLE *pdev)
   
   dsts.d32 = READ_REG32(&pdev->hw->DREGS->DStatus);
   
-  switch (dsts.b.enumspd)
-  {
+  switch (dsts.b.enumspd) {
   case DStatus_ENUMSPD_HS_PHY_30MHZ_OR_60MHZ:
     speed = USB_SPEED_HIGH;
     break;
@@ -889,9 +899,9 @@ GetDeviceSpeed (HANDLE *pdev)
 * @param  None
 * @retval Status : status
 */
-Status  EP0Activate(HANDLE *pdev)
+Status
+EP0Activate(HANDLE *pdev)
 {
-  Status             status = OK;
   DStatus_TypeDef    dsts;
   DEPCTL_TypeDef  diepctl;
   DCTL_TypeDef    dctl;
@@ -918,7 +928,7 @@ Status  EP0Activate(HANDLE *pdev)
   WRITE_REG32(&pdev->hw->INEP_REGS[0]->DIEPCTL, diepctl.d32);
   dctl.b.cgnpinnak = 1;
   MODIFY_REG32(&pdev->hw->DREGS->DCTL, dctl.d32, dctl.d32);
-  return status;
+  return OK;
 }
 
 
@@ -927,7 +937,8 @@ Status  EP0Activate(HANDLE *pdev)
 * @param  pdev : Selected device
 * @retval Status : status
 */
-Status EPActivate(HANDLE *pdev , EP *ep)
+Status
+EPActivate(HANDLE *pdev , EP *ep)
 {
   Status status = OK;
   DEPCTL_TypeDef  depctl;
@@ -975,7 +986,8 @@ Status EPActivate(HANDLE *pdev , EP *ep)
 * @param  pdev : Selected device
 * @retval Status : status
 */
-Status EPDeactivate(HANDLE *pdev , EP *ep)
+Status
+EPDeactivate(HANDLE *pdev , EP *ep)
 {
   Status status = OK;
   DEPCTL_TypeDef  depctl;
@@ -1014,7 +1026,8 @@ Status EPDeactivate(HANDLE *pdev , EP *ep)
 * @param  pdev : Selected device
 * @retval Status : status
 */
-Status EPStartXfer(HANDLE *pdev , EP *ep)
+Status
+EPStartXfer(HANDLE *pdev , EP *ep)
 {
   Status status = OK;
   DEPCTL_TypeDef     depctl;
@@ -1196,27 +1209,25 @@ Status EP0StartXfer(HANDLE *pdev , EP *ep)
     /* Program the transfer size and packet count as follows:
     * xfersize = N * (maxpacket + 4 - (maxpacket % 4))
     * pktcnt = N           */
-    if (ep->xfer_len == 0)
-    {
+    if (ep->xfer_len == 0) {
       deptsiz.b.xfersize = ep->maxpacket;
       deptsiz.b.pktcnt = 1;
-    }
-    else
-    {
+    } else {
       ep->xfer_len = ep->maxpacket;
       deptsiz.b.xfersize = ep->maxpacket;
       deptsiz.b.pktcnt = 1;
     }
+
     WRITE_REG32(&pdev->hw->OUTEP_REGS[ep->num]->DOEPTSIZ, deptsiz.d32);
-    if (pdev->cfg.dma_enable == 1)
-    {
+
+    if (pdev->cfg.dma_enable == 1) {
       WRITE_REG32(&pdev->hw->OUTEP_REGS[ep->num]->DOEPDMA, ep->dma_addr);
     }
+
     /* EP enable */
     depctl.b.cnak = 1;
     depctl.b.epena = 1;
     WRITE_REG32 (&(pdev->hw->OUTEP_REGS[ep->num]->DOEPCTL), depctl.d32);
-    
   }
   return status;
 }

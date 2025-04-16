@@ -184,25 +184,19 @@ CORE_DataInStage(HANDLE *pdev , uint8_t epnum)
 {
   EP *ep;
   
-  if(epnum == 0) 
-  {
+  if(epnum == 0) {
     ep = &pdev->dev.in_ep[0];
-    if ( pdev->dev.device_state == EP0_DATA_IN)
-    {
-      if(ep->rem_data_len > ep->maxpacket)
-      {
+    if ( pdev->dev.device_state == EP0_DATA_IN) {
+      if(ep->rem_data_len > ep->maxpacket) {
         ep->rem_data_len -=  ep->maxpacket;
-        if(pdev->cfg.dma_enable == 1)
-        {
+        if(pdev->cfg.dma_enable == 1) {
           /* in slave mode this, is handled by the TxFifoEmpty ISR */
           ep->xfer_buff += ep->maxpacket;
         }
         CtlContinueSendData (pdev, 
                                   ep->xfer_buff, 
                                   ep->rem_data_len);
-      }
-      else
-      { /* last packet is MPS multiple, so send ZLP packet */
+      } else { /* last packet is MPS multiple, so send ZLP packet */
         if((ep->total_data_len % ep->maxpacket == 0) &&
            (ep->total_data_len >= ep->maxpacket) &&
              (ep->total_data_len < ep->ctl_data_len )) {
@@ -222,7 +216,7 @@ CORE_DataInStage(HANDLE *pdev , uint8_t epnum)
     }
   }
   // else if((pdev->dev.class_cb->DataIn != NULL)&& 
-  //         (pdev->dev.device_status == CONFIGURED)) {
+  //         (pdev->dev.device_status == CONFIGURED)) {)
   else if (pdev->dev.device_status == CONFIGURED) {
     // pdev->dev.class_cb->DataIn(pdev, epnum); 
     CLASS_DataIn(pdev, epnum); 
@@ -389,16 +383,11 @@ CtlSendData (HANDLE  *pdev,
 * @retval status
 */
 Status
-CtlContinueSendData (HANDLE  *pdev, 
-                                       uint8_t *pbuf,
-                                       uint16_t len)
+CtlContinueSendData (HANDLE  *pdev, uint8_t *pbuf, uint16_t len)
 {
-  Status ret = OK;
-  
   EP_Tx (pdev, 0, pbuf, len);
   
-  
-  return ret;
+  return OK;
 }
 
 /**
