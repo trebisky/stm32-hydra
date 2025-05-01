@@ -54,7 +54,7 @@ extern volatile uint16_t APP_Tx_ptr_out;
 #define UsbRecBufferSize 2048
 #define UsbRecBufferSizeMask (UsbRecBufferSize-1)
 
-uint8_t __CCMRAM__ UsbRecBuffer[UsbRecBufferSize];
+static uint8_t __CCMRAM__ UsbRecBuffer[UsbRecBufferSize];
 
 volatile int UsbRecRead = 0;
 volatile int UsbRecWrite = 0;
@@ -65,10 +65,17 @@ HANDLE * usbDevice = NULL;
 
 static volatile uint8_t VCP_DTRHIGH = 0;
 static volatile uint8_t VCP_RTSHIGH = 0;
-uint8_t VCPGetDTR(void) { return VCP_DTRHIGH; }
-uint8_t VCPGetRTS(void) { return VCP_RTSHIGH; }
 
-uint32_t
+/* I did some research and there is no advantage to
+ * declaring function return types uint8_t in almost
+ * all cases.  The only case being with a signed 8 bit
+ * value that needs to be returned as an int, this
+ * requires an extra instruction to sign extend.
+ */
+int VCPGetDTR(void) { return VCP_DTRHIGH; }
+int VCPGetRTS(void) { return VCP_RTSHIGH; }
+
+int
 VCPBytesAvailable(void)
 {
 	return (UsbRecWrite - UsbRecRead) & UsbRecBufferSizeMask;
@@ -229,6 +236,7 @@ VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
 	usb_debug ( DM_EVENT, "DTR/RTS set: %d\n", Buf[0] );
 	VCP_DTRHIGH = (Buf[0] & 0x1);
 	VCP_RTSHIGH = (Buf[0] & 0x2)>>1;
+	// if ( Buf[0] & 0x2 ) VCP_RTSHIGH = 99;
     /* Not  needed for this driver */
     break;
 
@@ -258,6 +266,7 @@ VCP_DataTx (const uint8_t* Buf, uint32_t Len)
 	uint16_t cdc_buf_cnt = 0;
 
 	usb_debug ( DM_ORIG, "- VCP DataTx %d bytes: %c%c%c\n", Len, Buf[0], Buf[1], Buf[2] );
+	// printf ( "- VCP DataTx %d bytes: %c%c%c\n", Len, Buf[0], Buf[1], Buf[2] );
 
 	while ( cnt<Len ) {
 		while ( ((ptrIn+1)&APP_TX_DATA_SIZE_MASK)==APP_Tx_ptr_out ) {
@@ -279,6 +288,7 @@ VCP_DataTx (const uint8_t* Buf, uint32_t Len)
 
 tx_exit:
 	APP_Tx_ptr_in = ptrIn; // update volatile
+	printf ( "- VCP DataTx returns: %d\n", cnt );
 	return cnt;
 }
 
@@ -316,6 +326,7 @@ VCP_DataRx(uint8_t* Buf, uint32_t Len)
 	if (!VCP_DTRHIGH) return BUSY;
 
 #ifndef HYDRA
+	/* This was a hook for the Maple loader, or some such */
 	if (Len >= 4) {
 		if(Buf[0] == '1' && Buf[1] == 'E' && Buf[2] == 'A' && Buf[3] == 'F') {
 			Len = 0;
@@ -332,6 +343,7 @@ VCP_DataRx(uint8_t* Buf, uint32_t Len)
 
 	usb_debug ( DM_ORIG, "VCP_DataRx %d\n", Len );
 	usb_debug ( DM_READ1, "VCP_DataRx %X %d\n", Buf, Len );
+	printf ( "VCP_DataRx %d\n", Len );
 
 	if ( usb_read_hook ) {
 	    ( *usb_read_hook ) ( Buf, Len );

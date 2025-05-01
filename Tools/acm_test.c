@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <time.h>
 
+#include <termios.h>
+
 // #define TEST_DEVICE	"/dev/ttyACM0"
 #define TEST_DEVICE	"/dev/ttyACM1"
 
@@ -58,20 +60,28 @@ uu_delay ( void )
 		nanosleep ( &delay, NULL );
 }
 
-int
-main ( int argc, char **argv )
+void
+dump_buf ( char *buf, int n )
 {
-		int fd;
+		int i;
+
+		for ( i=0; i<n; i++ ) {
+			if ( i > 0 )
+				printf ( " " );
+			printf ( "%02x", buf[i] );
+		}
+		printf ( "\n" );
+}
+
+void
+write_test ( int fd )
+{
 		int i;
 		// int ntest = 500;
 		// int ntest = 10 * 1024 * 21;
 		// int ntest = 1024 * 21;
 		int ntest = 1;
 		int size = 512;
-
-		fd = open ( TEST_DEVICE, O_RDWR );
-		if ( fd < 0 )
-			error ("Cannot open serial device" );
 
 		printf ( "Sending %d packets of %d bytes to %s\n",
 			ntest, size, TEST_DEVICE );
@@ -89,10 +99,62 @@ main ( int argc, char **argv )
 			// uu_delay ();
 		}
 		// sleep ( 1 );
+		printf ( "%d bytes sent\n", ntest*size );
+}
+
+#define RBUF_SIZE	64*1024
+
+char rbuf[RBUF_SIZE];
+
+void
+read_test ( int fd )
+{
+		int n;
+		int limit = 100;
+
+		for ( ;; ) {
+			// n = read ( fd, rbuf, RBUF_SIZE );
+			n = read ( fd, rbuf, limit );
+			// printf ( "Read returns: %d %s\n", n, rbuf );
+			printf ( "Read returns: %d ", n );
+			dump_buf ( rbuf, n );
+			if ( n <= 0 )
+				break;
+		}
+}
+
+int
+open_usb ( char *dev )
+{
+		int fd;
+		struct termios tm;
+
+		fd = open ( TEST_DEVICE, O_RDWR );
+		if ( fd < 0 ) {
+			fprintf ( stderr, "Serial device: %s\n", dev );
+			error ("Cannot open serial device" );
+		}
+
+		tcgetattr ( fd, &tm );
+		// tm.c_lflag &= ~ECHO;
+		cfmakeraw ( &tm );
+		tcsetattr ( fd, 0, &tm );
+
+		return fd;
+}
+
+int
+main ( int argc, char **argv )
+{
+		int fd;
+
+		fd = open_usb ( TEST_DEVICE );
+
+		// write_test ( fd );
+		read_test ( fd );
 
 		printf ( "Closing\n" );
 		close ( fd );
-		printf ( "%d bytes sent\n", ntest*size );
 }
 
 /* THE END */

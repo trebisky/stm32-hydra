@@ -99,7 +99,7 @@ __ALIGN_BEGIN uint8_t CmdBuff[CDC_CMD_PACKET_SZE] __ALIGN_END ;
 volatile uint16_t APP_Tx_ptr_in  = 0;
 volatile uint16_t APP_Tx_ptr_out = 0;
 
-uint8_t  USB_Tx_State = 0;
+static uint8_t  USB_Tx_State = 0;
 
 static uint32_t cdcCmd = 0xFF;
 static uint32_t cdcLen = 0;
@@ -395,10 +395,11 @@ CLASS_EP0_RxReady ( void  *pdev)
 
 // static uint8_t
 // usbd_cdc_DataIn (void *pdev, uint8_t epnum)
-uint8_t
+Status
 CLASS_DataIn (void *pdev, uint8_t epnum)
 {
-	if (USB_Tx_State == 0) return OK;
+	if ( USB_Tx_State == 0 )
+		return OK;
 
     uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
     uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
@@ -420,13 +421,11 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
 
 	usb_debug ( DM_WRITE1, "USB Tx datain start: %d\n", USB_Tx_length );
 
-    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE) {
+    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE)
        USB_Tx_length = CDC_DATA_IN_PACKET_SIZE;
-    }
 
-    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) ) {
+    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) )
        USB_Tx_length = (APP_TX_DATA_SIZE - USB_Tx_ptr);
-    }
 
     APP_Tx_ptr_out = (USB_Tx_ptr + USB_Tx_length) & APP_TX_DATA_SIZE_MASK;
 
@@ -441,7 +440,8 @@ CLASS_DataIn (void *pdev, uint8_t epnum)
   return OK;
 }
 
-void usbd_cdc_PrepareRx (void *pdev)
+void
+usbd_cdc_PrepareRx (void *pdev)
 {
     EP_PrepareRx(pdev, CDC_OUT_EP, USB_Rx_Buffer, CDC_DATA_OUT_PACKET_SIZE);
 }
@@ -454,7 +454,7 @@ void usbd_cdc_PrepareRx (void *pdev)
   * @retval status
   */
 // static uint8_t usbd_cdc_DataOut(void *pdev, uint8_t epnum)
-uint8_t
+Status
 CLASS_DataOut(void *pdev, uint8_t epnum)
 {      
   /* Get the received data buffer and update the counter */
@@ -503,26 +503,29 @@ CLASS_SOF(void *pdev)
 static void
 Handle_USBAsynchXfer(void *pdev)
 {
-  if ( USB_Tx_State ) return;
+    uint16_t USB_Tx_ptr;
+    uint16_t USB_Tx_length;
 
-  uint16_t USB_Tx_ptr = APP_Tx_ptr_out;
-  uint16_t USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
-  if ( USB_Tx_length==0 )
-    return; // nothing to send
+    if ( USB_Tx_State )
+  	    return;
+
+    USB_Tx_ptr = APP_Tx_ptr_out;
+    USB_Tx_length = (APP_Tx_ptr_in - USB_Tx_ptr) & APP_TX_DATA_SIZE_MASK;
+
+    if ( USB_Tx_length==0 )
+        return; // nothing to send
 
 	usb_debug ( DM_WRITE1, "USB Tx asynch start: %d\n", USB_Tx_length );
 
     USB_Tx_State = 1;
 
-    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE) {
+    if (USB_Tx_length > CDC_DATA_IN_PACKET_SIZE)
        USB_Tx_length = CDC_DATA_IN_PACKET_SIZE;
-    }
 
-    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) ) {
+    if ( USB_Tx_length > (APP_TX_DATA_SIZE - USB_Tx_ptr) )
        USB_Tx_length = (APP_TX_DATA_SIZE - USB_Tx_ptr);
-    }
 
-    APP_Tx_ptr_out = (USB_Tx_ptr+USB_Tx_length)&APP_TX_DATA_SIZE_MASK;
+    APP_Tx_ptr_out = (USB_Tx_ptr + USB_Tx_length) & APP_TX_DATA_SIZE_MASK;
 
 	usb_debug ( DM_WRITE1, "USB Tx asynch send: %d\n", USB_Tx_length );
 

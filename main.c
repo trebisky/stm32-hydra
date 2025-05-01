@@ -407,8 +407,43 @@ static int xfer_count = 0;
 static void
 gobbler ( char *buf, int len )
 {
-	// printf ( "Hydra USB got: %d\n", len );
+	printf ( "Hydra USB got: %d %X\n", len, buf[0] );
 	xfer_count += len;
+}
+
+char buf[512];
+
+static void
+writer ( void )
+{
+		int i;
+		char *p;
+		int len;
+		// int n = 64
+		// int n = 4;
+		// int n = 10;
+		// int n = 6;
+		int n = 64;
+
+		// usb_write ( "ABCD\n", 5 );
+		// usb_write ( pbuf, 10000 );
+
+		p = buf;
+		for ( i=0; i<n; i++ ) {
+			*p++ = 'A';
+			*p++ = 'B';
+			*p++ = 'C';
+			*p++ = 'D';
+			*p++ = 'E';
+			*p++ = 'F';
+			*p++ = '\n';
+			*p++ = '\0';
+		}
+
+		// len = n * 8;
+		len = 200;
+		printf ( "Writing %d bytes\n", len );
+		usb_write ( buf, len );
 }
 
 /*
@@ -419,6 +454,7 @@ xfer_test ( void )
 {
 	int ii = 0;
 	int cc;
+	char *pbuf = (char *) 0x20000000;
 
 	printf ( "xfer test!\n" );
 	usb_hookup ( gobbler );
@@ -435,7 +471,12 @@ xfer_test ( void )
 		delay_ms ( 500 );
 		if ( console_check () ) {
 			cc = getc ();
-			printf ( "Somebody typed: %X\n", cc );
+			// printf ( "Somebody typed: %X\n", cc );
+			if ( ! class_is_connected() )
+				printf ( "Nobody connected\n" );
+			else {
+				writer ();
+			}
 		}
 	}
 }

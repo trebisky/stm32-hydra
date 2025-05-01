@@ -17,6 +17,7 @@
 
 #include "protos.h"
 
+#include "regs.h"
 #include "usb_regs.h"
 #include "usb_defines.h"
 
@@ -617,6 +618,8 @@ ReadCoreItr(HANDLE *pdev)
 }
 
 
+#ifdef notdef
+// never used
 /**
 * @brief  ReadOtgItr : returns the USB_OTG Interrupt register
 * @param  pdev : Selected device
@@ -627,6 +630,7 @@ ReadOtgItr (HANDLE *pdev)
 {
   return (READ_REG32 (&pdev->hw->GREGS->GOTGINT));
 }
+#endif
 
 #ifdef USE_DEVICE_MODE
 /*         PCD Core Layer       */
@@ -1191,8 +1195,7 @@ Status EP0StartXfer(HANDLE *pdev , EP *ep)
     
     if (pdev->cfg.dma_enable == 0) {
       /* Enable the Tx FIFO Empty Interrupt for this EP */
-      if (ep->xfer_len > 0)
-      {
+      if (ep->xfer_len > 0) {
         {
           fifoemptymsk |= 1 << ep->num;
           MODIFY_REG32(&pdev->hw->DREGS->DIEPEMPMSK, 0, fifoemptymsk);
@@ -1200,9 +1203,7 @@ Status EP0StartXfer(HANDLE *pdev , EP *ep)
         }
       }
     }
-  }
-  else
-  {
+  } else {
     /* OUT endpoint */
     depctl.d32  = READ_REG32(&pdev->hw->OUTEP_REGS[ep->num]->DOEPCTL);
     deptsiz.d32 = READ_REG32(&pdev->hw->OUTEP_REGS[ep->num]->DOEPTSIZ);

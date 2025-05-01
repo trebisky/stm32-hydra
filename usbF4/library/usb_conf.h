@@ -31,6 +31,8 @@ void usb_dump ( int, char *, char *, int );
 #define DM_DESC		0x20	/* descriptors for enumeration */
 #define DM_ALL		0xffffffff
 
+#define DM_DEFAULT		DM_ALL
+
 /* ---------------------------------------------------------------------------- */
 
 /* These may change with a different class, this is correct for VCP */
@@ -154,13 +156,13 @@ void usb_dump ( int, char *, char *, int );
  #define TXH_NP_HS_FIFOSIZ                         96
  #define TXH_P_HS_FIFOSIZ                          96
 
-#define HS_INTERNAL_DMA_ENABLED
+// #define HS_INTERNAL_DMA_ENABLED
 #define HS_DEDICATED_EP1_ENABLED
 
-//#define HS_LOW_PWR_MGMT_SUPPORT
-//#define HS_SOF_OUTPUT_ENABLED
+// #define HS_LOW_PWR_MGMT_SUPPORT
+// #define HS_SOF_OUTPUT_ENABLED
 
-//#define INTERNAL_VBUS_ENABLED
+// #define INTERNAL_VBUS_ENABLED
 #define EXTERNAL_VBUS_ENABLED
 
 #ifdef USE_ULPI_PHY

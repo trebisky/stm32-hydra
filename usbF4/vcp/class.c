@@ -30,6 +30,7 @@ class_usb_hookup ( bfptr x )
 void
 class_usb_write ( char *buf, int len )
 {
+	printf ( "class USB write: %d %X, %s\n", len, buf, buf );
 	(void) VCP_DataTx ( buf, len );
 }
 
@@ -38,6 +39,12 @@ int
 class_usb_read ( char *buf, int len )
 {
 		return VCPGetBytes ( buf, len );
+}
+
+int
+class_is_connected ( void )
+{
+		return VCPGetDTR();
 }
 
 /* See descr.c for this: */

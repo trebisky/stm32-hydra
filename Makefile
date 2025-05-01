@@ -26,7 +26,7 @@ AS = $(TOOLS)-as
 #LD = $(TOOLS)-gcc
 LD = $(TOOLS)-ld.bfd
 OBJCOPY = $(TOOLS)-objcopy
-DUMP = $(TOOLS)-objdump -d
+DUMP = $(TOOLS)-objdump -d -z
 GDB = $(TOOLS)-gdb
 
 BASE_OBJS = init.o main.o flash.o led.o serial.o nvic.o exti.o systick.o event.o iic.o

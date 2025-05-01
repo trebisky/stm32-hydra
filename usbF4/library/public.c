@@ -47,7 +47,7 @@ usb_puts ( char *msg )
 }
 
 void
-usb_write ( int fd, char *buf, int len )
+usb_write ( char *buf, int len )
 {
 		fusb_write ( usb_fd, buf, len );
 }
@@ -199,9 +199,12 @@ void asnprintf (char *abuf, unsigned int size, const char *fmt, va_list args);
 // static int usb_debug_mask = DM_READ1;
 // static int usb_debug_mask = DM_ORIG;
 // static int usb_debug_mask = DM_ORIG | DM_EVENT | DM_ENUM;
-static int usb_debug_mask = DM_DESC | DM_ENUM | DM_EVENT;;
+// static int usb_debug_mask = DM_DESC | DM_ENUM | DM_EVENT;
 // static int usb_debug_mask = DM_ALL;
 // static int usb_debug_mask = 0;
+
+/* See usb_conf.h */
+static int usb_debug_mask = DM_DEFAULT;
 
 void
 usb_debug ( int select, char *fmt, ... )

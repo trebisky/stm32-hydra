@@ -133,6 +133,7 @@ uint32_t OTG_EP1IN_ISR_Handler (HANDLE *pdev)
   if ( diepint.b.xfercompl )
   {
     fifoemptymsk = 0x1 << 1;
+	usb_debug ( DM_ORIG, "- EP1IN_ISR = TxE interrupt disabled for endpoint %d\n", 1 );
     MODIFY_REG32(&pdev->hw->DREGS->DIEPEMPMSK, fifoemptymsk, 0);
     CLEAR_IN_EP_INTR(1, xfercompl);
     /* TX COMPLETE */
@@ -324,7 +325,8 @@ static uint32_t SessionRequest_ISR(HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t OTG_ISR(HANDLE *pdev)
+static uint32_t
+OTG_ISR(HANDLE *pdev)
 {
 
   GOTGINT_TypeDef  gotgint;
@@ -336,8 +338,10 @@ static uint32_t OTG_ISR(HANDLE *pdev)
     CORE_DevDisconnected (pdev);
     usb_debug ( DM_ORIG, "Event - disconnected\n" );
   }
+
   /* Clear OTG interrupt */
   WRITE_REG32(&pdev->hw->GREGS->GOTGINT, gotgint.d32); 
+
   return 1;
 }
 #endif
@@ -446,6 +450,7 @@ HandleInEP_ISR(HANDLE *pdev)
       if ( diepint.b.xfercompl ) {
 	usb_debug ( DM_ORIG, "USBint = IN Endpoint %d Xfer complete\n", epnum );
         fifoemptymsk = 0x1 << epnum;
+		usb_debug ( DM_ORIG, "- HandleInEP_ISR - TxE interrupt disabled for endpoint %d\n", epnum );
         MODIFY_REG32(&pdev->hw->DREGS->DIEPEMPMSK, fifoemptymsk, 0);
         CLEAR_IN_EP_INTR(epnum, xfercompl);
         /* TX COMPLETE */
@@ -685,6 +690,7 @@ WriteEmptyTxFifo(HANDLE *pdev, uint32_t epnum)
     
     if( ep->xfer_count >= ep->xfer_len) {
       uint32_t fifoemptymsk = 1 << ep->num;
+	  usb_debug ( DM_ORIG, "- WriteEmptyTxFifo - TxE interrupt disabled for endpoint %d\n", ep->num );
       MODIFY_REG32(&pdev->hw->DREGS->DIEPEMPMSK, fifoemptymsk, 0);
       break;
     }
@@ -839,7 +845,8 @@ static uint32_t IsoINIncomplete_ISR(HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t IsoOUTIncomplete_ISR(HANDLE *pdev)
+static uint32_t
+IsoOUTIncomplete_ISR(HANDLE *pdev)
 {
   GINTStatus_TypeDef gintsts;  
   
@@ -859,7 +866,8 @@ static uint32_t IsoOUTIncomplete_ISR(HANDLE *pdev)
 * @param  pdev: device instance
 * @retval status
 */
-static uint32_t ReadDevInEP (HANDLE *pdev, uint8_t epnum)
+static uint32_t ReadDevInEP
+(HANDLE *pdev, uint8_t epnum)
 {
   uint32_t v, msk, emp;
   msk = READ_REG32(&pdev->hw->DREGS->DIEPMSK);
